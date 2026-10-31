@@ -53,7 +53,7 @@ with sync_playwright() as pw:
           q('pala-head-clock-color-hex').value='#zzzzzz';
           q('pala-head-clock-color-hex').dispatchEvent(event('input'));
           s._saveHeader();
-          const invalidBlocked=s.saved.header.title_color===initialTitle &&
+          const invalidBlocked=(s.saved.header?.title_color||'')===initialTitle &&
             q('pala-head-clock-color-hex').getAttribute('aria-invalid')==='true';
           const reset=q('pala-head-clock-color-hex').closest('.optional-color-field').querySelector('[data-do="optional-color-clear"]');
           reset.click();
