@@ -6968,7 +6968,7 @@ md-filled-select {
           return;
         }
       }
-      const color=id=>hex6(q(id+'-hex')?.value)||'';
+      const color=id=>(hex6(q(id+'-hex')?.value)||'').toLowerCase();
       this.saved.header=cleanHeader({ha:q('pala-ha-header').value,ha_title:q('pala-ha-title').value,
         pala:q('pala-head-mode').value,title:q('pala-head-title').value,
         subtitle:q('pala-head-subtitle').value,logo:q('pala-head-logo').checked,logo_mode:q('pala-head-logo-mode').value,clock:q('pala-head-clock').checked,
