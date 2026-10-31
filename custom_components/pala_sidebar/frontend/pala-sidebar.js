@@ -1514,6 +1514,14 @@ md-filled-select {
 .general-accent-preview span{opacity:.8;font:600 12px monospace}
 .general-accent-note{font-size:12px;line-height:1.4;color:var(--secondary-text-color,#aab3c0)}
 .general-accent-note[data-invalid="true"]{color:#ef7777}
+/* Headerkleurvelden: optionele themakleur blijft leeg opgeslagen, ook met een visueel kleurvoorbeeld. */
+.settings-dialog .optional-color-field .badge-color-control{width:100%;min-width:0}
+.settings-dialog .optional-color-field .badge-color-control input[type="color"]{flex:0 0 58px;width:58px;height:45px;background:var(--secondary-background-color,#263442)}
+.settings-dialog .optional-color-field .badge-color-control input[type="text"]{max-width:none;min-width:0;flex:1}
+.settings-dialog .optional-color-field input[aria-invalid="true"]{border-color:#ef4444!important}
+.optional-color-preview{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:39px;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:750;border:1px solid var(--divider-color,#6679)}
+.optional-color-preview span{font:600 11px monospace;opacity:.85}
+.optional-color-field .btn{align-self:flex-start}
 @media(prefers-reduced-motion:reduce){.general-accent-preview{transition:none}}
 .badge-color-swatches{display:flex;flex-wrap:wrap;gap:7px}
 .badge-color-swatch{width:30px;height:30px;border:2px solid #fff6;border-radius:9px;cursor:pointer;box-shadow:0 1px 3px #0004}
@@ -4420,6 +4428,12 @@ md-filled-select {
         this._closeOwnedDialog(this.actionDialog,()=>this._runAction({type:'more-info',entity:target.dataset.entity}));return;
       }
       if(cmd==='save-prefs'){this._saveDialog();return;}
+      if(cmd==='optional-color-clear'){
+        const id=target.dataset.field;
+        const input=this.dialog.querySelector('#'+id+'-hex');
+        if(input){input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));}
+        return;
+      }
       if(cmd==='general-accent-default'){
         const picker=this.dialog.querySelector('#pala-color');
         const hex=this.dialog.querySelector('#pala-color-hex');
@@ -4457,6 +4471,7 @@ md-filled-select {
       if(['pala-layout-title-attribute','pala-layout-icon-attribute','pala-layout-item-label','pala-layout-item-icon'].includes(e.target?.id))this._previewDynamicItem();
       if(e.target?.matches?.('[data-badge-color-native],[data-badge-color-hex]'))this._badgeColorPickerEvent(e.target);
       if(['pala-color','pala-color-hex'].includes(e.target?.id))this._generalAccentPreview();
+      if(e.target?.closest?.('.optional-color-field'))this._optionalColorPreview(e.target);
       if(e.target?.closest?.('[data-badge-rule]'))this._badgeSyncColorRules();
       if(e.target?.closest?.('[data-badge-stop]'))this._badgeSyncColorStops();
       if(e.target?.id?.startsWith('pala-badge-')||e.target?.closest?.('[data-badge-rule]')||e.target?.closest?.('[data-badge-stop]'))this._previewBadge();
@@ -4500,6 +4515,7 @@ md-filled-select {
       if(e.target?.closest?.('[data-badge-rule]'))this._badgeSyncColorRules();
       if(e.target?.closest?.('[data-badge-stop]'))this._badgeSyncColorStops();
       if(id==='pala-color'||id==='pala-color-hex')this._generalAccentPreview();
+      if(e.target?.closest?.('.optional-color-field'))this._optionalColorPreview(e.target);
       if(id==='pala-badge-color_transition' && e.target.value==='gradient' &&
         !text(this.dialog.querySelector('#pala-badge-color_stops')?.value)){
         // Eén keer automatisch de bestaande numerieke drempels als kleurpunten gebruiken.
@@ -5672,6 +5688,38 @@ md-filled-select {
       if(input===native)hex.value=native.value;
       else if(hex6(hex.value))native.value=hex6(hex.value);
     }
+    _optionalColorField(label,id,value=''){
+      const container=$('div','field optional-color-field');
+      const heading=$('label',null,label);heading.htmlFor=id+'-hex';
+      const valid=hex6(value)||'';
+      const fallback=colour(this.saved.accent||this._resolved().appearance.accent);
+      const controls=this._badgeColorPicker(id,valid||fallback);
+      const hex=controls.querySelector('[data-badge-color-hex]');
+      hex.value=valid;hex.placeholder='Automatisch · thema';
+      container.append(heading,controls);
+      const preview=$('div','optional-color-preview');preview.dataset.colorPreview=id;
+      preview.append($('strong',null,'Voorbeeldkleur'),$('span',null,''));
+      container.append(preview);
+      const clear=this._button('Themakleur gebruiken','optional-color-clear');
+      clear.dataset.field=id;clear.title='Eigen kleur verwijderen en de themakleur volgen';
+      container.append(clear);
+      return container;
+    }
+    _optionalColorPreview(input){
+      const wrap=input?.closest('.optional-color-field');if(!wrap)return;
+      const native=wrap.querySelector('[data-badge-color-native]'),
+        hex=wrap.querySelector('[data-badge-color-hex]'),
+        preview=wrap.querySelector('.optional-color-preview');
+      if(!native||!hex||!preview)return;
+      const raw=hex.value.trim(),value=hex6(raw);
+      const valid=raw===''||!!value;
+      hex.setAttribute('aria-invalid',String(!valid));
+      const swatch=value||native.value;
+      preview.style.backgroundColor=swatch;
+      preview.style.color=readableBadgeText(swatch);
+      preview.querySelector('strong').textContent=!valid?'Controleer HEX-kleur':value?'Eigen kleur':'Volgt thema';
+      preview.querySelector('span').textContent=value?value.toUpperCase():raw?'Ongeldige HEX':'Automatisch';
+    }
     _generalAccentPreview(){
       const hexInput=this.dialog?.querySelector('#pala-color-hex');
       const swatch=this.dialog?.querySelector('#pala-general-accent-preview');
@@ -6617,19 +6665,19 @@ md-filled-select {
       headPage.append(tokenPane);
       headPage.append($('p','field-note','Je kunt meerdere sensoren en eigen tekst combineren. Bestaande tokens zoals {sensor.woonkamer_temperatuur} en {sensor.f1#race_name} blijven volledig werken.'));
       headPage.append(this._formField('Uitlijning','pala-head-align',hh.align,[['left','Links'],['center','Midden'],['right','Rechts']]));
-      headPage.append(this._formField('Tekstkleur titel (#RRGGBB, leeg = thema)','pala-head-title-color',hh.title_color));
-      headPage.append(this._formField('Tekstkleur subtitel (#RRGGBB)','pala-head-subtitle-color',hh.subtitle_color));
-      headPage.append(this._formField('Tekstkleur sensorregel (#RRGGBB)','pala-head-extra-color',hh.extra_color));
+      headPage.append(this._optionalColorField('Tekstkleur titel','pala-head-title-color',hh.title_color));
+      headPage.append(this._optionalColorField('Tekstkleur subtitel','pala-head-subtitle-color',hh.subtitle_color));
+      headPage.append(this._optionalColorField('Tekstkleur sensorregel','pala-head-extra-color',hh.extra_color));
       headPage.append(this._formField('Titelgrootte in pixels (9–24)','pala-head-title-size',String(hh.title_size)));
       headPage.append(this._formField('Subtitelgrootte in pixels (8–20)','pala-head-subtitle-size',String(hh.subtitle_size)));
       headPage.append(this._formField('Avatar links in de header','pala-head-logo-mode',hh.logo_mode,[['account','Home Assistant-account (profielfoto / initialen)'],['custom','Eigen logo / icoon (bestaande instelling)']]));
       headPage.append($('p','field-note','Tik op de account-avatar om je Home Assistant-profiel te openen. Bij Eigen logo blijven je bestaande logoletters en -kleuren bruikbaar.'));
       headPage.append(this._formField('Eigen logoletters (maximaal 3)','pala-head-logo-text',hh.logo_text));
       headPage.append(this._formField('Logo-icoon (mdi:..., leeg = letters)','pala-head-logo-icon',hh.logo_icon));
-      headPage.append(this._formField('Achtergrond header (#RRGGBB)','pala-head-background-color',hh.background_color));
-      headPage.append(this._formField('Logokleur achtergrond (#RRGGBB)','pala-head-logo-bg',hh.logo_bg));
-      headPage.append(this._formField('Kleur logo (#RRGGBB)','pala-head-logo-color',hh.logo_color));
-      headPage.append(this._formField('Kleur klok (#RRGGBB)','pala-head-clock-color',hh.clock_color));
+      headPage.append(this._optionalColorField('Achtergrond header','pala-head-background-color',hh.background_color));
+      headPage.append(this._optionalColorField('Achtergrond logo','pala-head-logo-bg',hh.logo_bg));
+      headPage.append(this._optionalColorField('Kleur logo','pala-head-logo-color',hh.logo_color));
+      headPage.append(this._optionalColorField('Kleur klok','pala-head-clock-color',hh.clock_color));
       for(const [id,label,checked] of [['pala-head-logo','Avatar / logo tonen',hh.logo],['pala-head-clock','Datum/tijd tonen',hh.clock],['pala-head-quick','Van alles-knop tonen',hh.show_quick],['pala-head-settings','Instellingenknop tonen',hh.show_settings]]){
         const line=$('label','check'),box=$('input');box.type='checkbox';box.id=id;box.checked=checked;
         line.append(box,$('span',null,label));headPage.append(line);
@@ -6655,7 +6703,10 @@ md-filled-select {
       backup.append($('p',null,'De oorspronkelijke Home Assistant-rechten blijven altijd van toepassing. Dit is geen beheerinterface voor HA-dashboards zelf.'));
       backup.append($('p',null,'HA '+(this.hass?.config?.version||'?')+' · PalaSidebar '+VERSION+' · '+(this.integration==='native'?'Ingebouwd':'Zwevend')));
       const footer=$('div','btnrow');footer.append(this._button('Sluiten','settings-close'));pane.append(footer);
-      this.dialog.append(pane);this._generalAccentPreview();this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);
+      this.dialog.append(pane);this._generalAccentPreview();
+      for(const input of this.dialog.querySelectorAll('.optional-color-field [data-badge-color-hex]'))
+        this._optionalColorPreview(input);
+      this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);
       if(!this.dialog.open)this._openOwnedDialog(this.dialog,'settings');
     }
     _layoutEditor(page){
@@ -6904,17 +6955,28 @@ md-filled-select {
     _button(label,cmd,cls=''){const b=$('button','btn '+cls,label);b.type='button';b.dataset.do=cmd;return b;}
     _saveHeader(){
       const q=id=>this.dialog.querySelector('#'+id);
+      const colors=['pala-head-title-color','pala-head-subtitle-color','pala-head-extra-color',
+        'pala-head-background-color','pala-head-logo-bg','pala-head-logo-color','pala-head-clock-color'];
+      for(const id of colors){
+        const field=q(id+'-hex'),raw=field?.value.trim()||'';
+        if(raw&&!hex6(raw)){
+          field.setAttribute('aria-invalid','true');field.focus();
+          this._editorNotice('Kleur ongeldig: vul #RRGGBB in of kies Themakleur gebruiken.');
+          return;
+        }
+      }
+      const color=id=>hex6(q(id+'-hex')?.value)||'';
       this.saved.header=cleanHeader({ha:q('pala-ha-header').value,ha_title:q('pala-ha-title').value,
         pala:q('pala-head-mode').value,title:q('pala-head-title').value,
         subtitle:q('pala-head-subtitle').value,logo:q('pala-head-logo').checked,logo_mode:q('pala-head-logo-mode').value,clock:q('pala-head-clock').checked,
         extra:q('pala-head-extra').value,align:q('pala-head-align').value,
-        title_color:q('pala-head-title-color').value,subtitle_color:q('pala-head-subtitle-color').value,
-        extra_color:q('pala-head-extra-color').value,title_size:q('pala-head-title-size').value,
+        title_color:color('pala-head-title-color'),subtitle_color:color('pala-head-subtitle-color'),
+        extra_color:color('pala-head-extra-color'),title_size:q('pala-head-title-size').value,
         subtitle_size:q('pala-head-subtitle-size').value,logo_text:q('pala-head-logo-text').value,
         show_quick:q('pala-head-quick').checked,show_settings:q('pala-head-settings').checked,
-        logo_icon:q('pala-head-logo-icon').value,background_color:q('pala-head-background-color').value,
-        logo_bg:q('pala-head-logo-bg').value,logo_color:q('pala-head-logo-color').value,
-        clock_color:q('pala-head-clock-color').value});
+        logo_icon:q('pala-head-logo-icon').value,background_color:color('pala-head-background-color'),
+        logo_bg:color('pala-head-logo-bg'),logo_color:color('pala-head-logo-color'),
+        clock_color:color('pala-head-clock-color')});
       this._saveSettings();this.redraw();this._editorNotice('Header opgeslagen.');
     }
     _saveDialog(){
