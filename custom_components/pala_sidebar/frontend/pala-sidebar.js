@@ -1,6 +1,6 @@
 /**
  * PalaSidebar 2.0.0-beta7 – custom_components integratie met AutoLoader.
- * PalaSidebar contributors, 2026. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
+ * Copyright (c) 2026 Robin Bouwman. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
  * Leest uitsluitend HA-status; voert geen services uit zonder interactie.
  * Integratie via native ha-sidebar slot indien beschikbaar; anders overlay.
  */
