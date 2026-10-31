@@ -1,32 +1,34 @@
-# PalaSidebar source provenance and licensing
+# Herkomst van de PalaSidebar-broncode en licenties
 
-## What the project owner has reported
+## Verklaring van de projectbeheerder
 
-On 31 October 2026, the maintainer reported that **Custom Sidebar was used as a behavioral example**, not intentionally as a source for copied code. The maintainer cannot independently confirm whether any assistant-authored implementation copied or adapted source during development.
+Op **31 oktober 2026** heeft de beheerder aangegeven dat **Custom Sidebar alleen als voorbeeld voor de werking is gebruikt**. Het was niet de bedoeling broncode over te nemen. De beheerder kan echter niet onafhankelijk bevestigen of tijdens eerdere, door de assistent uitgevoerde wijzigingen toch code is overgenomen of bewerkt.
 
-Previous development discussions show the reference project and the user's YAML were examined to understand navigation, swipe and Android back-button behavior. Some of those **behaviors/techniques were reimplemented in PalaSidebar**. Reading reference code and recreating its behavior does not by itself prove that any source code was copied; conversely, a complete origin guarantee cannot be made from conversation history.
+In de eerdere ontwikkelgesprekken werd de oude sidebar samen met de bijbehorende YAML bestudeerd om het gedrag van menu's, swipebewegingen en de Android-terugknop te begrijpen. Dergelijke functies zijn opnieuw in PalaSidebar gebouwd. Alleen het bestuderen van een voorbeeld bewijst geen broncodekopie, maar de ontwikkelgeschiedenis biedt evenmin een absolute garantie dat er niets is hergebruikt.
 
-## Comparison with the exact old plugin archive
+## Vergelijking met de oorspronkelijke Custom Sidebar
 
-The supplied `custom-sidebar-master(5).zip` was identified as **elchininet/custom-sidebar v17.3.0**, licensed **Apache-2.0**. The 30 upstream source/build files were compared with 10 PalaSidebar beta7 runtime files, including the frontend. Two historical PalaSidebar builds were also checked.
+Het aangeleverde archief `custom-sidebar-master(5).zip` is herkend als **elchininet/custom-sidebar v17.3.0**, met de licentie **Apache-2.0**. Dertig oorspronkelijke bron- en distributiebestanden zijn vergeleken met tien uitvoerbestanden van PalaSidebar beta7. Ook twee oudere PalaSidebar-versies zijn onderzocht.
 
-- No exact 80-consecutive-character matches in the examined code.
-- No eight-consecutive-identifier matches.
-- No runtime imports or references to Custom Sidebar.
-- PalaSidebar's integration/loader arrangement differs from the original plugin's modular TypeScript architecture.
+- **Geen overeenkomende reeksen van 80 aaneengesloten codekarakters** gevonden.
+- **Geen overeenkomende reeksen van acht opeenvolgende identificaties** gevonden.
+- **Geen imports of afhankelijkheden van Custom Sidebar** in de onderzochte uitvoercode gevonden.
+- PalaSidebar gebruikt een Home Assistant-integratie met een eigen frontend-loader; de oorspronkelijke plugin had een andere, modulaire TypeScript-opbouw.
 
-These tests **support the assessment that no verbatim old-plugin code was copied**, but cannot rule out conceptual influence, rewritten algorithms, or other third-party sources. See [detailed public-release audit](docs/PUBLICATION-AUDIT-2026-10-31.md).
+Dit ondersteunt de conclusie dat geen letterlijke broncode uit dat archief is gekopieerd. Het sluit **niet** uit dat ideeën, algoritmen of bewerkte code afkomstig kunnen zijn uit externe bronnen. Lees het [uitgebreide publicatieonderzoek](docs/PUBLICATION-AUDIT-2026-10-31.md).
 
-## License handling
+## Auteursrecht en licentie
 
-- Original PalaSidebar contributions are licensed under MIT with **Copyright (c) 2026 Robin Bouwman**; this attribution is not a claim of ownership over any third-party material.
-- If evidence emerges that any Apache-2.0 source or other third-party implementation has been adapted, retain the corresponding license and notices and follow its redistribution requirements.
-- Do not remove a required third-party attribution simply to remove a project's name.
-- The PalaSidebar brand icon/logo was designed for this project during development, but the maintainer should confirm redistribution rights for *all* included assets and any imported fonts or images.
-- Check the current files and repository history for private configuration before public publication.
+- Eigen PalaSidebar-bijdragen worden onder de **MIT-licentie** verspreid met **© 2026 Robin Bouwman**. Daarmee worden geen rechten geclaimd op materiaal van derden.
+- Als later blijkt dat Apache-2.0-broncode of andere externe code is bewerkt of overgenomen, moeten de bijbehorende licentievoorwaarden en verplichte vermeldingen worden nageleefd.
+- Vereiste auteursvermeldingen mogen niet worden verwijderd alleen om de naam van een ander project niet meer te tonen.
+- Het PalaSidebar-logo is voor dit project ontworpen. Controleer wel dat alle meegeleverde logo's, afbeeldingen en eventuele lettertypen rechtmatig opnieuw verspreid mogen worden.
+- Controleer de bestanden en de Git-geschiedenis ook op privégegevens.
 
-## Release gate
+## Status van de publicatie
 
-The code-comparison task is complete. **The remaining owner-controlled checks are rights to publish all included assets, confirmation that there is no knowingly incorporated third-party source requiring extra notices, and a final scan of release content/history.** Issue [#1](https://github.com/OnlyRobin/PalaSideBar/issues/1) tracks these confirmations.
+De repository is **openbaar** en de versies **beta7, RC1, RC2 en beta8** zijn op 31 oktober 2026 als GitHub-prerelease gepubliceerd. De automatische code-, Hassfest-, HACS- en browsercontroles zijn op de recente testversies geslaagd.
 
-The repository is **public** and GitHub prerelease **v2.0.0-beta7** was published on 31 October 2026. Code checks, Hassfest and the public HACS validation have passed. This file preserves the provenance caveat that no mechanical source comparison can guarantee independent authorship or automatically establish rights to redistributed third-party assets. Issue [#1](https://github.com/OnlyRobin/PalaSideBar/issues/1) tracks those residual checks. Future changes should go through the `develop` branch and a reviewed pull request.
+De vergelijking van de broncode is afgerond, maar een automatische vergelijking kan geen volledig bewijs van onafhankelijk auteurschap of de rechten op alle externe onderdelen leveren. Eventuele openstaande vragen blijven geregistreerd in [GitHub-issue #1](https://github.com/OnlyRobin/PalaSideBar/issues/1).
+
+Nieuwe wijzigingen horen via een ontwikkelbranch, tests en een beoordeelde pull request te verlopen.
