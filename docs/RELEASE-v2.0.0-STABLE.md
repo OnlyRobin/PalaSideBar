@@ -1,10 +1,10 @@
-# PalaSidebar v2.0.0 — Stable release (draft)
+# PalaSidebar v2.0.0 — Voorbereiding van de stabiele release
 
-> **Nog niet gepubliceerd.** Deze release is technisch voorbereid op de branch `release/v2.0.0`. De bestaande openbare versie is `v2.0.0-beta7`.
+> **Nog niet gepubliceerd.** Deze release is technisch voorbereid op de branch `release/v2.0.0`. De huidige beta is `v2.0.0-beta8`; de eerdere RC1- en RC2-testreleases blijven beschikbaar.
 
 ## Wat zit erin?
 
-- Installeerbare PalaSidebar Home Assistant custom integration met automatische frontend AutoLoader.
+- Installeerbare PalaSidebar-integratie voor Home Assistant met automatische frontend AutoLoader.
 - Configureerbare sidebar, favorieten, snelmenu's en dashboardnavigatie.
 - Dynamische badges, Live Control Center en eigen thema's.
 - Lang indrukken / rechtermuisknop-menu's en aanpasbare dashboardvolgorde.
@@ -27,17 +27,17 @@
 - [ ] Hassfest op de definitieve release-commit groen.
 - [ ] HACS-validatie op de definitieve release-commit groen.
 - [ ] Alle Playwright/Chromium-regressietests op de definitieve release-commit groen.
-- [ ] Praktijktest van `develop`/`2.0.0-rc1` op Home Assistant geslaagd.
+- [ ] Praktijktest van beta8/RC2 op Home Assistant geslaagd.
 - [ ] Installatie-/migratie- en hersteltest geslaagd.
 - [ ] Release-pull-request naar `main` gereviewd en gemerged.
 
 ## Publicatie zodra alle voorwaarden zijn afgevinkt
 
-1. Merge de `release/v2.0.0` pull request naar `main` en controleer dat `manifest.json`, frontendversie, JS en backend dezelfde versie `2.0.0` hebben.
+1. Voeg de pull request van `release/v2.0.0` samen met `main` en controleer dat `manifest.json`, frontendversie, JS en backend dezelfde versie `2.0.0` hebben.
 2. Open https://github.com/OnlyRobin/PalaSideBar/releases/new.
-3. Maak tag `v2.0.0` **vanaf de `main`-commit met de stabiele code** (niet vanaf `develop`, en niet vanaf de oude beta7-tag).
-4. Titel: **PalaSidebar v2.0.0 — Stable**.
-5. Zet de openbare releasebeschrijving neer; **vink `Set as a pre-release` NIET aan**.
+3. Maak tag `v2.0.0` **vanaf de `main`-commit met de stabiele code** (niet vanaf `develop` of een eerdere betatag).
+4. Titel: **PalaSidebar v2.0.0 — Stabiele versie**.
+5. Vul de openbare releasebeschrijving in; **vink `Set as a pre-release` NIET aan** (dit is de Engelse naam van een GitHub-instelling).
 6. Publiceer en controleer dat GitHub de normale `Latest` release toont.
 7. Installeer via HACS → PalaSidebar → drie puntjes → Redownload / update, maak eerst een back-up en herstart Home Assistant.
 
