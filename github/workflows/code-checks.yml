@@ -1,0 +1,24 @@
+name: Code checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  syntax-and-layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify syntax and packaging
+        run: |
+          python -m compileall -q custom_components/pala_sidebar
+          node --check custom_components/pala_sidebar/frontend/pala-sidebar.js
+          node --check custom_components/pala_sidebar/frontend/pala-sidebar-loader.js
+          python tests/test_github_layout.py
