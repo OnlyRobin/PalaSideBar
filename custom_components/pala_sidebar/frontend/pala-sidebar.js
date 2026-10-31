@@ -1,12 +1,12 @@
 /**
- * PalaSidebar 2.0.0-beta7 – custom_components integratie met AutoLoader.
+ * PalaSidebar 2.0.0-rc1 – custom_components integratie met AutoLoader.
  * Copyright (c) 2026 Robin Bouwman. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
  * Leest uitsluitend HA-status; voert geen services uit zonder interactie.
  * Integratie via native ha-sidebar slot indien beschikbaar; anders overlay.
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-beta7';
+  const VERSION = '2.0.0-rc1';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
