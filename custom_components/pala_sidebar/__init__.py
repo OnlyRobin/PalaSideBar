@@ -14,9 +14,11 @@ from homeassistant.components.frontend import add_extra_js_url, remove_extra_js_
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 DOMAIN = "pala_sidebar"
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 _LOGGER = logging.getLogger(__name__)
 _HERE = Path(__file__).resolve().parent
 _FRONTEND = _HERE / "frontend"
