@@ -6,7 +6,7 @@ path=pathlib.Path(__file__).resolve().parents[1] / 'custom_components' / 'pala_s
 
 def mkmod(name):
     x=types.ModuleType(name);x.__path__=[];sys.modules[name]=x;return x
-for mod in ('homeassistant','homeassistant.components','homeassistant.components.frontend','homeassistant.components.http','homeassistant.config_entries','homeassistant.core','homeassistant.helpers','homeassistant.helpers.typing'):
+for mod in ('homeassistant','homeassistant.components','homeassistant.components.frontend','homeassistant.components.http','homeassistant.config_entries','homeassistant.core','homeassistant.helpers','homeassistant.helpers.config_validation','homeassistant.helpers.typing'):
     mkmod(mod)
 seen=[]
 frontend=sys.modules['homeassistant.components.frontend'];frontend.add_extra_js_url=lambda h,u:seen.append(('add',u));frontend.remove_extra_js_url=lambda h,u:seen.append(('remove',u))
@@ -16,6 +16,7 @@ sys.modules['homeassistant.components.http'].StaticPathConfig=StaticPathConfig
 sys.modules['homeassistant.config_entries'].ConfigEntry=type('ConfigEntry',(),{})
 sys.modules['homeassistant.core'].HomeAssistant=type('HomeAssistant',(),{})
 sys.modules['homeassistant.helpers.typing'].ConfigType=dict
+sys.modules['homeassistant.helpers.config_validation'].config_entry_only_config_schema=lambda domain: {'config_entry_domain':domain}
 spec=importlib.util.spec_from_file_location('ha_pala_test',path/'__init__.py',submodule_search_locations=[str(path)])
 m=importlib.util.module_from_spec(spec);sys.modules[spec.name]=m;spec.loader.exec_module(m)
 class HTTP:
