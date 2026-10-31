@@ -5550,8 +5550,9 @@ md-filled-select {
       const info=fields[target];if(!info)return;
       const field=q(info[0]);if(!field)return;
       const token='{'+entity+(attr?'#'+attr:'')+'}';
-      const start=Number.isInteger(field.selectionStart)?field.selectionStart:field.value.length;
-      const end=Number.isInteger(field.selectionEnd)?field.selectionEnd:start;
+      const editing=document.activeElement===field;
+      const start=editing&&Number.isInteger(field.selectionStart)?field.selectionStart:field.value.length;
+      const end=editing&&Number.isInteger(field.selectionEnd)?field.selectionEnd:start;
       const before=field.value.slice(0,start),after=field.value.slice(end);
       const spacer=before&&!/\s$/.test(before)?' ':'';
       const result=before+spacer+token+after;
