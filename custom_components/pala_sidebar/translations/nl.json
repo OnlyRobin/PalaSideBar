@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "PalaSidebar installeren",
+        "description": "Registreer PalaSidebar automatisch in Home Assistant. De JavaScript-bestanden blijven in custom_components; extra_module_url is niet nodig."
+      }
+    },
+    "abort": {
+      "already_configured": "PalaSidebar is al geïnstalleerd."
+    }
+  }
+}

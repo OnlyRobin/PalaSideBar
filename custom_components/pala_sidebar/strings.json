@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Install PalaSidebar",
+        "description": "Add the PalaSidebar frontend automatically. JavaScript files remain under custom_components; no extra_module_url is needed."
+      }
+    },
+    "abort": {
+      "already_configured": "PalaSidebar is already configured."
+    }
+  }
+}
