@@ -2,8 +2,8 @@
 
 ## Welke versie staat waar?
 
-- **main / GitHub-release:** `v2.0.0-beta7` is de gepubliceerde prerelease. De `main`-branch bevat ook latere documentatieupdates.
-- **develop:** `2.0.0-rc1` is de *release candidate* voor een toekomstige stabiele `v2.0.0`. **Nog geen stabiele release.**
+- **main:** de stabiele `v2.0.0` is nog niet gepubliceerd. Beta7, RC1 en RC2 zijn bestaande prereleases. De `main`-branch bevat ook latere documentatieupdates.
+- **develop:** `2.0.0-rc2` is de actuele *release candidate* (gepubliceerd via HACS als prerelease). **Nog geen stabiele release.**
 - Beide branches hebben het Home Assistant-domein `pala_sidebar` en dezelfde interne URL's en opslag-ID's: installeer ze **niet tegelijk in dezelfde Home Assistant-instantie**.
 
 ## Aanbevolen: test in aparte Home Assistant-testomgeving
@@ -14,7 +14,7 @@
 4. Open de GitHub Actions-pagina [Development browser regression and test package](https://github.com/OnlyRobin/PalaSideBar/actions/workflows/develop-regression.yml).
 5. Selecteer de **nieuwste geslaagde** run voor branch `develop` (groene vink); onder **Artifacts** download je `PalaSidebar-develop-test`. GitHub kan hiervoor een ingelogd account verlangen.
 6. Pak de GitHub-artifact uit en pak daarna `PalaSidebar-develop-test.zip` uit. Daarin staat `custom_components/pala_sidebar/`. Kopieer uitsluitend die map naar de testinstantie op `/config/custom_components/pala_sidebar/`.
-7. Herstart de **testinstantie** volledig en controleer dat de integratie is toegevoegd via Instellingen → Apparaten en diensten. Open `/pala_sidebar/assets/pala-sidebar-version.json` op de URL van jouw Home Assistant: daar moet `2.0.0-rc1` staan.
+7. Herstart de **testinstantie** volledig en controleer dat de integratie is toegevoegd via Instellingen → Apparaten en diensten. Open `/pala_sidebar/assets/pala-sidebar-version.json` op de URL van jouw Home Assistant: daar moet `2.0.0-rc2` staan.
 8. Test het uiterlijk en de werking op desktop, Android Companion en indien van toepassing PalaKiosk.
 
 Alternatief zonder GitHub Actions-artifact: [download de actuele develop-branch als ZIP](https://github.com/OnlyRobin/PalaSideBar/archive/refs/heads/develop.zip). Daarin staat de integratiemap onder `PalaSideBar-develop/custom_components/pala_sidebar/`. De artifactmethode heeft de voorkeur, omdat het ZIP-bestand **pas wordt aangeboden als de automatische regressietests slagen**.
