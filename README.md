@@ -15,6 +15,10 @@ PalaSidebar is a Home Assistant custom integration with a configurable sidebar a
 
 **Repository:** https://github.com/OnlyRobin/PalaSideBar
 
+## Publicatie / First public HACS release
+
+De Nederlandstalige publicatiestappen staan in [HACS-PUBLICATIE-NL.md](docs/HACS-PUBLICATIE-NL.md). Deze repository is voor de eerste release voorbereid; maak hem eerst openbaar, laat de echte HACS-validatie slagen en publiceer daarna pas de GitHub-prerelease `v2.0.0-beta7`. Zie ook de [kant-en-klare releasetekst](docs/RELEASE-TEXT-v2.0.0-beta7.md).
+
 ## Installation with HACS
 
 1. Make sure HACS is available in Home Assistant.
