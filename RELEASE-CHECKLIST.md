@@ -12,6 +12,12 @@ Target version: `2.0.0-beta7` (planned prerelease)
 - [x] HACS validation identified as unavailable for private repositories; workflow skips it until public.
 - [x] Draft release notes: `docs/RELEASE-NOTES-v2.0.0-beta7.md`.
 
+## Latest validation (2026-10-31)
+- [x] Code checks and **Hassfest passed** after adjusting manifest ordering and adding the config-entry-only schema.
+- [x] Current source/asset/publication review recorded in [docs/PUBLICATION-AUDIT-2026-10-31.md](docs/PUBLICATION-AUDIT-2026-10-31.md).
+- [ ] Close [Issue #1: provenance and licensing](https://github.com/OnlyRobin/PalaSideBar/issues/1) **only after the maintainer confirms the source and asset rights**.
+- [ ] HACS validation must pass when the repository is public; a skipped check is not a pass.
+
 ## Required before public HACS prerelease
 - [ ] Review `PROVENANCE.md`, identify third-party code/assets, and retain required license and attribution notices.
 - [ ] Check for private addresses, credentials, tokens and personal defaults in all tracked files.
