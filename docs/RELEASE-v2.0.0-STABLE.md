@@ -9,6 +9,7 @@
 - Dynamische badges, Live Control Center en eigen thema's.
 - Lang indrukken / rechtermuisknop-menu's en aanpasbare dashboardvolgorde.
 - Instellingen per Home Assistant-account met export, import en herstel.
+- Oplossing voor lege **PalaSidebar UI**-instellingen, ontbrekende standaardondertitel en de incomplete standaardsectie **BEHEER** (gevalideerd in RC2).
 - Broncode en copyrightvermeldingen afgestemd op **© 2026 Robin Bouwman** onder MIT voor eigen bijdragen.
 - Aparte ontwikkelbranch en regressietests voor desktop, mobiel/touch en backend.
 
