@@ -48,7 +48,7 @@ jobs:
           python -m playwright install --with-deps chromium
           CHROME_BINARY="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
           sudo ln -sf "$CHROME_BINARY" /usr/bin/chromium
-      # RC4 regressietests omvatten ook nieuwe gebruikers zonder opgeslagen headerconfiguratie.
+      # RC4 regressietests controleren ook het normaliseren van hoofdlettergevoelige HEX-invoer.
       - name: Run backend and Chromium regression tests
         run: |
           set -eu
