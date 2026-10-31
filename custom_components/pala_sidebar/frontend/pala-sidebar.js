@@ -1,12 +1,12 @@
 /**
- * PalaSidebar 2.0.0-rc3 – custom_components integratie met AutoLoader.
+ * PalaSidebar 2.0.0-rc4 – custom_components integratie met AutoLoader.
  * Copyright (c) 2026 Robin Bouwman. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
  * Leest uitsluitend HA-status; voert geen services uit zonder interactie.
  * Integratie via native ha-sidebar slot indien beschikbaar; anders overlay.
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc3';
+  const VERSION = '2.0.0-rc4';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -1505,6 +1505,16 @@ md-filled-select {
 .badge-color-control{display:flex;align-items:center;gap:9px;min-width:0}
 .badge-color-control input[type="color"]{width:49px;height:44px;padding:3px;flex:0 0 49px;border:1px solid var(--divider-color,#667);border-radius:10px;background:transparent;cursor:pointer}
 .badge-color-control input[type="text"]{min-width:0;flex:1;max-width:145px;min-height:42px;border-radius:9px;background:var(--secondary-background-color,#263442);border:1px solid var(--divider-color,#667);padding:8px;color:inherit;font:600 13px monospace;letter-spacing:.02em}
+/* Algemeen gebruikt dezelfde picker als badges; het voorbeeld verandert direct, de sidebar pas na Opslaan. */
+.settings-dialog .general-accent-field .badge-color-control{width:100%;align-items:stretch}
+.settings-dialog .general-accent-field .badge-color-control input[type="color"]{flex:0 0 64px;width:64px;min-height:48px;height:48px;background:var(--secondary-background-color,#263442)}
+.settings-dialog .general-accent-field .badge-color-control input[type="text"]{max-width:none;flex:1;min-width:0;font-size:14px}
+.settings-dialog .general-accent-field input[aria-invalid="true"]{border-color:#ef4444!important;outline-color:#ef4444}
+.general-accent-preview{border-radius:11px;padding:11px 14px;min-height:42px;display:flex;align-items:center;justify-content:space-between;font-weight:750;border:1px solid var(--divider-color,#6679);transition:background-color .15s ease,color .15s ease}
+.general-accent-preview span{opacity:.8;font:600 12px monospace}
+.general-accent-note{font-size:12px;line-height:1.4;color:var(--secondary-text-color,#aab3c0)}
+.general-accent-note[data-invalid="true"]{color:#ef7777}
+@media(prefers-reduced-motion:reduce){.general-accent-preview{transition:none}}
 .badge-color-swatches{display:flex;flex-wrap:wrap;gap:7px}
 .badge-color-swatch{width:30px;height:30px;border:2px solid #fff6;border-radius:9px;cursor:pointer;box-shadow:0 1px 3px #0004}
 .badge-color-swatch:focus-visible{outline:2px solid var(--p-accent);outline-offset:2px}
@@ -4410,6 +4420,12 @@ md-filled-select {
         this._closeOwnedDialog(this.actionDialog,()=>this._runAction({type:'more-info',entity:target.dataset.entity}));return;
       }
       if(cmd==='save-prefs'){this._saveDialog();return;}
+      if(cmd==='general-accent-default'){
+        const picker=this.dialog.querySelector('#pala-color');
+        const hex=this.dialog.querySelector('#pala-color-hex');
+        if(picker&&hex){picker.value='#38bdf8';hex.value=picker.value;this._generalAccentPreview();}
+        return;
+      }
       if(cmd==='reset-prefs'){if(!this._prefsStore?.ready){this._editorNotice('Wacht op het laden van je serverinstellingen voordat je herstelt.');return;}if(!confirm('Alle PalaSidebar-instellingen voor dit Home Assistant-account herstellen, ook op andere apparaten?'))return;this.saved=EMPTY_PREFS();this._pfxDraft=null;this._pfxApply();this._saveSettings();this._closeOwnedDialog(this.dialog);this.redraw();return;}
       if(cmd==='add-link'){this._addLink();return;}
       if(cmd==='remove-link'){this.saved.links=this.saved.links.filter(i=>i.id!==target.dataset.id);this._saveSettings();this._rebuildSettingsAtSamePosition(this.editorTab);this.redraw();return;}
@@ -4440,6 +4456,7 @@ md-filled-select {
       }
       if(['pala-layout-title-attribute','pala-layout-icon-attribute','pala-layout-item-label','pala-layout-item-icon'].includes(e.target?.id))this._previewDynamicItem();
       if(e.target?.matches?.('[data-badge-color-native],[data-badge-color-hex]'))this._badgeColorPickerEvent(e.target);
+      if(['pala-color','pala-color-hex'].includes(e.target?.id))this._generalAccentPreview();
       if(e.target?.closest?.('[data-badge-rule]'))this._badgeSyncColorRules();
       if(e.target?.closest?.('[data-badge-stop]'))this._badgeSyncColorStops();
       if(e.target?.id?.startsWith('pala-badge-')||e.target?.closest?.('[data-badge-rule]')||e.target?.closest?.('[data-badge-stop]'))this._previewBadge();
@@ -4477,10 +4494,12 @@ md-filled-select {
       if(e.target?.matches?.('[data-badge-color-native],[data-badge-color-hex]')){
         this._badgeColorPickerEvent(e.target);
         const hex=e.target.closest('.badge-color-control')?.querySelector('[data-badge-color-hex]');
-        if(hex && !hex6(hex.value))hex.value=hex.closest('.badge-color-control').querySelector('[data-badge-color-native]').value;
+        if(hex && !hex6(hex.value) && hex.id!=='pala-color-hex')
+          hex.value=hex.closest('.badge-color-control').querySelector('[data-badge-color-native]').value;
       }
       if(e.target?.closest?.('[data-badge-rule]'))this._badgeSyncColorRules();
       if(e.target?.closest?.('[data-badge-stop]'))this._badgeSyncColorStops();
+      if(id==='pala-color'||id==='pala-color-hex')this._generalAccentPreview();
       if(id==='pala-badge-color_transition' && e.target.value==='gradient' &&
         !text(this.dialog.querySelector('#pala-badge-color_stops')?.value)){
         // Eén keer automatisch de bestaande numerieke drempels als kleurpunten gebruiken.
@@ -5653,6 +5672,24 @@ md-filled-select {
       if(input===native)hex.value=native.value;
       else if(hex6(hex.value))native.value=hex6(hex.value);
     }
+    _generalAccentPreview(){
+      const hexInput=this.dialog?.querySelector('#pala-color-hex');
+      const swatch=this.dialog?.querySelector('#pala-general-accent-preview');
+      const note=this.dialog?.querySelector('#pala-general-accent-note');
+      if(!hexInput||!swatch||!note)return;
+      const value=hexInput.value.trim();
+      const valid=/^#[0-9a-f]{6}$/i.test(value);
+      if(valid){
+        const color=value.toLowerCase();
+        swatch.style.backgroundColor=color;swatch.style.color=readableBadgeText(color);
+        const code=swatch.querySelector('span');if(code)code.textContent=color.toUpperCase();
+        note.textContent='Dit is je nieuwe accentkleur. De sidebar verandert na Instellingen opslaan.';
+        note.dataset.invalid='false';hexInput.removeAttribute('aria-invalid');
+      }else{
+        note.textContent='Ongeldige kleur. Gebruik #RRGGBB, bijvoorbeeld #38BDF8.';
+        note.dataset.invalid='true';hexInput.setAttribute('aria-invalid','true');
+      }
+    }
     _badgeAddStop(value='',color='#38bdf8'){
       const list=this.dialog.querySelector('#pala-badge-gradient-stop-list');
       if(!list||list.children.length>=15)return;
@@ -6527,7 +6564,17 @@ md-filled-select {
       general.append(this._formField('Weergave','pala-mode',this.saved.mode||'auto', [['auto','Automatisch'],['integrated','Ingebouwd'],['floating','Zwevend menu']]));
       general.append(this._formField('Dichtheid','pala-density',this.saved.density||'compact',[['compact','Compact'],['normal','Ruim']]));
       general.append(this._formField('Apparaatprofiel','pala-device',this.saved.device||'auto',[['auto','Automatisch'],['desktop','Computer'],['tablet','Tablet / PalaKiosk'],['phone','Telefoon']]));
-      general.append(this._formField('Kleuraccent (hex)','pala-color',this.saved.accent||colour(this.config.appearance.accent)));
+      const accentField=$('div','field general-accent-field');
+      const accentLabel=$('label',null,'Kleuraccent');accentLabel.htmlFor='pala-color-hex';
+      accentField.append(accentLabel,this._badgeColorPicker('pala-color',this.saved.accent||colour(this.config.appearance.accent)));
+      const accentPreview=$('div','general-accent-preview');
+      accentPreview.id='pala-general-accent-preview';
+      accentPreview.append($('strong',null,'Voorbeeldkleur'),$('span',null,''));
+      accentField.append(accentPreview);
+      const accentNote=$('small','general-accent-note','Kies een kleur of vul een HEX-code in.');accentNote.id='pala-general-accent-note';
+      accentNote.setAttribute('role','status');accentNote.setAttribute('aria-live','polite');accentField.append(accentNote);
+      accentField.append(this._button('Standaardkleur herstellen','general-accent-default'));
+      general.append(accentField);
       for(const [id,label,checked] of [
         ['pala-mobile-dock','Mobiele navigatiebalk onderaan',this._dockEnabled()],
         ['pala-mobile-swipe','Vanaf de linkerrand vegen om het menu te openen',this.saved.mobile_swipe??this._mobile().swipe_open]]){
@@ -6608,7 +6655,7 @@ md-filled-select {
       backup.append($('p',null,'De oorspronkelijke Home Assistant-rechten blijven altijd van toepassing. Dit is geen beheerinterface voor HA-dashboards zelf.'));
       backup.append($('p',null,'HA '+(this.hass?.config?.version||'?')+' · PalaSidebar '+VERSION+' · '+(this.integration==='native'?'Ingebouwd':'Zwevend')));
       const footer=$('div','btnrow');footer.append(this._button('Sluiten','settings-close'));pane.append(footer);
-      this.dialog.append(pane);this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);
+      this.dialog.append(pane);this._generalAccentPreview();this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);
       if(!this.dialog.open)this._openOwnedDialog(this.dialog,'settings');
     }
     _layoutEditor(page){
@@ -6872,13 +6919,19 @@ md-filled-select {
     }
     _saveDialog(){
       const q=id=>this.dialog.querySelector('#'+id);
+      // Valideer vóór het wijzigen van voorkeuren: foutief handmatig HEX mag geen
+      // eerder gekozen kleur opslaan of een deel van de instellingen aanpassen.
+      const input=q('pala-color-hex')?.value.trim()||'';
+      if(!/^#[0-9a-f]{6}$/i.test(input)){
+        this._generalAccentPreview();
+        q('pala-color-hex')?.focus();this._editorNotice('Gebruik een geldige HEX-kleur (#RRGGBB).');return;
+      }
       this.saved.mode=q('pala-mode').value;this.saved.density=q('pala-density').value;this.saved.device=q('pala-device').value;this.saved.mobile_dock=q('pala-mobile-dock').checked;this.saved.mobile_swipe=q('pala-mobile-swipe').checked;
       this.saved.dialog_motion=q('pala-dialog-motion').value;
       this.saved.dialog_style=q('pala-dialog-style').value;
       this.saved.dialog_backdrop=q('pala-dialog-backdrop').value;
       this.saved.rail_motion=q('pala-rail-motion').value;
-      const input=q('pala-color').value.trim();if(!/^#[0-9a-f]{6}$/i.test(input)){alert('Voer een geldige kleur in zoals #38bdf8');return;}
-      this.saved.accent=input;this._saveSettings();this._closeOwnedDialog(this.dialog);this.redraw();this.ensurePlacement();
+      this.saved.accent=input.toLowerCase();this._saveSettings();this._closeOwnedDialog(this.dialog);this.redraw();this.ensurePlacement();
     }
     _addLink(){
       const name=text(this.dialog.querySelector('#pala-newname')?.value),path=text(this.dialog.querySelector('#pala-newpath')?.value),icon=text(this.dialog.querySelector('#pala-newicon')?.value);
