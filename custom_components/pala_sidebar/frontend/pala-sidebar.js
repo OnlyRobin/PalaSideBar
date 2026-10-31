@@ -5714,6 +5714,9 @@ md-filled-select {
       const raw=hex.value.trim(),value=hex6(raw);
       const valid=raw===''||!!value;
       hex.setAttribute('aria-invalid',String(!valid));
+      // Na wissen of herstellen opnieuw de actuele accentkleur tonen; nooit een
+      // eerder gekozen eigen kleur laten staan terwijl de instelling leeg is.
+      if(!raw)native.value=colour(this.style.getPropertyValue('--p-accent')||this.saved.accent||this._resolved().appearance.accent);
       const swatch=value||native.value;
       preview.style.backgroundColor=swatch;
       preview.style.color=readableBadgeText(swatch);
