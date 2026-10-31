@@ -65,6 +65,25 @@ jobs:
           code=$?
           set -e
           if [ "$code" -ne 1 ]; then
+            TEST_EXIT="$code" python - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'controle-rapport/zelftest.log'
+          t=p.read_text(errors='replace').lower() if p.exists() else ''
+          print('Diagnose zelftest: exitcode',os.environ.get('TEST_EXIT'))
+          for label,pattern in (
+              ('dubieus eigenaarsschap','dubious ownership'),
+              ('geen detecties','no leaks found'),
+              ('git niet beschikbaar','git: executable file not found'),
+              ('foutieve optie','unknown flag'),
+              ('geen git-repository','not a git repository'),
+              ('onvoldoende rechten','permission denied'),
+              ('geen configuratie','config error'),
+              ('algemene scannerfout','error'),
+          ):
+              print(label, pattern in t)
+          print('Rapport aangemaakt:',(p.parent/'zelftest.json').exists())
+          PY
             echo "::error::Secretscanner doorstond de detectie-zelftest niet; onderzoek onbetrouwbaar."
             exit 1
           fi
