@@ -1521,7 +1521,7 @@ md-filled-select {
 .settings-dialog .optional-color-field input[aria-invalid="true"]{border-color:#ef4444!important}
 .optional-color-preview{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:39px;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:750;border:1px solid var(--divider-color,#6679)}
 .optional-color-preview span{font:600 11px monospace;opacity:.85}
-.optional-color-field .btn{align-self:flex-start}
+.optional-color-field .field-clear{flex:0 0 42px;width:42px;min-width:42px;min-height:44px;font-size:21px}
 @media(prefers-reduced-motion:reduce){.general-accent-preview{transition:none}}
 .badge-color-swatches{display:flex;flex-wrap:wrap;gap:7px}
 .badge-color-swatch{width:30px;height:30px;border:2px solid #fff6;border-radius:9px;cursor:pointer;box-shadow:0 1px 3px #0004}
@@ -5696,13 +5696,13 @@ md-filled-select {
       const controls=this._badgeColorPicker(id,valid||fallback);
       const hex=controls.querySelector('[data-badge-color-hex]');
       hex.value=valid;hex.placeholder='Automatisch · thema';
-      container.append(heading,controls);
+      const clear=this._button('↺','optional-color-clear','field-clear');
+      clear.dataset.field=id;clear.title='Themakleur gebruiken';
+      clear.setAttribute('aria-label',label+': themakleur gebruiken');
+      controls.append(clear);container.append(heading,controls);
       const preview=$('div','optional-color-preview');preview.dataset.colorPreview=id;
       preview.append($('strong',null,'Voorbeeldkleur'),$('span',null,''));
       container.append(preview);
-      const clear=this._button('Themakleur gebruiken','optional-color-clear');
-      clear.dataset.field=id;clear.title='Eigen kleur verwijderen en de themakleur volgen';
-      container.append(clear);
       return container;
     }
     _optionalColorPreview(input){
