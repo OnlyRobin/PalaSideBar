@@ -6523,7 +6523,7 @@ md-filled-select {
       backup.append($('p',null,'De oorspronkelijke Home Assistant-rechten blijven altijd van toepassing. Dit is geen beheerinterface voor HA-dashboards zelf.'));
       backup.append($('p',null,'HA '+(this.hass?.config?.version||'?')+' · PalaSidebar '+VERSION+' · '+(this.integration==='native'?'Ingebouwd':'Zwevend')));
       const footer=$('div','btnrow');footer.append(this._button('Sluiten','settings-close'));pane.append(footer);
-      this.dialog.append(pane);this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);if(tab==='ui_style')this._pfxPreview();
+      this.dialog.append(pane);this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);
       if(!this.dialog.open)this._openOwnedDialog(this.dialog,'settings');
     }
     _layoutEditor(page){
