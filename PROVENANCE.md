@@ -19,7 +19,7 @@ These tests **support the assessment that no verbatim old-plugin code was copied
 
 ## License handling
 
-- The repository includes MIT terms for PalaSidebar source/assets that the copyright owners have authority to license.
+- Original PalaSidebar contributions are licensed under MIT with **Copyright (c) 2026 Robin Bouwman**; this attribution is not a claim of ownership over any third-party material.
 - If evidence emerges that any Apache-2.0 source or other third-party implementation has been adapted, retain the corresponding license and notices and follow its redistribution requirements.
 - Do not remove a required third-party attribution simply to remove a project's name.
 - The PalaSidebar brand icon/logo was designed for this project during development, but the maintainer should confirm redistribution rights for *all* included assets and any imported fonts or images.
@@ -29,4 +29,4 @@ These tests **support the assessment that no verbatim old-plugin code was copied
 
 The code-comparison task is complete. **The remaining owner-controlled checks are rights to publish all included assets, confirmation that there is no knowingly incorporated third-party source requiring extra notices, and a final scan of release content/history.** Issue [#1](https://github.com/OnlyRobin/PalaSideBar/issues/1) tracks these confirmations.
 
-Keep the repository private until these are checked. HACS validation is currently skipped for private repositories, while Code checks and Hassfest run normally. A public HACS pre-release should only be created after visibility, license, and validation gates are complete.
+The repository is **public** and GitHub prerelease **v2.0.0-beta7** was published on 31 October 2026. Code checks, Hassfest and the public HACS validation have passed. This file preserves the provenance caveat that no mechanical source comparison can guarantee independent authorship or automatically establish rights to redistributed third-party assets. Issue [#1](https://github.com/OnlyRobin/PalaSideBar/issues/1) tracks those residual checks. Future changes should go through the `develop` branch and a reviewed pull request.
