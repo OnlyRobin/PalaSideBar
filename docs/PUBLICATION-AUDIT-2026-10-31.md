@@ -1,67 +1,79 @@
-# PalaSidebar public-release audit — 2026-10-31
+# PalaSidebar: onderzoek vóór de eerste openbare release — 31 oktober 2026
 
-**Historical audit (31 October 2026).** At the time of the initial audit, the repository was private. The repository was subsequently made **public** and prerelease [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) was published after Code checks, Hassfest and public HACS validation passed. The findings below document the original review and its limits; public release does not prove ownership of any third-party sources/assets. Copyright notice for original PalaSidebar code: **© Robin Bouwman 2026**. Remaining questions are tracked in [issue #1](https://github.com/OnlyRobin/PalaSideBar/issues/1).
+> **Historisch onderzoek.** Dit verslag is opgesteld toen de repository nog privé was. De repository is later openbaar gemaakt en de eerste prerelease beta7 is gepubliceerd nadat de automatische code-, Hassfest- en HACS-controles waren geslaagd. Inmiddels bestaat ook [beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8). De bevindingen hieronder beschrijven de **oorspronkelijke audit** en zijn geen garantie dat de rechten op ieder extern onderdeel definitief vaststaan. Voor de eigen PalaSidebar-bijdragen geldt **© 2026 Robin Bouwman**; openstaande vragen worden gevolgd in [issue #1](https://github.com/OnlyRobin/PalaSideBar/issues/1).
 
-## Technical checks verified on GitHub
+## Destijds gecontroleerd op GitHub
 
-- Integration domain: `pala_sidebar`; source under `custom_components/pala_sidebar`.
-- `hacs.json`, manifest and version `2.0.0-beta7` are present.
-- **Code checks: passed** on commit `e05efc7`.
-- **Hassfest: passed** on commit `e05efc7`, after sorting manifest fields and defining a config-entry-only schema.
-- HACS action is *skipped* for private repositories by design; this is **not** a HACS validation pass.
-- Local `brand/` assets are present; Home Assistant 2026.3+ supports custom integration brand assets locally.
+- Integratiedomein: `pala_sidebar`; broncode onder `custom_components/pala_sidebar`.
+- `hacs.json`, het integratiemanifest en versie `2.0.0-beta7` waren aanwezig.
+- De codecontrole slaagde op commit `e05efc7`.
+- Hassfest slaagde op commit `e05efc7`, nadat de volgorde van manifestvelden was gecorrigeerd en het configuratieschema voor integraties via de gebruikersinterface was toegevoegd.
+- Toen de repository nog privé was, werd de HACS-validatie bewust overgeslagen. **Overgeslagen** is niet hetzelfde als **geslaagd**.
+- De lokale bestanden onder `brand/` waren aanwezig. Home Assistant vanaf 2026.3 ondersteunt lokale merkafbeeldingen bij customintegraties.
 
-## Source-origin findings and limitations
+## Herkomst van de broncode: bevindingen en beperkingen
 
-- The currently tracked frontend `pala-sidebar.js` was compared with the main source file from `elchininet/custom-sidebar` (Apache License 2.0) and distribution scripts from `galloween/custom-sidebar-v2` and `Villhellm/custom-sidebar`.
-- A heuristic comparison of **16 consecutive JavaScript identifiers** found zero matching windows between the PalaSidebar frontend and those three files. The PalaSidebar JavaScript also has no literal `custom-sidebar` code references.
-- These checks **do not prove independent authorship**: historical revisions, conceptual reuse, adapted algorithms and human source-origin information still require review. The exact original ZIP has now also been compared; see the detailed section below.
-- The known upstream `elchininet/custom-sidebar` carries **Apache-2.0**. An older file may have different rights. No conclusion is made about the licensing status of the other two projects merely because `LICENSE` was not found at the inspected path.
-- `LICENSE` (MIT) may cover original PalaSidebar contributions only. If any third-party source is reused, its applicable copyright, licensing and attribution requirements must be preserved; renaming code does not remove that obligation.
-- The eight logo PNGs are in the repository. Confirm the rights to redistribute the project logo and any non-generated assets.
+- De toenmalige frontend `pala-sidebar.js` is vergeleken met broncode van `elchininet/custom-sidebar` (Apache-2.0) en met bestanden uit `galloween/custom-sidebar-v2` en `Villhellm/custom-sidebar`.
+- Bij een eerste vergelijking van **16 opeenvolgende JavaScript-identificaties** werden geen overeenkomende reeksen gevonden. Er waren ook geen letterlijke verwijzingen naar `custom-sidebar` in de uitvoerbare frontendcode.
+- Een vergelijking van teksten bewijst **geen onafhankelijk auteurschap**. Eerdere versies, functionele ideeën, bewerkte algoritmen en informatie over het ontstaan van de code kunnen daarnaast relevant zijn. Het exacte oude ZIP-archief is later afzonderlijk onderzocht.
+- Van `elchininet/custom-sidebar` is vastgesteld dat de onderzochte versie de licentie **Apache-2.0** gebruikt. Voor oudere of andere bestanden kunnen andere rechten gelden. Het ontbreken van een licentiebestand op een bekeken pad bewijst niets over de rechten van de twee andere genoemde projecten.
+- De MIT-licentie van PalaSidebar mag alleen gelden voor materiaal dat de rechthebbende daadwerkelijk onder MIT mag verspreiden. Als materiaal van derden is overgenomen, moeten bijbehorende licenties en auteursvermeldingen behouden blijven.
+- De repository bevat acht PNG-bestanden met PalaSidebar-logo's. Controleer het recht om deze en alle eventuele andere niet-eigen onderdelen openbaar te verspreiden.
 
-## Exact uploaded upstream archive comparison (2026-10-31)
+## Vergelijking met het exacte aangeleverde oude archief
 
-The user supplied `custom-sidebar-master(5).zip`, identified by its own `package.json` as **`elchininet/custom-sidebar` version 17.3.0** under **Apache-2.0**. The ZIP contains 469 entries, including `src/`, `dist/`, a full Apache-2.0 `LICENSE`, and a bundled `.hass/` test environment.
+De gebruiker leverde `custom-sidebar-master(5).zip` aan. Volgens de eigen `package.json` gaat het om **`elchininet/custom-sidebar` versie 17.3.0** onder **Apache-2.0**. Het archief telt 469 onderdelen, waaronder `src/`, `dist/`, een volledig Apache-2.0-licentiebestand en een meegeleverde Home Assistant-testomgeving onder `.hass/`.
 
-- Original archive SHA-256: `d46a81b744818659b3320d5a5c47e493e2c72a4bfe1e48b6d0e034f2981167e4`.
-- Upstream code tested: **30** source and compiled JavaScript/TypeScript/CSS files under `src/` and `dist/` (total 304,085 bytes).
-- Current code tested: **10** JavaScript/Python/JSON/CSS runtime files in `custom_components/pala_sidebar` (543,222 UTF-8 bytes), matching the frontend size of the tracked beta7 release. The two Python manifest/schema commits on GitHub do not change frontend source.
-- **Exact 80-character test:** indexed all 292,899 upstream 80-character code windows and tested all 541,952 code windows from the current runtime files; **zero matches**. Hash collisions would increase false positives, not hide exact matches. These findings concern matching contiguous text, not licenses.
-- **Identifier-sequence test:** compared eight consecutive JavaScript/TypeScript identifiers across the same code files; **zero matches**.
-- **Historical check:** the additional PalaSidebar v1.3.54 and v2.0.0-beta3 frontend snapshots were also checked against the same exact old source archive: **zero 80-character matches and zero eight-identifier matches** in each. This supports continuity of independent-looking code across those versions, but does not prove independent design.
-- Checked runtime source files for `custom-sidebar`, `custom_sidebar`, `CustomSidebar`, `elchininet`, `galloween`, `villhellm` and `apache`: **zero matching references**. Historical documentation discusses upstream openly for provenance; this is not an imported runtime dependency.
-- Implementations differ structurally: upstream is a modular TypeScript HACS **plugin** using source modules, subscribers, fetchers and validators; PalaSidebar is a Home Assistant **integration** with an independent frontend loader and a self-contained sidebar JavaScript. Similar Home Assistant events or UI behavior by themselves do not demonstrate copying.
+- **SHA-256 van het archief:** `d46a81b744818659b3320d5a5c47e493e2c72a4bfe1e48b6d0e034f2981167e4`.
+- **Onderzochte oorspronkelijke code:** 30 bron- en gecompileerde JavaScript-, TypeScript- en CSS-bestanden onder `src/` en `dist/`, samen 304.085 bytes.
+- **Onderzochte PalaSidebar-code:** tien uitvoerbestanden van het type JavaScript, Python, JSON en CSS in `custom_components/pala_sidebar`, samen 543.222 UTF-8-bytes. Dit kwam overeen met de frontendomvang van de toenmalige beta7. Latere wijzigingen aan het Python-manifest of configuratieschema veranderen die vergelijking van de frontend niet.
+- **Exacte reeksen van 80 tekens:** alle 292.899 bronreeksen van 80 tekens werden geïndexeerd en vergeleken met 541.952 reeksen uit de onderzochte PalaSidebar-bestanden. Er waren **nul overeenkomsten**. Eventuele hashbotsingen zouden eerder extra schijnbare overeenkomsten opleveren dan exacte overeenkomsten verbergen.
+- **Opeenvolgende identificaties:** bij acht opeenvolgende JavaScript-/TypeScript-identificaties waren er **nul overeenkomsten**.
+- **Oudere PalaSidebar-versies:** ook de frontends van v1.3.54 en v2.0.0-beta3 zijn vergeleken met hetzelfde oude bronarchief. In beide gevallen werden **nul overeenkomende reeksen van 80 tekens en nul overeenkomende reeksen van acht identificaties** gevonden. Dit ondersteunt de indruk van een afzonderlijke codebasis door de tijd heen, maar bewijst geen onafhankelijk ontwerp.
+- **Externe projectverwijzingen:** in de onderzochte uitvoerbestanden leverde het zoeken naar `custom-sidebar`, `custom_sidebar`, `CustomSidebar`, `elchininet`, `galloween`, `villhellm` en `apache` **nul resultaten** op. In de historische documentatie worden de oude projecten uiteraard wél besproken; dit betekent niet dat ze als code worden geïmporteerd.
+- **Architectuurverschil:** het oorspronkelijke project was een modulaire TypeScript-**plugin** met aparte bronmodules, abonnementen, gegevensophalers en controles. PalaSidebar is een Home Assistant-**integratie** met een eigen frontend-loader en één zelfstandig JavaScript-bestand. Vergelijkbare Home Assistant-gebeurtenissen of UI-functies vormen op zichzelf geen bewijs van kopiëren.
 
-**Interpretation:** No literal code copying was detected across this exact supplied upstream ZIP and the current beta7 runtime. This substantially reduces concern about direct verbatim copying, but **does not establish ownership or exclude rewritten/adapted code**. The maintainer must still verify that no third-party implementation was adapted in a way that creates license obligations.
+**Betekenis van de uitkomst:** bij deze concrete bronvergelijking is geen letterlijke codekopie vastgesteld. Dat verkleint de kans op rechtstreeks overnemen van tekst uit het onderzochte archief, maar **bewijst geen eigendom en sluit bewerkte of anderszins afgeleide code niet uit**. De beheerder moet daarom blijven nagaan of code van derden is verwerkt op een manier die extra licentieverplichtingen oproept.
 
-**Sensitive-file precaution:** The upstream ZIP also contains a `.hass/config/.storage/` test area, an `auth` file, `secrets.yaml`, and a Home Assistant database. These files were **not** copied into PalaSidebar, posted to GitHub, or quoted in this audit. Do not redistribute the original ZIP wholesale without reviewing these contents.
+### Let op: vertrouwelijke bestanden in het oorspronkelijke ZIP-archief
 
-**Licensing:** Apache-2.0 does not ban reuse; it requires compliance for redistributed portions, including retaining applicable licenses/notices and identifying modified files as required. The MIT file in PalaSidebar covers only material licensed by its rightful owners. No attribution requirement is asserted for merely reading/using the old project as a behavioral reference with no code reuse.
+Het oude archief bevat ook een testmap `.hass/config/.storage/`, een `auth`-bestand, `secrets.yaml` en een Home Assistant-database. Deze bestanden zijn **niet** naar de PalaSidebar-repository gekopieerd of in het onderzoek gepubliceerd. Verspreid het oorspronkelijke archief niet zonder eerst de inhoud op vertrouwelijke gegevens te controleren.
 
-## Privacy and publication-safety scan
+### Licentievoorwaarden
 
-Examined release-package text files for common credential assignments, RFC1918 IP addresses, hardcoded private hostnames, e-mail addresses and absolute HTTP URLs. No apparent live secrets, private IP addresses, or personal service hostnames were found. The observed URL values were documentation links, SVG XML namespaces and examples.
+Apache-2.0 verbiedt het hergebruiken van code niet, maar stelt wel voorwaarden bij verspreiding van overgenomen materiaal. Dit omvat waar nodig het bewaren van licentieteksten, verplichte vermeldingen en het aangeven van gewijzigde bestanden. De MIT-licentie van PalaSidebar dekt alleen materiaal waarvoor de rechthebbende die licentie mag toepassen.
 
-This is a pattern scan, **not** a guaranteed secrets audit. Check previous commits and all local-only config files before publication.
+Alleen het bestuderen van een andere sidebar als **gedragsvoorbeeld** zonder broncodeovername leidt op zichzelf niet automatisch tot een verplichting om de Apache-2.0-licentie over te nemen.
 
-## Unresolved gate — maintainer confirmation required
+## Controle op privégegevens
 
-- [ ] Confirm origin of the current implementation, and identify any code adapted from another sidebar project.
-- [x] Compare the exact historical upstream ZIP/version: **Custom Sidebar 17.3.0 / Apache-2.0**; no literal code matches found (details above).
-- [ ] If code or assets were reused, add the exact original license and required notices/credits and check compatibility before publishing.
-- [ ] Confirm that all committed icons/logos and media can be publicly redistributed.
-- [ ] Confirm there are no secrets or personally identifying defaults in Git history.
+De tekstbestanden van het releasepakket zijn onderzocht op veelvoorkomende vormen van toegangssleutels, wachtwoordtoewijzingen, interne IP-adressen, interne hostnamen, e-mailadressen en absolute HTTP-adressen.
 
-After the gate is cleared:
-1. Make the repository public.
-2. Let **HACS validation** run and fix any failures.
-3. Re-run Code checks and Hassfest against the release commit.
-4. Create an actual GitHub **pre-release** (not only a tag) named `v2.0.0-beta7`.
-5. Test installation/update in a real Home Assistant system through HACS custom repositories.
+Daarbij zijn geen herkenbare actieve geheime gegevens, privé-IP-adressen of persoonlijke hostnamen gevonden. De aangetroffen URL's betroffen onder meer documentatielinks, XML-naamruimten van SVG en voorbeelden.
 
-Sources:
-- https://github.com/elchininet/custom-sidebar (upstream project; Apache-2.0)
+Dit was een **controle op tekstpatronen**, geen garantie dat alle vertrouwelijke gegevens uit alle oude commits of lokale configuratiebestanden zijn verwijderd.
+
+## Openstaande aandachtspunten
+
+- [ ] De herkomst van alle gebruikte code bevestigen en vastleggen of er ergens aangepaste code van andere sidebarprojecten aanwezig is.
+- [x] Het exacte oude archief en de licentie vergelijken: **Custom Sidebar 17.3.0 / Apache-2.0**, zonder gevonden lange letterlijke overeenkomsten.
+- [ ] Als toch code of afbeeldingen van derden zijn overgenomen, de juiste licentieteksten en verplichte auteursvermeldingen toevoegen.
+- [ ] Bevestigen dat alle meegeleverde logo's, iconen en overige media rechtmatig verspreid mogen worden.
+- [ ] De volledige Git-geschiedenis en persoonlijke configuratiebestanden op vertrouwelijke gegevens controleren.
+
+## De oorspronkelijke publicatiestappen (inmiddels uitgevoerd)
+
+1. De repository openbaar maken.
+2. De HACS-validatie uitvoeren en eventuele fouten oplossen.
+3. Code checks en Hassfest op de releasecode opnieuw uitvoeren.
+4. Een echte GitHub-prerelease publiceren, niet alleen een tag.
+5. Installatie en bijwerken via een echte Home Assistant-installatie testen.
+
+Sinds dit onderzoek zijn beta7, RC1, RC2 en beta8 gepubliceerd. Het testen van de praktijkwerking en het afronden van eventuele licentievraagstukken blijven afzonderlijke taken.
+
+## Geraadpleegde project- en documentatiebronnen
+
+- https://github.com/elchininet/custom-sidebar (oorspronkelijk project, Apache-2.0)
 - https://github.com/galloween/custom-sidebar-v2
 - https://github.com/Villhellm/custom-sidebar
 - https://contributors.home-assistant.io/core/integrations/brands/
