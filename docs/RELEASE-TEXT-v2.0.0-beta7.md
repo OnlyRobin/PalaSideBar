@@ -1,4 +1,4 @@
-# PalaSidebar v2.0.0-beta7 — First HACS Beta
+# PalaSidebar v2.0.0-beta7 — Eerste HACS-bèta
 
 De eerste publieke **beta** van PalaSidebar, een configureerbare sidebar voor Home Assistant met HACS-installatie en automatische frontendregistratie.
 
@@ -7,7 +7,7 @@ De eerste publieke **beta** van PalaSidebar, een configureerbare sidebar voor Ho
 - Configureerbare navigatie, dashboards, favorieten en snelkoppelingen
 - Live Control Center met dynamische sensorwaarden en thema-overname
 - Snelmenu's via lang indrukken en rechtermuisknop, en dashboards slepen/sorteren
-- Theme Studio Pro en Performance Center
+- Thema-ontwerper (Theme Studio Pro) en prestatiecentrum (Performance Center)
 - Instellingen per Home Assistant-account met import, export en herstelmogelijkheden
 - Home Assistant-herstartknop voor beheerders, met bevestiging
 - Lokale integratielogo's en een AutoLoader vanuit `custom_components`
