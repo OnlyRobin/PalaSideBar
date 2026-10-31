@@ -27,9 +27,9 @@ Target version: `2.0.0-beta7` (planned prerelease)
 - [x] Code checks, Hassfest and public HACS validator succeeded on the release candidate.
 - [x] Repository owner made repository **public**. Asset/source rights and Git history should still be reviewed before distribution (issue #1).
 - [ ] Run HACS validation successfully as a **public** repository; a skipped job does not count.
-- [ ] **Owner action:** Publish a GitHub release (not only a tag): tag `v2.0.0-beta7`, title `PalaSidebar v2.0.0-beta7 — First HACS Beta`, target `main`, mark **pre-release**; copy notes from `docs/RELEASE-TEXT-v2.0.0-beta7.md`. Connected GitHub actions cannot create releases.
+- [x] **Published** GitHub prerelease [`v2.0.0-beta7`](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) on 2026-10-31, title `PalaSidebar v2.0.0-beta7 — First HACS Beta`. Verified public, not draft, prerelease flag true, manifest version matches.
 - [ ] Add repo to HACS → Custom repositories → Integration and enable prereleases if needed.
 - [ ] Test fresh install and update from manual install, desktop and Android Companion app.
 - [ ] Complete HACS installation and release announcement only after the above checks.
 
-GitHub release notes are prepared and the repository is public, but **no GitHub tag or release has been created**.
+**GitHub prerelease `v2.0.0-beta7` is live**. Code checks, Hassfest, and public HACS validation passed on its commit. Next: verify real HACS installation and migration from any manual install. Issue #1 remains open for follow-up provenance/asset review.
