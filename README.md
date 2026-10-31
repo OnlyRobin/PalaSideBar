@@ -57,7 +57,7 @@ Built for Home Assistant custom integrations. Brand images are included locally 
 
 ## Publishing checklist
 
-Before making this repository public, review `PROVENANCE.md` and verify the licensing of every reused source file and asset. The repository is initially private; HACS installation requires that the Home Assistant installation can access the repository.
+This repository is public. Read `PROVENANCE.md` and [the publication audit](docs/PUBLICATION-AUDIT-2026-10-31.md) for source and asset provenance; public visibility does not waive third-party license obligations. The first HACS prerelease must only be published after the live HACS validator passes.
 
 ## License
 
