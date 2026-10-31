@@ -1,5 +1,7 @@
 # PalaSidebar
 
+**© Robin Bouwman 2026** · Licensed under MIT.
+
 PalaSidebar is a Home Assistant custom integration with a configurable sidebar and a bundled frontend loader.
 
 **Status:** 2.0.0-beta7 (pre-release). Tested as an installable custom integration; further real-device testing is recommended.
@@ -17,7 +19,7 @@ PalaSidebar is a Home Assistant custom integration with a configurable sidebar a
 
 ## Publicatie / First public HACS release
 
-De Nederlandstalige publicatiestappen staan in [HACS-PUBLICATIE-NL.md](docs/HACS-PUBLICATIE-NL.md). Deze repository is voor de eerste release voorbereid; maak hem eerst openbaar, laat de echte HACS-validatie slagen en publiceer daarna pas de GitHub-prerelease `v2.0.0-beta7`. Zie ook de [kant-en-klare releasetekst](docs/RELEASE-TEXT-v2.0.0-beta7.md).
+De eerste publieke prerelease is [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7). GitHub Actions (Code checks, Hassfest en HACS-validatie) zijn geslaagd. De historische publicatie-instructies staan in [HACS-PUBLICATIE-NL.md](docs/HACS-PUBLICATIE-NL.md); nieuwe wijzigingen verlopen via de `develop`-branch en worden na controle naar `main` gemerged.
 
 ## Installation with HACS
 
@@ -61,4 +63,4 @@ This repository is public. Read `PROVENANCE.md` and [the publication audit](docs
 
 ## License
 
-This repository includes a proposed MIT `LICENSE` for original PalaSidebar contributions. **It does not cancel third-party copyright, attribution or license obligations.** See `PROVENANCE.md` before publishing.
+**Copyright © 2026 Robin Bouwman.** PalaSidebar is distributed under the [MIT license](LICENSE) for the original code and assets the copyright holder has the right to license. Third-party materials, if included, retain their applicable license and attribution obligations; see [PROVENANCE.md](PROVENANCE.md).
