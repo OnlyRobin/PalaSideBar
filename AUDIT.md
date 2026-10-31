@@ -1,17 +1,21 @@
-# Beta7 preparation audit
+# Historische technische controle voor beta7
 
-- Built from user-supplied beta6 archive. Existing integration domain, route, config and account preference keys retained.
-- Visible former nickname references renamed to **PalaSidebar UI**, including settings tab, previews and labels.
-- CSS custom properties renamed consistently. New style setting stored as `ui_style`; previous `palafix` preference is read for migration without modifying user data in place.
-- The only remaining old nickname strings in code refer to **specific legacy identifiers**, required to detect/remove stale previously loaded scripts or read old preferences. They do not point to an external dependency or repository.
-- Removed obsolete references to an older sidebar project in comments. The package manifest has no declared dependency on that project.
-- `LICENSE` (MIT) is included for owned contributions. **Third-party provenance must be audited before publishing** (see `PROVENANCE.md`).
-- HACS layout, manifest, icon and version checks prepared; repository URL placeholders remain until actual GitHub owner/repository is known.
-- Full cross-device stability and ownership review are not guaranteed by this audit.
+Dit document beschrijft de voorbereidingen voor de oorspronkelijke beta7. Het is een **historisch verslag**, geen beoordeling van de huidige beta8. Inmiddels zijn meerdere problemen uit beta7 verholpen en is [beta8 gepubliceerd](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8).
 
-## Tests executed for this package
+## Onderzochte punten
 
-12 individual test scripts passed using their direct Python entry points (some are browser scripts, not pytest functions):
+- De oorspronkelijke integratie werd opgebouwd vanuit het door de gebruiker aangeleverde beta6-archief. De bestaande integratiedomeinnaam, routes, configuratie en accountvoorkeuren bleven behouden.
+- De zichtbare oude projectnaam werd vervangen door **PalaSidebar UI**, inclusief tabbladen, voorbeelden en labels.
+- CSS-eigenschappen werden consistent hernoemd. De nieuwe stijlvoorkeur gebruikt `ui_style`; de vroegere `palafix`-voorkeur blijft als migratiebron leesbaar.
+- Resterende oude namen in de code verwijzen naar **oude opslag- en resource-identificaties** die nodig zijn voor het herkennen of opruimen van eerder geladen scripts. Dit betekent geen externe afhankelijkheid.
+- Oude verwijzingen naar een ander sidebarproject werden verwijderd uit commentaar. Het manifest heeft geen afhankelijkheid van die andere integratie.
+- Er werd een MIT-licentie opgenomen voor materiaal waarvoor de auteurs daadwerkelijk de verspreidingsrechten bezitten. De herkomstbeoordeling staat in [PROVENANCE.md](PROVENANCE.md).
+- De HACS-mapstructuur, het manifest, de logo's en de versiebestanden werden nagekeken.
+- Destijds waren de werking op alle apparaten en alle rechten op eventuele externe onderdelen nog niet volledig bevestigd.
+
+## Destijds uitgevoerde tests
+
+De volgende twaalf testscripts zijn afzonderlijk geslaagd:
 
 - `test_pala_sidebar_cc.py`
 - `test_brand_files.py`
@@ -26,4 +30,6 @@
 - `test_beta5_action_safety.py`
 - `test_pala_sidebar_cc_browser.py`
 
-`node --check` succeeded for both frontend and loader, Python compilation succeeded, and the HACS layout smoke test passed. Actual HACS/GitHub Actions validation and real-device tests require a published repository and a Home Assistant installation.
+Daarnaast slaagden `node --check`, de Python-compilatie en de eerste controle van de HACS-mapstructuur. Dit waren testresultaten van het toenmalige pakket; de latere GitHub-workflows en tests van de actuele releases hebben hun eigen resultaten.
+
+**Latere ontdekking:** in beta7 bleef het tabblad PalaSidebar UI leeg, ontbrak de standaardondertitel en bevatte BEHEER te weinig standaardopties. De drie problemen zijn gereproduceerd in [de beta7-audit](https://github.com/OnlyRobin/PalaSideBar/actions/runs/41213687322) en hersteld in beta8.
