@@ -6,6 +6,16 @@
 - **develop:** `2.0.0-rc2` is de actuele *release candidate* (gepubliceerd via HACS als prerelease). **Nog geen stabiele release.**
 - Beide branches hebben het Home Assistant-domein `pala_sidebar` en dezelfde interne URL's en opslag-ID's: installeer ze **niet tegelijk in dezelfde Home Assistant-instantie**.
 
+## RC2 testen via HACS (aanbevolen)
+
+1. Maak een volledige Home Assistant-back-up, exporteer PalaSidebar-instellingen en bewaar eventuele eigen `pala-sidebar-config.json` buiten de integratiemap.
+2. Open HACS → **PalaSidebar** → **Download / Redownload** en zet **Show beta versions** aan.
+3. Kies **v2.0.0-rc2** (prerelease), installeer en herstart Home Assistant volledig.
+4. Controleer de ondertitel **Mijn Home Assistant**, de ingevulde **PalaSidebar UI**-instellingen en de extra standaardknoppen bij **BEHEER**.
+5. Als er iets misgaat, selecteer **v2.0.0-rc1** opnieuw via HACS en herstart Home Assistant. Je bestaande instellingen en eventuele eigen configuratie moet je vooraf apart geback-upt hebben.
+
+Een losse branch is niet rechtstreeks als HACS-versie te installeren; de gepubliceerde RC2-release **wel**.
+
 ## Aanbevolen: test in aparte Home Assistant-testomgeving
 
 1. Maak een volledige Home Assistant-back-up; download die ook naar je computer.
@@ -29,7 +39,7 @@ Dan is testen mogelijk, maar **niet parallel**. Plan een kort onderhoudsmoment e
 4. Herstart Home Assistant volledig. Controleer de versie-URL en test alle functies.
 5. **Terugzetten:** herstel de oorspronkelijke map of gebruik HACS → PalaSidebar → drie puntjes → **Redownload** → kies `v2.0.0-beta7` als beschikbare versie. Herstart HA opnieuw. Herstel zo nodig je aparte configuratieback-up.
 
-Let op: een handmatig geplaatste ontwikkelversie is geen HACS-release. HACS kan die later bij een update overschrijven. HACS toont standaard de recente GitHub-releases en de **default branch** (`main`), niet willekeurig de `develop`-branch; voor de echte `develop`-code gebruik je daarom de ZIP-testmethode.
+Let op: een **handmatig** geplaatste branchversie is geen HACS-release en kan later door HACS worden overschreven. HACS toont voor PalaSidebar uitsluitend gepubliceerde releases/prereleases, omdat `hide_default_branch: true` is ingesteld. Voor de meest recente niet-gepubliceerde ontwikkelcommit gebruik je de ZIP-testmethode; voor **RC2** kun je gewoon HACS gebruiken.
 
 ## Testchecklist voor v2.0.0
 
