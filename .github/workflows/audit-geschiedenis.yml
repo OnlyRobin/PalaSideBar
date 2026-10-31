@@ -3,10 +3,13 @@ name: Nacontrole volledige Git-geschiedenis en assets
 on:
   push:
     branches:
+      - main
+      - develop
       - audit/volledige-gitgeschiedenis
-    paths:
-      - .github/workflows/audit-geschiedenis.yml
-      - scripts/controle_git_geschiedenis.py
+  pull_request:
+    branches:
+      - main
+      - develop
   workflow_dispatch:
 
 permissions:
