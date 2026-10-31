@@ -1,12 +1,12 @@
 /**
- * PalaSidebar 2.0.0-rc2 – custom_components integratie met AutoLoader.
+ * PalaSidebar 2.0.0-rc3 – custom_components integratie met AutoLoader.
  * Copyright (c) 2026 Robin Bouwman. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
  * Leest uitsluitend HA-status; voert geen services uit zonder interactie.
  * Integratie via native ha-sidebar slot indien beschikbaar; anders overlay.
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc2';
+  const VERSION = '2.0.0-rc3';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -1446,6 +1446,9 @@ md-filled-select {
 .editor-record{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;border-bottom:1px solid var(--divider-color,#6677);padding:8px 0;overflow-wrap:anywhere}
 .editor-record .btn{flex-shrink:0}.entity-suggestions{display:flex;flex-direction:column;gap:3px;max-height:170px;overflow:auto}
 .entity-suggestions .btn{font-size:11px;text-align:left;padding:6px 8px;overflow-wrap:anywhere}
+.entity-picker-open{min-width:42px;min-height:42px;border:1px solid var(--divider-color,#566)!important;border-radius:9px!important;background:var(--secondary-background-color,#283647)!important}
+.entity-suggestions[hidden]{display:none!important}
+.entity-suggestions .btn:focus-visible{outline:2px solid var(--p-accent);outline-offset:-2px}
 .popup-message{font-size:14px!important;white-space:pre-wrap;overflow-wrap:anywhere}
 .dialog .btn{min-height:36px}@media (pointer:coarse){.dialog .btn,.dialog .field input,.dialog .field select{min-height:44px}}
 .editor-notice{color:var(--p-accent)!important;font-weight:700}
@@ -4257,6 +4260,12 @@ md-filled-select {
       }
       if(cmd==='agenda-save'){this._agendaSaveEditor();return;}
       if(cmd==='save-header'){this._saveHeader();return;}
+      if(cmd==='head-token-insert'){this._insertHeaderToken();return;}
+      if(cmd==='entity-picker-open'){
+        const field=this.dialog.querySelector('#'+target.dataset.field);
+        if(field){this._updateSuggestions(field,true);field.focus();}
+        return;
+      }
       if(cmd==='layout-section-pick'){const sel=this.dialog.querySelector('#pala-layout-section');if(sel){sel.value=target.dataset.id;this._layoutFillSection();}return;}
       if(cmd==='layout-icon-same-sensor'){
         const source=this.dialog?.querySelector('#pala-layout-title-entity')?.value||'';
@@ -4418,6 +4427,7 @@ md-filled-select {
     _input(e){
       if(e.target===this.searchInput){this.search=e.target.value;this._drawList();}
       else if(e.target?.dataset?.entityPicker)this._updateSuggestions(e.target);
+      if(e.target?.id==='pala-head-token-entity')this._fillHeaderTokenAttributes();
       if(e.target?.id==='pala-badge-entity'){
         this._refreshBadgeAttributeOptions();this._refreshBadgeColorAttributeOptions();
       }
@@ -4451,6 +4461,8 @@ md-filled-select {
         this._refreshBadgeAttributeOptions();this._refreshBadgeColorAttributeOptions();
       }
       if(id==='pala-badge-insert-entity')this._refreshBadgeInsertAttributes();
+      if(id==='pala-head-token-entity')this._fillHeaderTokenAttributes();
+      if(id==='pala-head-token-attribute')this._previewHeaderToken();
       if(id==='pala-sensor-select')this._fillSensorEditor(e.target.value);
       if(['pala-sensor-title-entity','pala-sensor-icon-entity'].includes(id))
         this._fillSensorAttributes(id.includes('title')?'title':'icon');
@@ -5469,22 +5481,84 @@ md-filled-select {
       return wrap;
     }
     _entityField(label,id,value=''){
-      const f=this._formField(label,id,value);const input=f.querySelector('input');input.placeholder='Typ naam of entity_id, bijvoorbeeld sensor.buienalarm_neerslag';input.dataset.entityPicker='1';
-      const suggestions=$('div','entity-suggestions');suggestions.dataset.for=id;f.append(suggestions);
+      // Eén lichtgewicht Home Assistant-entiteitenkiezer voor alle sensor-/entiteitvelden.
+      // Dit veld schrijft uitsluitend de entity_id weg; attributen zijn contextafhankelijk.
+      const f=this._formField(label,id,value),input=f.querySelector('input');
+      input.placeholder='Zoek op naam of entity_id';input.dataset.entityPicker='1';
+      input.autocomplete='off';input.spellcheck=false;
+      input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');
+      input.setAttribute('aria-expanded','false');input.setAttribute('aria-controls',id+'-suggestions');
+      const button=this._button('⌕','entity-picker-open','entity-picker-open');
+      button.dataset.field=id;button.title='Zoek Home Assistant-entiteit';button.setAttribute('aria-label',label+': lijst openen');
+      f.querySelector('.field-control')?.append(button);
+      const suggestions=$('div','entity-suggestions');suggestions.id=id+'-suggestions';suggestions.dataset.for=id;
+      suggestions.setAttribute('role','listbox');suggestions.hidden=true;f.append(suggestions);
       return f;
     }
-    _updateSuggestions(input){
+    _updateSuggestions(input,force=false){
       const host=this.dialog.querySelector('[data-for="'+input.id+'"]');if(!host)return;
-      const query=text(input.value).toLowerCase();host.replaceChildren();
-      if(isEntity(query)&&this.hass?.states?.[query])return;
-      const entries=Object.entries(this.hass?.states||{});
-      let count=0;
-      for(const [id,state] of entries){
-        const name=text(state.attributes?.friendly_name);
-        if(!id.toLowerCase().includes(query)&&!name.toLowerCase().includes(query))continue;
-        const b=this._button((name?name+' · ':'')+id,'choose-entity');b.dataset.field=input.id;b.dataset.entity=id;
-        host.append(b);if(++count>=12)break;
+      const query=text(input.value).toLocaleLowerCase('nl'),states=this.hass?.states||{};
+      host.replaceChildren();
+      const finish=show=>{host.hidden=!show;input.setAttribute('aria-expanded',String(show));};
+      if((!query&&!force)||(!force&&isEntity(query)&&states[query])){finish(false);return;}
+      const matches=[];
+      for(const [id,state] of Object.entries(states)){
+        const name=text(state?.attributes?.friendly_name),idLower=id.toLowerCase(),nameLower=name.toLocaleLowerCase('nl');
+        if(query&&!idLower.includes(query)&&!nameLower.includes(query))continue;
+        const rank=idLower===query?0:nameLower===query?1:idLower.startsWith(query)?2:nameLower.startsWith(query)?3:4;
+        matches.push({id,name,rank});
       }
+      matches.sort((a,b)=>a.rank-b.rank||a.name.localeCompare(b.name,'nl')||a.id.localeCompare(b.id));
+      for(const item of matches.slice(0,12)){
+        const b=this._button((item.name?item.name+' · ':'')+item.id,'choose-entity');
+        b.dataset.field=input.id;b.dataset.entity=item.id;b.setAttribute('role','option');
+        host.append(b);
+      }
+      finish(matches.length>0);
+    }
+    _fillHeaderTokenAttributes(){
+      const entity=this.dialog.querySelector('#pala-head-token-entity')?.value||'';
+      const select=this.dialog.querySelector('#pala-head-token-attribute');if(!select)return;
+      const prior=select.dataset.entity===entity?select.value:'';
+      const attrs=this.hass?.states?.[entity]?.attributes||{};
+      const options=[['','Gewone sensorwaarde (state)']];
+      for(const [key,value] of Object.entries(attrs).sort(([a],[b])=>a.localeCompare(b,'nl'))){
+        if(!/^[a-zA-Z0-9_-]{1,80}$/.test(key)||value===null||typeof value==='object')continue;
+        options.push([key,key+' · '+String(value).slice(0,55)]);
+      }
+      select.replaceChildren(...options.map(([key,label])=>{const o=$('option',null,label);o.value=key;return o;}));
+      select.dataset.entity=entity;select.value=options.some(([key])=>key===prior)?prior:'';
+      this._previewHeaderToken();
+    }
+    _previewHeaderToken(){
+      const preview=this.dialog.querySelector('#pala-head-token-preview');if(!preview)return;
+      const id=text(this.dialog.querySelector('#pala-head-token-entity')?.value);
+      const attribute=this.dialog.querySelector('#pala-head-token-attribute')?.value||'';
+      const state=this.hass?.states?.[id];
+      if(!isEntity(id)){preview.textContent='Zoek een entiteit om de actuele waarde te bekijken.';return;}
+      const raw=attribute?state?.attributes?.[attribute]:state?.state;
+      const value=raw===undefined||raw===null?'Niet beschikbaar':String(raw);
+      preview.textContent='Voorbeeld: '+value.slice(0,160)+(state?'':' · entiteit momenteel niet gevonden');
+    }
+    _insertHeaderToken(){
+      const q=id=>this.dialog.querySelector('#'+id);
+      const entity=text(q('pala-head-token-entity')?.value),attr=q('pala-head-token-attribute')?.value||'';
+      if(!isEntity(entity)){this._editorNotice('Kies eerst een geldige Home Assistant-entiteit.');return;}
+      if(attr&&!/^[a-zA-Z0-9_-]{1,80}$/.test(attr)){this._editorNotice('Dit attribuut is niet geldig.');return;}
+      const target=q('pala-head-token-target')?.value||'extra';
+      const fields={extra:['pala-head-extra',240],title:['pala-head-title',60],subtitle:['pala-head-subtitle',90]};
+      const info=fields[target];if(!info)return;
+      const field=q(info[0]);if(!field)return;
+      const token='{'+entity+(attr?'#'+attr:'')+'}';
+      const start=Number.isInteger(field.selectionStart)?field.selectionStart:field.value.length;
+      const end=Number.isInteger(field.selectionEnd)?field.selectionEnd:start;
+      const before=field.value.slice(0,start),after=field.value.slice(end);
+      const spacer=before&&!/\s$/.test(before)?' ':'';
+      const result=before+spacer+token+after;
+      if(result.length>info[1]){this._editorNotice('De gekozen headertekst is te lang ('+info[1]+' tekens maximaal).');return;}
+      field.value=result;field.focus();field.setSelectionRange(before.length+spacer.length+token.length,before.length+spacer.length+token.length);
+      field.dispatchEvent(new Event('input',{bubbles:true}));
+      this._editorNotice('Sensor toegevoegd. Kies Header opslaan om de wijziging te bewaren.');
     }
     _showEditorTab(tab){
       this.editorTab=tab;
@@ -6483,7 +6557,17 @@ md-filled-select {
       headPage.append(this._formField('Eigen titel (leeg = standaard)','pala-head-title',hh.title));
       headPage.append(this._formField('Eigen subtitel (leeg = standaard)','pala-head-subtitle',hh.subtitle));
       headPage.append(this._formField('Extra sensorregel onder header','pala-head-extra',hh.extra));
-      headPage.append($('p','field-note','In titel, subtitel en extra regel kun je tokens gebruiken: {sensor.woonkamer_temperatuur} of {sensor.f1#race_name}. De tekst wordt zonder HTML of scripts getoond.'));
+      const tokenPane=$('div','layout-dynamic-panel');
+      tokenPane.append($('h4',null,'Sensor of attribuut aan de header toevoegen'));
+      tokenPane.append($('p','field-note','Zoek een Home Assistant-entiteit op naam, kies eventueel een attribuut en voeg de waarde toe aan de titel, subtitel of extra sensorregel. De actuele waarde wordt automatisch ververst.'));
+      tokenPane.append(this._entityField('Zoek sensor / entiteit','pala-head-token-entity'));
+      tokenPane.append(this._formField('Welke waarde wil je tonen?','pala-head-token-attribute','',[['','Gewone sensorwaarde (state)']]));
+      tokenPane.append(this._formField('Toevoegen aan','pala-head-token-target','extra',[['extra','Extra sensorregel'],['title','Eigen titel'],['subtitle','Eigen subtitel']]));
+      const tokenPreview=$('p','field-note','Zoek een entiteit om de actuele waarde te bekijken.');tokenPreview.id='pala-head-token-preview';
+      tokenPreview.setAttribute('aria-live','polite');tokenPane.append(tokenPreview);
+      tokenPane.append(this._button('Sensorwaarde invoegen','head-token-insert','primary'));
+      headPage.append(tokenPane);
+      headPage.append($('p','field-note','Je kunt meerdere sensoren en eigen tekst combineren. Bestaande tokens zoals {sensor.woonkamer_temperatuur} en {sensor.f1#race_name} blijven volledig werken.'));
       headPage.append(this._formField('Uitlijning','pala-head-align',hh.align,[['left','Links'],['center','Midden'],['right','Rechts']]));
       headPage.append(this._formField('Tekstkleur titel (#RRGGBB, leeg = thema)','pala-head-title-color',hh.title_color));
       headPage.append(this._formField('Tekstkleur subtitel (#RRGGBB)','pala-head-subtitle-color',hh.subtitle_color));
