@@ -3,7 +3,7 @@
 Repository: https://github.com/OnlyRobin/PalaSideBar  
 Doelversie: **`2.0.0-beta7`** — GitHub-release-tag: **`v2.0.0-beta7`**
 
-> **Status:** voorbereid, nog niet openbaar gemaakt of als GitHub-release gepubliceerd. Openbaar maken is een bewuste beheerdershandeling. Alle code, GitHub Actions-logs en Git-geschiedenis worden zichtbaar na deze wijziging.
+> **Historisch publicatieplan:** deze stappen zijn op 31 oktober 2026 uitgevoerd. De repository is **openbaar**, GitHub-prerelease [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) is gepubliceerd en de Code checks, Hassfest en HACS-validatie zijn geslaagd. De instructies hieronder blijven beschikbaar als referentie voor een nieuwe repository; publiceer **niet** nogmaals dezelfde tag.
 
 ## 0. Publicatievoorwaarden controleren
 

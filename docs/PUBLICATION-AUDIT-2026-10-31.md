@@ -1,6 +1,6 @@
 # PalaSidebar public-release audit — 2026-10-31
 
-Status: **NOT CLEARED FOR PUBLIC RELEASE**. The repository intentionally remains private.
+**Historical audit (31 October 2026).** At the time of the initial audit, the repository was private. The repository was subsequently made **public** and prerelease [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) was published after Code checks, Hassfest and public HACS validation passed. The findings below document the original review and its limits; public release does not prove ownership of any third-party sources/assets. Copyright notice for original PalaSidebar code: **© Robin Bouwman 2026**. Remaining questions are tracked in [issue #1](https://github.com/OnlyRobin/PalaSideBar/issues/1).
 
 ## Technical checks verified on GitHub
 

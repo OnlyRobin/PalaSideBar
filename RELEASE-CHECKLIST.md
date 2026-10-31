@@ -1,7 +1,7 @@
 # GitHub / HACS release checklist
 
 Repository: https://github.com/OnlyRobin/PalaSideBar  
-Target version: `2.0.0-beta7` (planned prerelease)
+Published beta: `2.0.0-beta7` (GitHub prerelease, 2026-10-31)
 
 ## Repository and CI
 - [x] GitHub repository created and made **public** by the owner.
@@ -14,6 +14,11 @@ Target version: `2.0.0-beta7` (planned prerelease)
 - [x] Dutch public release instructions: [`docs/HACS-PUBLICATIE-NL.md`](docs/HACS-PUBLICATIE-NL.md).
 - [x] Ready-to-paste prerelease notes: [`docs/RELEASE-TEXT-v2.0.0-beta7.md`](docs/RELEASE-TEXT-v2.0.0-beta7.md).
 
+## Copyright and licensing
+- [x] MIT LICENSE attributes original PalaSidebar code to **Robin Bouwman (2026)** on `develop`.
+- [x] README and frontend code header use the same copyright attribution on `develop`.
+- [ ] Merge copyright/documentation updates to `main` only after review and passing tests. The existing `v2.0.0-beta7` tag is immutable.
+
 ## Latest validation (2026-10-31)
 - [x] Code checks and **Hassfest passed** after adjusting manifest ordering and adding the config-entry-only schema.
 - [x] Current source/asset/publication review recorded in [docs/PUBLICATION-AUDIT-2026-10-31.md](docs/PUBLICATION-AUDIT-2026-10-31.md).
@@ -21,12 +26,12 @@ Target version: `2.0.0-beta7` (planned prerelease)
 - [ ] Close [Issue #1: provenance and licensing](https://github.com/OnlyRobin/PalaSideBar/issues/1) **only after the maintainer confirms the source and asset rights**.
 - [x] HACS validation **passed** on the public repository (run [41203936735](https://github.com/OnlyRobin/PalaSideBar/actions/runs/41203936735), attempt 2).
 
-## Required before public HACS prerelease
-- [ ] Review `PROVENANCE.md`, identify third-party code/assets, and retain required license and attribution notices.
-- [ ] Check for private addresses, credentials, tokens and personal defaults in all tracked files.
-- [x] Code checks, Hassfest and public HACS validator succeeded on the release candidate.
+## Completed release steps and post-release follow-up
+- [x] Source provenance and exact older ZIP comparison documented in `PROVENANCE.md`; third-party rights concerns remain explicitly tracked in issue #1.
+- [x] Static scan of tracked release files performed; historical Git content and any third-party license rights should remain under review.
+- [x] Code checks, Hassfest and public HACS validator succeeded on the release commit.
 - [x] Repository owner made repository **public**. Asset/source rights and Git history should still be reviewed before distribution (issue #1).
-- [ ] Run HACS validation successfully as a **public** repository; a skipped job does not count.
+- [x] HACS validation succeeded on the public repository; see [successful run](https://github.com/OnlyRobin/PalaSideBar/actions/runs/41205006660).
 - [x] **Published** GitHub prerelease [`v2.0.0-beta7`](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) on 2026-10-31, title `PalaSidebar v2.0.0-beta7 — First HACS Beta`. Verified public, not draft, prerelease flag true, manifest version matches.
 - [ ] Add repo to HACS → Custom repositories → Integration and enable prereleases if needed.
 - [ ] Test fresh install and update from manual install, desktop and Android Companion app.
