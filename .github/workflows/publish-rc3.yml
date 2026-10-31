@@ -1,0 +1,74 @@
+name: Publish PalaSidebar RC3 prerelease for HACS
+on:
+  push:
+    branches:
+      - rc3-header-sensor-picker
+    paths:
+      - .github/workflows/publish-rc3.yml
+permissions:
+  contents: write
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the isolated RC3 test branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify version and source structure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest=json.loads(Path('custom_components/pala_sidebar/manifest.json').read_text())
+          version=json.loads(Path('custom_components/pala_sidebar/frontend/pala-sidebar-version.json').read_text())
+          assert manifest['domain']=='pala_sidebar'
+          assert manifest['version']==version['version']=='2.0.0-rc3'
+          js=Path('custom_components/pala_sidebar/frontend/pala-sidebar.js').read_text()
+          assert "const VERSION = '2.0.0-rc3'" in js
+          print("RC3 version and integration layout consistent")
+          PY
+          python -m compileall -q custom_components/pala_sidebar
+          node --check custom_components/pala_sidebar/frontend/pala-sidebar.js
+          node --check custom_components/pala_sidebar/frontend/pala-sidebar-loader.js
+          python tests/test_github_layout.py
+      - name: Check HACS compatibility
+        uses: hacs/action@main
+        with:
+          category: integration
+      - name: Install Playwright and Chromium
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+          CHROME_BINARY="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+          sudo ln -sf "$CHROME_BINARY" /usr/bin/chromium
+      - name: Run backend and Chromium regression tests
+        run: |
+          set -eu
+          for test in tests/test_*.py; do
+            echo "::group::$test"
+            python "$test"
+            echo "::endgroup::"
+          done
+      - name: Publish RC3 only if all checks pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -eu
+          if gh release view v2.0.0-rc3 >/dev/null 2>&1; then
+            echo "RC3 release already exists; leaving it intact"
+            exit 0
+          fi
+          gh release create v2.0.0-rc3 \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "PalaSidebar v2.0.0-rc3 — HACS Test" \
+            --notes-file docs/RELEASE-v2.0.0-rc3.md
+          gh release view v2.0.0-rc3 --json tagName,isPrerelease,isDraft,url
