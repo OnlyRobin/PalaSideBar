@@ -4,7 +4,7 @@
 
 PalaSidebar is a Home Assistant custom integration with a configurable sidebar and a bundled frontend loader.
 
-**Current GitHub release:** [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) (pre-release). **Development branch:** `2.0.0-rc1` (unreleased release candidate; requires real-device testing before stable v2.0.0).
+**Current public GitHub release:** [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7). **This release branch:** `2.0.0` (prepared, **NOT YET PUBLISHED** or validated on real devices). **Develop:** `2.0.0-rc1` (test build).
 
 ## Features
 
