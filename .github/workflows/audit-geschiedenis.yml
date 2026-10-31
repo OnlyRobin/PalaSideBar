@@ -1,0 +1,107 @@
+name: Nacontrole volledige Git-geschiedenis en assets
+
+on:
+  push:
+    branches:
+      - audit/volledige-gitgeschiedenis
+    paths:
+      - .github/workflows/audit-geschiedenis.yml
+      - scripts/controle_git_geschiedenis.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Volledige geschiedenis en secretscontrole
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Git-repository met volledige geschiedenis ophalen
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Alle gepubliceerde branches en tags ophalen
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*' '+refs/tags/*:refs/tags/*'
+          echo "Bereikbare commits: $(git rev-list --all --count)"
+          echo "Branches: $(git for-each-ref refs/remotes/origin --format='%(refname)' | wc -l)"
+          echo "Tags: $(git tag --list | wc -l)"
+
+      - name: Eigen controle van bestanden en Git-objecten
+        run: |
+          set -euo pipefail
+          AUDIT_SUMMARY_PATH="$RUNNER_TEMP/audit-samenvatting.json" python scripts/controle_git_geschiedenis.py
+          python tests/test_brand_files.py
+
+      - name: Versiegebonden secretscanner downloaden
+        run: |
+          set -euo pipefail
+          docker pull ghcr.io/gitleaks/gitleaks:v8.30.0
+
+      - name: Controleer dat de scanner een fictieve sleutel herkent
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/controle-test" "$RUNNER_TEMP/controle-rapport"
+          cd "$RUNNER_TEMP/controle-test"
+          git init -q
+          git config user.name AuditTest
+          git config user.email audit@example.invalid
+          python - <<'PY'
+          from pathlib import Path
+          import random
+          import string
+          r=random.Random(117)
+          fake='ghp_' + ''.join(r.choices(string.ascii_letters+string.digits,k=36))
+          Path('test.txt').write_text('token = "' + fake + '"\n')
+          PY
+          git add test.txt
+          git commit -qm 'fictieve detectietest'
+          set +e
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src:ro" -v "$RUNNER_TEMP/controle-rapport:/audit" -w /src ghcr.io/gitleaks/gitleaks:v8.30.0 git /src --log-opts="--all" --redact --quiet --report-format json --report-path /audit/zelftest.json >"$RUNNER_TEMP/controle-rapport/zelftest.log" 2>&1
+          code=$?
+          set -e
+          if [ "$code" -ne 1 ]; then
+            echo "::error::Secretscanner doorstond de detectie-zelftest niet; onderzoek onbetrouwbaar."
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'controle-rapport/zelftest.json'
+          if not p.exists() or not json.loads(p.read_text()):
+              raise SystemExit('Zelftest gaf geen geverifieerde detectie')
+          print('Zelftest geslaagd: fictieve sleutel herkend, geheim niet gepubliceerd.')
+          PY
+
+      - name: Gitleaks volledige geschiedenis, alle bereikbare refs
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/controle-rapport"
+          set +e
+          docker run --rm --user "$(id -u):$(id -g)" -v "$GITHUB_WORKSPACE:/src:ro" -v "$RUNNER_TEMP/controle-rapport:/audit" -w /src ghcr.io/gitleaks/gitleaks:v8.30.0 git /src --log-opts="--all" --redact --quiet --report-format json --report-path /audit/geschiedenis.json >"$RUNNER_TEMP/controle-rapport/geschiedenis.log" 2>&1
+          code=$?
+          set -e
+          if [ "$code" -gt 1 ]; then
+            echo "::error::Secretscanner kon niet betrouwbaar uitvoeren; uitslag telt niet."
+            exit 1
+          fi
+          SCAN_EXIT="$code" python - <<'PY'
+          from collections import Counter
+          import json
+          import os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'controle-rapport/geschiedenis.json'
+          findings=json.loads(p.read_text()) if p.exists() and p.stat().st_size else []
+          counts=Counter(str(x.get('RuleID','overig')) for x in findings)
+          print('Secretscan over alle bereikbare refs:',len(findings),'mogelijke bevindingen.')
+          for key,n in sorted(counts.items()):
+              print('Scannerregel:',key,'— aantal:',n)
+          if os.environ['SCAN_EXIT']=='1' or findings:
+              raise SystemExit('Mogelijke geheimen gevonden; geen waarden gepubliceerd. Handmatig onderzoek nodig.')
+          PY
+          echo "Geen mogelijke geheimen gevonden door Gitleaks."
