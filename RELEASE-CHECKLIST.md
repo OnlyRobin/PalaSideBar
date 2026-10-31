@@ -15,6 +15,7 @@ Target version: `2.0.0-beta7` (planned prerelease)
 ## Latest validation (2026-10-31)
 - [x] Code checks and **Hassfest passed** after adjusting manifest ordering and adding the config-entry-only schema.
 - [x] Current source/asset/publication review recorded in [docs/PUBLICATION-AUDIT-2026-10-31.md](docs/PUBLICATION-AUDIT-2026-10-31.md).
+- [x] Compare exact supplied historical `custom-sidebar-master(5).zip` (v17.3.0 / Apache-2.0) with current beta7 runtime and historical v1.3.54/beta3 frontend; no long literal matches found.
 - [ ] Close [Issue #1: provenance and licensing](https://github.com/OnlyRobin/PalaSideBar/issues/1) **only after the maintainer confirms the source and asset rights**.
 - [ ] HACS validation must pass when the repository is public; a skipped check is not a pass.
 
