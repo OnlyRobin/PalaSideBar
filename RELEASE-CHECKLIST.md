@@ -11,6 +11,8 @@ Target version: `2.0.0-beta7` (planned prerelease)
 - [x] Source code checks passed on the initial upload.
 - [x] HACS validation identified as unavailable for private repositories; workflow skips it until public.
 - [x] Draft release notes: `docs/RELEASE-NOTES-v2.0.0-beta7.md`.
+- [x] Dutch public release instructions: [`docs/HACS-PUBLICATIE-NL.md`](docs/HACS-PUBLICATIE-NL.md).
+- [x] Ready-to-paste prerelease notes: [`docs/RELEASE-TEXT-v2.0.0-beta7.md`](docs/RELEASE-TEXT-v2.0.0-beta7.md).
 
 ## Latest validation (2026-10-31)
 - [x] Code checks and **Hassfest passed** after adjusting manifest ordering and adding the config-entry-only schema.
@@ -23,9 +25,9 @@ Target version: `2.0.0-beta7` (planned prerelease)
 - [ ] Review `PROVENANCE.md`, identify third-party code/assets, and retain required license and attribution notices.
 - [ ] Check for private addresses, credentials, tokens and personal defaults in all tracked files.
 - [ ] Test after the latest workflow edits; confirm Code checks success.
-- [ ] Make repository public when source and asset redistribution rights are confirmed.
+- [ ] Repository owner: confirm source and asset redistribution rights, then make repository public via GitHub Settings → General → Danger Zone. The connected GitHub actions cannot change repository visibility.
 - [ ] Run HACS validation successfully as a **public** repository; a skipped job does not count.
-- [ ] Create release tag `v2.0.0-beta7` and mark it **pre-release**.
+- [ ] After HACS validation succeeds, publish **a GitHub release**, not only a tag: tag `v2.0.0-beta7`, title `PalaSidebar v2.0.0-beta7 — First HACS Beta`, and mark **pre-release**. The connected GitHub actions cannot create releases.
 - [ ] Add repo to HACS → Custom repositories → Integration and enable prereleases if needed.
 - [ ] Test fresh install and update from manual install, desktop and Android Companion app.
 - [ ] Complete HACS installation and release announcement only after the above checks.
