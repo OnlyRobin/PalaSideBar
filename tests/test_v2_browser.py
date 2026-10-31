@@ -38,7 +38,7 @@ with sync_playwright() as pw:
         }''')
         assert result['defaults']=={'live':False,'menu':True,'perf':False},result
         assert all(x in result['pages'] for x in ('live_center','themes','performance','quick')),result
-        assert result['version']=='2.0.0-rc2',result
+        assert result['version']=='2.0.0-beta8',result
         result=page.evaluate('''()=>{
           const s=window.__sidebar,d=s.dialog;
           d.querySelector('#pala-v2-live-enabled').checked=true;
