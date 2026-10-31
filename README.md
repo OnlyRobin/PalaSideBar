@@ -8,13 +8,14 @@
 
 | Versie | Betekenis |
 | --- | --- |
-| **[v2.0.0-rc3](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc3)** | Nieuwste **release candidate**: sensoren zoeken en attributen kiezen in de header; testversie, nog niet stabiel |
+| **[v2.0.0-rc4](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc4)** | Nieuwste **release candidate**: kleurkiezers met HEX-code en directe voorbeelden in Algemeen en Header; nog niet stabiel |
+| [v2.0.0-rc3](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc3) | Eerdere release candidate: sensoren zoeken en attributen kiezen in de header |
 | **[v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8)** | Nieuwste **beta** met de herstelde PalaSidebar UI, ondertitel en BEHEER-opties |
 | [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) | Oudere beta, met drie inmiddels bekende fouten |
 | [v2.0.0-rc1](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc1) en [v2.0.0-rc2](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc2) | Eerdere release candidates; blijven beschikbaar om terug te zetten |
 | **v2.0.0 Stable** | Nog **niet uitgebracht**; eerst testen op echte apparaten |
 
-> **Belangrijk bij HACS-updates:** HACS heeft geen afzonderlijk beta- en RC-updatekanaal. Bij versievergelijking staat `2.0.0-rc3` boven `2.0.0-rc2` en doorgaans ook boven `2.0.0-beta8`. De automatisch aangeboden update hoeft dus niet uit dezelfde beta-reeks te komen. Kies **altijd bewust de gewenste versie** via HACS → PalaSidebar → Downloaden/Opnieuw downloaden → testversies. In `hacs.json` is de standaardbranch verborgen voor releasekeuzes.
+> **Belangrijk bij HACS-updates:** HACS heeft geen afzonderlijk beta- en RC-updatekanaal. Bij versievergelijking staat `2.0.0-rc4` boven `2.0.0-rc3` en `2.0.0-rc2` en doorgaans ook boven `2.0.0-beta8`. De automatisch aangeboden update hoeft dus niet uit dezelfde beta-reeks te komen. Kies **altijd bewust de gewenste versie** via HACS → PalaSidebar → Downloaden/Opnieuw downloaden → testversies. In `hacs.json` is de standaardbranch verborgen voor releasekeuzes.
 
 ## Mogelijkheden
 
@@ -34,7 +35,7 @@
 1. Zorg dat **HACS** is geïnstalleerd in Home Assistant.
 2. Open **HACS → drie puntjes → Aangepaste repositories** (of *Custom repositories*).
 3. Voeg `https://github.com/OnlyRobin/PalaSideBar` toe als type **Integratie** (*Integration*).
-4. Open **PalaSidebar**, schakel de weergave van testversies (*pre-releases / beta versions*) in en kies **v2.0.0-rc3** (nieuwste RC) of **v2.0.0-beta8** (beta-reeks).
+4. Open **PalaSidebar**, schakel de weergave van testversies (*pre-releases / beta versions*) in en kies **v2.0.0-rc4** (nieuwste RC) of bewust **v2.0.0-beta8** (beta-reeks).
 5. Klik op **Downloaden** en herstart Home Assistant **volledig**.
 6. Open **Instellingen → Apparaten en diensten → Integratie toevoegen** en voeg **PalaSidebar** toe, als deze nog niet is toegevoegd.
 7. Verwijder eventuele oude, handmatig ingestelde PalaSidebar-JavaScript-resources om dubbel laden te voorkomen.
@@ -57,11 +58,21 @@ Open op je Home Assistant-adres het pad:
 /pala_sidebar/assets/pala-sidebar-version.json
 ```
 
-Bij RC3 moet hier `2.0.0-rc3` staan; bij beta8 `2.0.0-beta8`. De versie staat ook onderaan PalaSidebar.
+Bij RC4 moet hier `2.0.0-rc4` staan nadat je deze release hebt gekozen; bij RC3 `2.0.0-rc3` en bij beta8 `2.0.0-beta8`. De versie staat ook onderaan PalaSidebar.
 
 ### Teruggaan naar een eerdere versie
 
 Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer de eerdere release (bijvoorbeeld beta7 of RC2). Herstart Home Assistant en herstel zo nodig je back-up. Een andere versie kiezen is geen vervanging voor een back-up van je instellingen.
+
+## Wat is nieuw in RC4?
+
+- **Algemeen → Kleuraccent**: een echte kleurenkiezer, bewerkbare HEX-code en een direct zichtbaar voorbeeld. Je accent wordt pas definitief toegepast na **Instellingen opslaan**.
+- **Header**: visuele kleurkiezers voor de zeven kleuren van tekst, sensorregel, headerachtergrond, logo en klok.
+- Bij de header kun je een eigen kleur verwijderen met **Themakleur gebruiken**. Een lege instelling blijft automatisch de vormgeving van het thema volgen.
+- Ongeldige HEX-kleuren worden gemarkeerd en blokkeren het bewaren zonder bestaande kleuren te overschrijven.
+- De reeds aanwezige kleurkiezers onder **Badges**, **Thema’s** en **PalaSidebar UI** blijven gewoon beschikbaar.
+
+RC4 is gepubliceerd na geslaagde geautomatiseerde code-, Hassfest-, HACS- en Chromium-regressietests. Het blijft een testversie: controleer op je telefoon en tablet vooral de standaardkleur, kleurkeuze, HEX-invoer, opslaan en de keuze voor themakleuren. Zie [RC4-wijzigingen](docs/RELEASE-v2.0.0-rc4.md).
 
 ## Wat is nieuw in RC3?
 
@@ -94,6 +105,7 @@ PalaSidebar is gebouwd als Home Assistant-customintegratie. Lokale logo's worden
 - **`main`:** standaardbranch; we wijzigen die pas na controle.
 - **`develop`:** ontwikkelbranch voor verbeteringen en regressietests.
 - **`rc3-header-sensor-picker`:** testbranch waarmee RC3 is gepubliceerd.
+- **`rc4-accent-color-picker`:** aparte testbranch voor RC4, zonder de eerdere releases aan te passen.
 - **`release/v2.0.0`:** voorbereiding van de toekomstige stabiele versie; nog niet gepubliceerd.
 - **`release/v2.0.0-beta8`:** bronbranch waarmee beta8 is uitgebracht.
 
