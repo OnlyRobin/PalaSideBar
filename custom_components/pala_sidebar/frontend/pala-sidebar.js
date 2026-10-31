@@ -1,12 +1,12 @@
 /**
- * PalaSidebar 2.0.0-rc1 – custom_components integratie met AutoLoader.
+ * PalaSidebar 2.0.0-rc2 – custom_components integratie met AutoLoader.
  * Copyright (c) 2026 Robin Bouwman. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
  * Leest uitsluitend HA-status; voert geen services uit zonder interactie.
  * Integratie via native ha-sidebar slot indien beschikbaar; anders overlay.
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc1';
+  const VERSION = '2.0.0-rc2';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -118,7 +118,18 @@
     discovery: {enabled:true, title:'Andere dashboards', include_system_panels:false, exclude:['config','profile','developer-tools','notifications']},
     groups: [
       {id:'start',title:'START',items:[{id:'home',label:'Overzicht',path:'/lovelace',icon:'mdi:view-dashboard-outline'}]},
-      {id:'beheer',title:'BEHEER',admin_only:true,items:[{id:'integraties',label:'Integraties',path:'/config/integrations',icon:'mdi:puzzle-outline'},{id:'updates',label:'Updates',path:'/config/updates',icon:'mdi:update',badge:'updates'}]}
+      {id:'beheer',title:'BEHEER',admin_only:true,items:[
+        {id:'integraties',label:'Integraties',path:'/config/integrations',icon:'mdi:puzzle-outline'},
+        {id:'updates',label:'Updates',path:'/config/updates',icon:'mdi:update',badge:'updates'},
+        {id:'apparaten',label:'Apparaten',path:'/config/devices/dashboard',icon:'mdi:devices'},
+        {id:'entiteiten',label:'Entiteiten',path:'/config/entities',icon:'mdi:format-list-bulleted'},
+        {id:'automatiseringen',label:'Automatiseringen',path:'/config/automation',icon:'mdi:robot-outline'},
+        {id:'scripts',label:'Scripts',path:'/config/script',icon:'mdi:script-text-outline'},
+        {id:'helpers',label:'Helpers',path:'/config/helpers',icon:'mdi:hand-heart-outline'},
+        {id:'ontwikkelaar',label:'Ontwikkelaarstools',path:'/developer-tools',icon:'mdi:hammer-wrench'},
+        {id:'hacs',label:'HACS',path:'/hacs',icon:'mdi:store-outline',requires_panel:'hacs'},
+        {id:'add-ons',label:'Add-ons',path:'/hassio/dashboard',icon:'mdi:puzzle',requires_panel:'hassio'}
+      ]}
     ], quick_entities:[], profiles:[], mobile:{enabled:true,dock:false,dock_labels:true,dock_items:['home','energie','media'],back_button:true,back_closes_menu:true,swipe_open:true,swipe_close:true,haptics:false,tablet_dock:false}
   };
   // Snelkoppelingen zijn per HA-gebruiker instelbaar. Geen persoonlijke routes
@@ -1040,6 +1051,15 @@ md-filled-select {
       admin_only:!!g.admin_only, collapsed:!!g.collapsed,
       items:arr(g.items).slice(0,100).map(configItem).filter(Boolean)
     })).filter(g=>g.id && g.items.length);
+    // Restore newly added default management links for an untouched legacy BEHEER
+    // group. User-customized groups are never expanded or overwritten.
+    const defaultBeheer=FALLBACK.groups.find(g=>g.id==='beheer');
+    for(const group of groups){
+      if(group.id!=='beheer'||group.items.length!==2)continue;
+      const legacy=[['integraties','/config/integrations'],['updates','/config/updates']];
+      if(!legacy.every(([id,path])=>group.items.some(item=>item.id===id&&item.path===path)))continue;
+      group.items.push(...defaultBeheer.items.slice(2).map(configItem));
+    }
     const appearance={...FALLBACK.appearance,...(raw.appearance && typeof raw.appearance==='object' && !Array.isArray(raw.appearance)?raw.appearance:{})};
     const discovery={...FALLBACK.discovery,...(raw.discovery && typeof raw.discovery==='object' && !Array.isArray(raw.discovery)?raw.discovery:{})};
     const profiles=arr(raw.profiles).slice(0,25).filter(x=>x && typeof x==='object');
@@ -1048,7 +1068,7 @@ md-filled-select {
     for(const k of ['enabled','dock','dock_labels','back_button','back_closes_menu','swipe_open','swipe_close','haptics','tablet_dock'])
       if(typeof mobileInput[k]==='boolean')mobile[k]=mobileInput[k];
     if(Array.isArray(mobileInput.dock_items))mobile.dock_items=mobileInput.dock_items.filter(x=>typeof x==='string').map(cleanId).slice(0,3);
-    return {schema:1,title:text(raw.title||'PalaSidebar').slice(0,60),subtitle:text(raw.subtitle||'').slice(0,90),
+    return {schema:1,title:text(raw.title||'PalaSidebar').slice(0,60),subtitle:text(raw.subtitle ?? FALLBACK.subtitle).slice(0,90),
       mode:['auto','integrated','floating'].includes(raw.mode)?raw.mode:'auto',
       appearance,theme:cleanTheme(raw.theme||FALLBACK.theme),header:cleanHeader(upgradeLegacyHeader(raw.header||FALLBACK.header)),discovery,groups:groups.length?groups:defaults().groups,
       quick_entities:arr(raw.quick_entities).slice(0,8).map(quickEntity).filter(Boolean),
@@ -6485,7 +6505,7 @@ md-filled-select {
       headPage.append($('p','warning','Bij een grote Home Assistant-update kan de headerstructuur veranderen. De originele HA-navigatie blijft beschikbaar.'));
       headPage.append(this._button('Header opslaan','save-header','primary'));
       const gr=$('div','btnrow');gr.append(this._button('Instellingen opslaan','save-prefs','primary'));general.append(gr);
-      this._layoutEditor(page('layout'));this._quickEditor(page('quick'));this._contextMenuEditor(pane.querySelector('#pala-page-quick'));this._menuEditor(page('menu'));this._badgeEditor(page('badges'));this._actionEditor(page('actions'));this._sensorEditor(page('sensors'));this._agendaEditor(page('agenda'));this._liveCenterEditor(page('live_center'));this._themeEditor(page('themes'));this._themeStudioPro(pane.querySelector('#pala-page-themes'));this._designEditor(page('design'));this._pfxEditor(page('palafix'));this._diagnosticEditor(page('diagnostic'));this._performanceEditor(page('performance'));
+      this._layoutEditor(page('layout'));this._quickEditor(page('quick'));this._contextMenuEditor(pane.querySelector('#pala-page-quick'));this._menuEditor(page('menu'));this._badgeEditor(page('badges'));this._actionEditor(page('actions'));this._sensorEditor(page('sensors'));this._agendaEditor(page('agenda'));this._liveCenterEditor(page('live_center'));this._themeEditor(page('themes'));this._themeStudioPro(pane.querySelector('#pala-page-themes'));this._designEditor(page('design'));this._pfxEditor(page('ui_style'));this._diagnosticEditor(page('diagnostic'));this._performanceEditor(page('performance'));
       const backup=page('backup');backup.append($('h3',null,'Opslag en backup'),
         $('p',null,'Je persoonlijke dashboards, badges, acties, sensoren en header worden automatisch opgeslagen bij Home Assistant onder je gebruikersaccount. Cache wissen verwijdert deze serverinstellingen niet. De browser bewaart ook een lokale kopie voor als Home Assistant tijdelijk onbereikbaar is.'));
       backup.append(this._help('Veilig herstellen zonder menu-items te verliezen',
@@ -6503,7 +6523,7 @@ md-filled-select {
       backup.append($('p',null,'De oorspronkelijke Home Assistant-rechten blijven altijd van toepassing. Dit is geen beheerinterface voor HA-dashboards zelf.'));
       backup.append($('p',null,'HA '+(this.hass?.config?.version||'?')+' · PalaSidebar '+VERSION+' · '+(this.integration==='native'?'Ingebouwd':'Zwevend')));
       const footer=$('div','btnrow');footer.append(this._button('Sluiten','settings-close'));pane.append(footer);
-      this.dialog.append(pane);this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);if(tab==='palafix')this._pfxPreview();
+      this.dialog.append(pane);this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);if(tab==='ui_style')this._pfxPreview();
       if(!this.dialog.open)this._openOwnedDialog(this.dialog,'settings');
     }
     _layoutEditor(page){
