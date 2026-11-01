@@ -58,14 +58,22 @@ with sync_playwright() as pw:
         opened=styles()
         assert opened["border"]=="3px" and opened["padding"]=="12px",opened
         assert opened["visibility"]=="visible" and not opened["noticeHidden"],opened
-        page.evaluate("window.issue16.setAttribute('data-compact','true')")
+        page.evaluate("""()=>{
+          const s=window.issue16,nav=s.native;
+          s.saved.device='desktop';nav.expanded=false;nav.removeAttribute('expanded');
+          s._compactSync();
+        }""")
         page.wait_for_timeout(550)
         collapsed=styles()
         assert collapsed["visibility"]=="hidden" and collapsed["maxHeight"]=="0px",collapsed
         assert collapsed["noticePadding"]=="0px" and collapsed["noticeBorder"]=="0px",collapsed
         assert collapsed["border"]=="0px" and collapsed["padding"]=="0px" and collapsed["margin"]=="0px",collapsed
         assert "rc.15" in collapsed["text"] and not collapsed["noticeHidden"],collapsed
-        page.evaluate("window.issue16.setAttribute('data-compact','false')")
+        page.evaluate("""()=>{
+          const s=window.issue16,nav=s.native;
+          nav.expanded=true;nav.setAttribute('expanded','');
+          s._compactSync();
+        }""")
         page.wait_for_timeout(550)
         reopened=styles()
         assert reopened["border"]=="3px" and reopened["padding"]=="12px",reopened
