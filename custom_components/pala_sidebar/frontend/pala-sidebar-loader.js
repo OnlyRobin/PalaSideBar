@@ -14,7 +14,7 @@
   const MANIFEST = '/pala_sidebar/assets/pala-sidebar-version.json';
   const CHECK_INTERVAL = 10 * 60 * 1000;
   const MIN_ACTIVE_INTERVAL = 60 * 1000;
-  const ACCEPTED_VERSION = /^\d{1,3}\.\d{1,3}\.\d{1,4}(?:[-.][A-Za-z0-9]+)?$/;
+  const ACCEPTED_VERSION = /^\d{1,3}\.\d{1,3}\.\d{1,4}(?:-(?:beta|rc)\.?[1-9]\d*)?$/i;
   const state = { loaded: null, latest: null, checking: false, checkedAt: 0, failed: false, skipped: null };
   let notice = null;
 
