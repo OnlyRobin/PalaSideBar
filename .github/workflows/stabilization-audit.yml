@@ -1,0 +1,96 @@
+name: PalaSidebar RC5 naar stabiel — integrale audit
+on:
+  push:
+    branches:
+      - stabilization/rc5-to-v2
+  pull_request:
+    branches:
+      - release/v2.0.0
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controleer-broncode:
+    name: Versies, Python, JavaScript en pakket
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Controleer distributiebestanden en onderlinge versies
+        run: |
+          python -m compileall -q custom_components/pala_sidebar
+          node --check custom_components/pala_sidebar/frontend/pala-sidebar.js
+          node --check custom_components/pala_sidebar/frontend/pala-sidebar-loader.js
+          python tests/test_github_layout.py
+          python tests/test_brand_files.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('custom_components/pala_sidebar')
+          manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          version=json.loads((root/'frontend/pala-sidebar-version.json').read_text(encoding='utf-8'))
+          source=(root/'frontend/pala-sidebar.js').read_text(encoding='utf-8')
+          assert manifest['version']==version['version']=='2.0.0-rc5', (manifest['version'],version)
+          assert "const VERSION = '2.0.0-rc5'" in source
+          assert 'safeHeaderImage' in source
+          assert (root/'frontend/pala-sidebar-loader.js').is_file()
+          assert (root/'frontend/default-config.json').is_file()
+          assert (root/'strings.json').is_file()
+          assert (root/'translations/nl.json').is_file()
+          assert 'frontend/get_user_data' in source and 'frontend/set_user_data' in source
+          print('PASS RC5-bronbestanden, versie, migratie en pakketstructuur')
+          PY
+      - name: Maak testpakket (geen release)
+        run: |
+          mkdir -p dist/custom_components
+          cp -R custom_components/pala_sidebar dist/custom_components/
+          (cd dist && zip -qr ../PalaSidebar-stabilisatie-test.zip custom_components)
+          unzip -t PalaSidebar-stabilisatie-test.zip | tail -1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PalaSidebar-stabilisatie-test
+          path: PalaSidebar-stabilisatie-test.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  hacs:
+    name: HACS en integratiemetadata
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Controleer HACS
+        uses: hacs/action@main
+        with:
+          category: integration
+
+  browser:
+    name: Chromium regressietests (alle bestaande tests + opslag en race)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Installeer Playwright en Chromium
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+          CHROME_BINARY="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+          sudo ln -sf "$CHROME_BINARY" /usr/bin/chromium
+      - name: Voer ALLE browser- en migratietests uit
+        run: |
+          set -eu
+          for test in tests/test_*.py; do
+            echo "::group::$test"
+            python "$test"
+            echo "::endgroup::"
+          done
+          echo "Alle regressietests geslaagd."
