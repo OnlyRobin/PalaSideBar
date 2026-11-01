@@ -41,7 +41,7 @@ jobs:
           v=json.loads((root/'frontend/pala-sidebar-version.json').read_text(encoding='utf-8'))
           source=(root/'frontend/pala-sidebar.js').read_text(encoding='utf-8')
           version=meta['version']
-          assert re.fullmatch(r'2\.0\.0-rc\.[1-9]\d*',version),version
+          assert re.fullmatch(r'2\.0\.[1-9]\d*-rc\.[1-9]\d*',version),version
           assert meta['domain']=='pala_sidebar'
           assert v['version']==version,(meta['version'],v['version'])
           assert f"const VERSION = '{version}'" in source,version
