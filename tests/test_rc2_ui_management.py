@@ -54,7 +54,7 @@ with sync_playwright() as pw:
             'integraties','updates','apparaten','entiteiten','automatiseringen',
             'scripts','helpers','ontwikkelaar','hacs','add-ons')),got
         assert got['uiChildren']>=5 and got['heading'] and got['save'] and got['shown'],got
-        assert got['version']=='2.0.0-rc.11',got
+        assert got['version']=='2.0.0-rc.12',got
         assert not errors,errors
         print('PASS rc4 styling tab, subtitle and BEHEER defaults',width,'px')
         page.close()
