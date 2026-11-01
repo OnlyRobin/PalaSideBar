@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc10';
+  const VERSION = '2.0.0-rc11';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -514,10 +514,11 @@ md-filled-select {
     supercell:'"Supercell-Magic", system-ui, sans-serif',
     roboto:'Roboto, Arial, sans-serif',
     system:'system-ui, -apple-system, sans-serif',
-    arial:'Arial, Helvetica, sans-serif'
+    arial:'Arial, Helvetica, sans-serif',
+    custom:'"PalaUserFont",system-ui,sans-serif'
   };
   const PFX_DEFAULT=Object.freeze({
-    enabled:true,font:'ha',fontScale:100,mobileScale:100,accentMode:'ha',accent:'#ffd700',
+    enabled:true,font:'ha',customFont:'',footerScale:100,buttonGlow:false,fontScale:100,mobileScale:100,accentMode:'ha',accent:'#ffd700',
     background:'ha',glass:45,cardRadius:20,controlRadius:14,
     sidebarBlur:true,dialogBlur:true,shadows:true,energyGlow:true,energyMode:'ha',
     ...Object.fromEntries(Object.entries(PFX_ENERGY).map(([key,val])=>[key,val[1]]))
@@ -529,10 +530,11 @@ md-filled-select {
     if(['ha','glass','flat','amoled','classic'].includes(r.background))v.background=r.background;
     if(['ha','custom'].includes(r.accentMode))v.accentMode=r.accentMode;
     if(['ha','custom'].includes(r.energyMode))v.energyMode=r.energyMode;
-    for(const [key,min,max] of [['fontScale',75,160],['mobileScale',75,160],['glass',15,95],['cardRadius',0,44],['controlRadius',0,32]]){
+    if(typeof r.customFont==='string' && /^data:font\/(?:woff2|woff|ttf|otf);base64,[A-Za-z0-9+/=]+$/.test(r.customFont) && r.customFont.length<=240000)v.customFont=r.customFont;
+    for(const [key,min,max] of [['footerScale',75,160],['fontScale',75,160],['mobileScale',75,160],['glass',15,95],['cardRadius',0,44],['controlRadius',0,32]]){
       if(r[key]!==''&&r[key]!=null&&Number.isFinite(Number(r[key])))v[key]=clamp(Math.round(Number(r[key])),min,max);
     }
-    for(const k of ['enabled','sidebarBlur','dialogBlur','shadows','energyGlow'])if(typeof r[k]==='boolean')v[k]=r[k];
+    for(const k of ['enabled','sidebarBlur','dialogBlur','shadows','energyGlow','buttonGlow'])if(typeof r[k]==='boolean')v[k]=r[k];
     for(const key of ['accent',...Object.keys(PFX_ENERGY)])if(/^#[a-f0-9]{6}$/i.test(r[key]||''))v[key]=r[key].toLowerCase();
     return v;
   };
@@ -557,7 +559,8 @@ md-filled-select {
     const rules=[];const vars=[];
     const classic=v.background==='classic';
     const needsTypography=classic||v.font!=='ha'||v.fontScale!==100||v.mobileScale!==100;
-    const font=PFX_FONTS[v.font];
+    const font=v.font==='custom'&&!v.customFont?PFX_FONTS.ha:PFX_FONTS[v.font];
+    if(v.customFont)rules.push('@font-face{font-family:"PalaUserFont";src:url("'+v.customFont+'") format("'+(v.customFont.startsWith('data:font/woff2')?'woff2':v.customFont.startsWith('data:font/woff')?'woff':v.customFont.startsWith('data:font/otf')?'opentype':'truetype')+'");font-display:swap}');
     if(v.font!=='ha'){
       const tokens=['--pala-sidebar-ui-font-family','--primary-font-family','--secondary-font-family',
         '--font-family','--ha-font-family-body','--ha-card-header-font-family','--mdc-typography-font-family',
@@ -644,6 +647,7 @@ md-filled-select {
     else if(v.background!=='ha'&&!classic){rules.push('ha-sidebar .mdc-drawer__surface{backdrop-filter:blur(8px) saturate(130%);-webkit-backdrop-filter:blur(8px) saturate(130%)}');}
     if(!v.dialogBlur){vars.push('--pala-sidebar-ui-dialog-filter:none!important;');if(classic)rules.push('ha-dialog .mdc-dialog__surface,.mdc-dialog .mdc-dialog__surface{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}');}
     else if(!classic)rules.push('ha-dialog .mdc-dialog__surface,.mdc-dialog .mdc-dialog__surface{backdrop-filter:blur(10px) saturate(130%);-webkit-backdrop-filter:blur(10px) saturate(130%)}');
+    if(v.buttonGlow)rules.push('pala-sidebar button:hover,.pfx-presets button:hover{box-shadow:0 0 0 1px var(--primary-color,#ffd700),0 8px 28px color-mix(in srgb,var(--primary-color,#ffd700) 25%,transparent)!important;transform:translateY(-1px)}');
     if(!v.shadows){vars.push('--ha-card-box-shadow:none!important;');rules.push('ha-card{box-shadow:none!important}');}
     if(v.energyGlow&&!classic)rules.push('.energy-line{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--energy-solar-color,#f5b642) 28%,transparent))}.gauge{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--energy-grid-consumption-color,#eb3c41) 25%,transparent))}');
     if(!v.energyGlow){rules.push('.energy-line,.gauge{filter:none!important;}');}
@@ -2511,15 +2515,19 @@ md-filled-select {
         const btn=this._button(label,'pfx-preset');btn.dataset.profile=key;profiles.append(btn);
       }
       page.append(profiles);
+      const premiumStyle=$('style');premiumStyle.textContent='.pfx-presets{display:flex;flex-wrap:wrap;gap:9px;padding:8px;border-radius:18px;background:linear-gradient(130deg,rgba(255,255,255,.065),rgba(255,255,255,.012));border:1px solid rgba(150,160,180,.2)}.pfx-presets button{border-radius:12px!important;transition:transform .2s,box-shadow .2s,border-color .2s}.pfx-presets button:hover{transform:translateY(-2px);border-color:var(--primary-color,#ffd700)!important;box-shadow:0 9px 23px rgba(0,0,0,.18)}';page.append(premiumStyle);
       const preview=$('div','pfx-preview');preview.id='pala-pfx-preview';preview.append($('strong',null,'Live voorbeeld'));
       const sample=$('div','pfx-sample');sample.append($('div','pfx-title','PalaSidebar · Mijn Home Assistant'),$('small',null,'Een voorbeeldkaart met energiekleuren, vormgeving en typografie'));
       const pills=$('div','pfx-pills');for(const key of ['energyGrid','energySolar','energyReturn']){const t=$('span','pfx-pill',PFX_ENERGY[key][2]);t.dataset.pfxSwatch=key;pills.append(t);}sample.append(pills);preview.append(sample);page.append(preview);
       this._pfxSection(page,'Lettertype en responsieve grootte','Desktop en mobiel passen nu ook direct de PalaSidebar-menu-items, secties, badges en sensorteksten aan. De aparte titel- en subtitelgroottes in Header blijven zelfstandig instelbaar. Met ‘Klassieke stijl’ herstel je ook de oude compacte lettergroottes.',[
         ['toggle','enabled','PalaSidebar-vormgeving actief'],
-        ['select','font','Lettertype',Object.entries({ha:'Home Assistant-thema',supercell:'Supercell Magic',roboto:'Roboto',system:'Systeemfont',arial:'Arial'})],
+        ['select','font','Lettertype',Object.entries({ha:'Home Assistant-thema',supercell:'Supercell Magic',roboto:'Roboto',system:'Systeemfont',arial:'Arial',custom:'Eigen lettertype (upload)'})],
         ['range','fontScale','Desktop tekstgrootte',[75,160,5,'%']],
         ['range','mobileScale','Mobiel tekstgrootte',[75,160,5,'%']]
       ]);
+      const upload=$('label','field');upload.append($('span',null,'Eigen lettertype uploaden · WOFF2, WOFF, TTF, OTF (max. 160 kB)'));
+      const fontFile=$('input');fontFile.type='file';fontFile.id='pala-custom-font-upload';fontFile.accept='.woff2,.woff,.ttf,.otf';upload.append(fontFile);page.append(upload);
+      const fontInfo=$('p','field-note',this._pfxPrefs().customFont?'Eigen lettertype beschikbaar. Kies Eigen lettertype en sla op.':'Upload blijft lokaal tot je op Vormgeving opslaan klikt. Grote fonts zijn niet geschikt voor accountopslag.');fontInfo.id='pala-custom-font-status';page.append(fontInfo);
       this._pfxSection(page,'Thema en achtergrond','‘Home Assistant’ respecteert het actieve thema. ‘Klassieke vormgeving’ herstelt de oude volledige styling. AMOLED is een donkere override.',[
         ['select','background','Dashboardachtergrond',[['ha','Volg Home Assistant'],['classic','Klassieke vormgeving'],['glass','Glas · zacht verloop'],['flat','Effen · HA-achtergrond'],['amoled','AMOLED zwart']]],
         ['select','accentMode','Accentkleur',[['ha','Volg Home Assistant'],['custom','Eigen accentkleur']]],
@@ -2529,7 +2537,7 @@ md-filled-select {
         ['range','cardRadius','Kaarten en dialogen',[0,44,2,'px']],
         ['range','controlRadius','Knoppen en invoervelden',[0,32,2,'px']],
         ['toggle','sidebarBlur','Glasvervaging van HA-sidebar'],['toggle','dialogBlur','Glasvervaging van HA-dialogen'],
-        ['toggle','shadows','Kaartschaduwen'],['toggle','energyGlow','Subtiele energie-gloed']
+        ['toggle','shadows','Kaartschaduwen'],['toggle','energyGlow','Subtiele energie-gloed'],['toggle','buttonGlow','Premium knop-gloed'],['range','footerScale','Onderste Home Assistant-knoppen',[75,160,5,'%']]
       ]);
       const energy=$('section','pfx-section');energy.append($('h3',null,'Energiepalet'),$('p','pfx-description','Stel de acht Home Assistant Energy Dashboard-kleuren in. Alle zeven kleurtrappen lopen automatisch mee.'));
       const grid=$('div','pfx-grid');grid.append(this._pfxField('select','energyMode','Energiekleuren',[['ha','Volg Home Assistant'],['custom','Eigen kleurenpalet']]));
@@ -4649,6 +4657,13 @@ md-filled-select {
     }
     _change(e) {
       const id=e.target?.id;
+      if(id==='pala-custom-font-upload'){
+        const file=e.target.files?.[0];if(!file)return;
+        const out=this.dialog?.querySelector('#pala-custom-font-status');
+        if(!/\.(woff2?|ttf|otf)$/i.test(file.name)||file.size>160*1024){if(out)out.textContent='Kies WOFF2/WOFF/TTF/OTF van maximaal 160 kB.';e.target.value='';return;}
+        const ext=file.name.split('.').pop().toLowerCase(),mime=ext==='woff2'?'woff2':ext==='woff'?'woff':ext==='otf'?'otf':'ttf';
+        const reader=new FileReader();reader.onload=()=>{const data=String(reader.result||'');if(data.length>240000)return;if(!this._pfxDraft)this._pfxDraft=this._pfxPrefs();this._pfxDraft.customFont=data.replace(/^data:[^;]+;base64,/, 'data:font/'+mime+';base64,');const sel=this.dialog?.querySelector('#pala-pfx-font');if(sel)sel.value='custom';this._pfxPreview();if(out)out.textContent='Lettertype geladen: '+file.name+' · klik Vormgeving opslaan.';};reader.readAsDataURL(file);return;
+      }
       if(id==='pala-issue-screenshot'){
         const file=e.target.files?.[0],preview=this.dialog?.querySelector('#pala-issue-screenshot-preview'),status=this.dialog?.querySelector('#pala-issue-screenshot-status');
         if(this._issueImageUrl){URL.revokeObjectURL(this._issueImageUrl);this._issueImageUrl=null;}
@@ -5321,15 +5336,19 @@ md-filled-select {
       const found=[];const visit=(root,depth=0)=>{
         if(!root?.querySelectorAll||depth>3)return;
         for(const element of root.querySelectorAll('a[href]'))found.push(element);
+        for(const element of root.querySelectorAll('ha-list-item-button,ha-list-item-base')){
+          const label=(element.textContent||'').trim().toLowerCase();if(/^(instellingen|meldingen|profiel|settings|notifications|profile)/.test(label))found.push(element);
+        }
         for(const element of root.querySelectorAll('*'))if(element.shadowRoot)visit(element.shadowRoot,depth+1);
       };
       visit(native.shadowRoot);
       const ui=pfxClean(this._pfxDraft||this.saved.ui_style||PFX_DEFAULT);
-      const scale=ui.enabled?(matchMedia('(max-width:700px)').matches?ui.mobileScale:ui.fontScale)/100:1;
+      const scale=ui.enabled?(matchMedia('(max-width:700px)').matches?ui.mobileScale:ui.fontScale)*ui.footerScale/10000:1;
       const footerSize=(13*scale).toFixed(2)+'px';
       for(const anchor of found){
-        const href=anchor.getAttribute('href');let path='';
-        try{path=href?.startsWith('/')&&!href.startsWith('//')?href.split(/[?#]/)[0]:(new URL(href,location.href)).pathname;path=path.replace(/\/+$/,'')||'/';}catch{continue;}
+        const href=anchor.getAttribute('href')||anchor.querySelector?.('a[href]')?.getAttribute('href');let path='';
+        if(!href){const label=(anchor.textContent||'').trim().toLowerCase();path=/^(instellingen|settings)/.test(label)?'/config':/^(meldingen|notifications)/.test(label)?'/notifications':/^(profiel|profile)/.test(label)?'/profile':'';}
+        try{if(href)path=href.startsWith('/')&&!href.startsWith('//')?href.split(/[?#]/)[0]:(new URL(href,location.href)).pathname;path=path.replace(/\/+$/,'')||'/';}catch{continue;}
         if(!Object.prototype.hasOwnProperty.call(visibility,path))continue;
         let node=anchor.closest('ha-list-item-button,ha-list-item-base')||anchor;
         let parent=anchor.getRootNode()?.host;
@@ -5342,10 +5361,12 @@ md-filled-select {
           element.style.setProperty('--md-sys-typescale-label-large-size',footerSize);
           element.style.setProperty('--mdc-typography-body1-font-size',footerSize);
           element.style.setProperty('--pala-native-footer-size',footerSize);
+          element.style.setProperty('--md-list-item-label-text-size',footerSize);
+          element.style.setProperty('--md-list-item-one-line-container-height', 'auto');
         }
         if(node.shadowRoot){
           let style=node.shadowRoot.querySelector('style[data-pala-footer-font]');
-          if(!style){style=document.createElement('style');style.dataset.palaFooterFont='';style.textContent='span:not(.icon):not([class*="icon"]),.label,.name,.primary,.text{font-size:var(--pala-native-footer-size,13px)!important}';node.shadowRoot.append(style);}
+          if(!style){style=document.createElement('style');style.dataset.palaFooterFont='';style.textContent='::slotted(*),span:not(.icon):not([class*="icon"]),.label,.name,.primary,.text,.title{font-size:var(--pala-native-footer-size,13px)!important}';node.shadowRoot.append(style);}
         }
         if(!this._haFooterStyles.has(node))this._haFooterStyles.set(node,[node.style.getPropertyValue('display'),node.style.getPropertyPriority('display')]);
         if(visibility[path]===false)node.style.setProperty('display','none','important');
