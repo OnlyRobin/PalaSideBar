@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc.11';
+  const VERSION = '2.0.0-rc.12';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -518,7 +518,10 @@ md-filled-select {
     custom:'"PalaUserFont",system-ui,sans-serif'
   };
   const PFX_DEFAULT=Object.freeze({
-    enabled:true,font:'ha',customFont:'',footerScale:100,buttonGlow:false,fontScale:100,mobileScale:100,accentMode:'ha',accent:'#ffd700',
+    enabled:true,font:'ha',customFont:'',footerScale:100,buttonGlow:false,fontScale:100,mobileScale:100,
+    badgeMode:'ha',badgeColor:'#ffd700',badgeText:'#071925',badgeBorderColor:'#ffffff',badgeBorderWidth:0,badgeRadius:7,badgeGlow:0,badgeOpacity:100,badgePad:5,
+    nativeBadgeMode:'sidebar',nativeBadgeColor:'#ffd700',nativeBadgeText:'#071925',nativeBadgeRadius:8,nativeBadgeBorder:1,
+    navBorderWidth:0,navBorderColor:'#ffd700',backgroundColor:'#1b2230',accentMode:'ha',accent:'#ffd700',
     background:'ha',glass:45,cardRadius:20,controlRadius:14,
     sidebarBlur:true,dialogBlur:true,shadows:true,energyGlow:true,energyMode:'ha',
     ...Object.fromEntries(Object.entries(PFX_ENERGY).map(([key,val])=>[key,val[1]]))
@@ -527,22 +530,24 @@ md-filled-select {
     const r=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};
     const v={...PFX_DEFAULT};
     if(Object.prototype.hasOwnProperty.call(PFX_FONTS,r.font))v.font=r.font;
-    if(['ha','glass','flat','amoled','classic'].includes(r.background))v.background=r.background;
+    if(['ha','glass','flat','amoled','classic','solid','midnight','aurora','sunset'].includes(r.background))v.background=r.background;
+    if(['ha','custom'].includes(r.badgeMode))v.badgeMode=r.badgeMode;
+    if(['ha','sidebar','custom'].includes(r.nativeBadgeMode))v.nativeBadgeMode=r.nativeBadgeMode;
     if(['ha','custom'].includes(r.accentMode))v.accentMode=r.accentMode;
     if(['ha','custom'].includes(r.energyMode))v.energyMode=r.energyMode;
     if(typeof r.customFont==='string' && /^data:font\/(?:woff2|woff|ttf|otf);base64,[A-Za-z0-9+/=]+$/.test(r.customFont) && r.customFont.length<=240000)v.customFont=r.customFont;
-    for(const [key,min,max] of [['footerScale',75,160],['fontScale',75,160],['mobileScale',75,160],['glass',15,95],['cardRadius',0,44],['controlRadius',0,32]]){
+    for(const [key,min,max] of [['footerScale',75,160],['fontScale',75,160],['mobileScale',75,160],['glass',15,95],['cardRadius',0,44],['controlRadius',0,32],['badgeBorderWidth',0,4],['badgeRadius',0,24],['badgeGlow',0,24],['badgeOpacity',30,100],['badgePad',0,14],['nativeBadgeRadius',0,24],['nativeBadgeBorder',0,4],['navBorderWidth',0,4]]){
       if(r[key]!==''&&r[key]!=null&&Number.isFinite(Number(r[key])))v[key]=clamp(Math.round(Number(r[key])),min,max);
     }
     for(const k of ['enabled','sidebarBlur','dialogBlur','shadows','energyGlow','buttonGlow'])if(typeof r[k]==='boolean')v[k]=r[k];
-    for(const key of ['accent',...Object.keys(PFX_ENERGY)])if(/^#[a-f0-9]{6}$/i.test(r[key]||''))v[key]=r[key].toLowerCase();
+    for(const key of ['accent','badgeColor','badgeText','badgeBorderColor','nativeBadgeColor','nativeBadgeText','navBorderColor','backgroundColor',...Object.keys(PFX_ENERGY)])if(/^#[a-f0-9]{6}$/i.test(r[key]||''))v[key]=r[key].toLowerCase();
     return v;
   };
   const pfxLegacy=(raw)=>{
     const a=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:null;
     if(!a)return null;
     const p={...a};
-    if(!['ha','glass','flat','amoled','classic'].includes(p.background))p.background=p.background==='original'?'classic':'ha';
+    if(!['ha','glass','flat','amoled','classic','solid','midnight','aurora','sunset'].includes(p.background))p.background=p.background==='original'?'classic':'ha';
     p.accentMode='custom';p.energyMode='custom';p.mobileScale=p.fontScale||100;
     return pfxClean(p);
   };
@@ -626,6 +631,14 @@ md-filled-select {
       vars.push('--lovelace-background:linear-gradient(145deg,color-mix(in srgb,var(--primary-background-color,#18202b) '+(100-v.glass*.12).toFixed(1)+'%,var(--card-background-color,#263442)),var(--primary-background-color,#18202b))!important;');
     }else if(v.background==='flat'){
       vars.push('--lovelace-background:var(--primary-background-color)!important;');
+    }else if(v.background==='solid'){
+      vars.push('--lovelace-background:'+v.backgroundColor+'!important;');
+    }else if(v.background==='midnight'){
+      vars.push('--lovelace-background:linear-gradient(145deg,#070d1d,#172849)!important;');
+    }else if(v.background==='aurora'){
+      vars.push('--lovelace-background:linear-gradient(140deg,#06231f,#173750 55%,#0c162e)!important;');
+    }else if(v.background==='sunset'){
+      vars.push('--lovelace-background:linear-gradient(135deg,#311b38,#72465b 55%,#18233a)!important;');
     }else if(v.background==='amoled'){
       vars.push('--lovelace-background:#050506!important;--card-background-color:#09090c!important;');
       vars.push('--md-sys-color-background:#050506!important;--app-header-background-color:#09090c!important;');
@@ -2472,10 +2485,37 @@ md-filled-select {
       // CSS media queries pick desktop/mobile on resize with no listener.
       for(const root of [this,this._dialogPortal]){
         if(!root)continue;
+        root.style.setProperty('--pala-badge-fill',prefs.badgeColor);
+        root.style.setProperty('--pala-badge-ink',prefs.badgeText);
+        root.style.setProperty('--pala-badge-border-color',prefs.badgeBorderColor);
+        root.style.setProperty('--pala-badge-border-width',prefs.badgeBorderWidth+'px');
+        root.style.setProperty('--pala-badge-radius',prefs.badgeRadius+'px');
+        root.style.setProperty('--pala-badge-pad',prefs.badgePad+'px');
+        root.style.setProperty('--pala-badge-glow',prefs.badgeGlow?('0 0 '+prefs.badgeGlow+'px '+prefs.badgeColor):'none');
+        root.style.setProperty('--pala-badge-alpha',(prefs.badgeOpacity/100).toFixed(2));
+        root.style.setProperty('--pala-nav-border-width',prefs.navBorderWidth+'px');
+        root.style.setProperty('--pala-nav-border-color',prefs.navBorderColor);
         root.style.setProperty('--pfx-desktop-text-scale',(prefs.enabled?prefs.fontScale/100:1).toFixed(2));
         root.style.setProperty('--pfx-mobile-text-scale',(prefs.enabled?prefs.mobileScale/100:1).toFixed(2));
       }
-      if(this.integration==='native')this._syncNativeFooter();
+      this.setAttribute('data-pfx-badge-custom',String(prefs.enabled&&prefs.badgeMode==='custom'));
+      if(this.shadowRoot){
+        let badgeStyle=this.shadowRoot.querySelector('style[data-pala-badge-studio]');
+        if(!badgeStyle){badgeStyle=document.createElement('style');badgeStyle.dataset.palaBadgeStudio='';
+          badgeStyle.textContent=String.raw\`
+            .nav-row{border:var(--pala-nav-border-width,0px) solid var(--pala-nav-border-color,transparent)}
+            .badge:not([data-style="dot"]):not([data-style="plain"]){border:var(--pala-badge-border-width,0px) solid var(--pala-badge-border-color,transparent);border-radius:var(--pala-badge-radius,7px);padding-inline:var(--pala-badge-pad,5px);box-shadow:var(--pala-badge-glow,none);opacity:var(--pala-badge-alpha,1)}
+            :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"]:not([data-style="dot"]):not([data-style="plain"]):not([data-style="outline"]){background:var(--pala-badge-fill)!important;color:var(--pala-badge-ink)!important}
+            :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"][data-style="soft"]{background:color-mix(in srgb,var(--pala-badge-fill) 28%,transparent)!important;color:var(--pala-badge-fill)!important}
+            :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"]:is([data-style="plain"],[data-style="outline"]){color:var(--pala-badge-fill)!important}
+            .badge[data-style="glass"]:not([data-color="sensor"]):not([data-color="custom"]){background:color-mix(in srgb,var(--pala-badge-fill,var(--p-accent)) 18%,transparent)!important;backdrop-filter:blur(5px)}
+            .badge[data-style="gradient"]:not([data-color="sensor"]):not([data-color="custom"]){background:linear-gradient(130deg,var(--pala-badge-fill,var(--p-accent)),color-mix(in srgb,var(--pala-badge-fill,var(--p-accent)) 60%,#ffffff))!important;color:var(--pala-badge-ink,#071925)!important}
+            .badge[data-style="glass"]:is([data-color="sensor"],[data-color="custom"]){background:color-mix(in srgb,var(--p-badge-color,var(--p-accent)) 19%,transparent)!important}
+            .badge[data-style="gradient"]:is([data-color="sensor"],[data-color="custom"]){background:linear-gradient(130deg,var(--p-badge-color,var(--p-accent)),color-mix(in srgb,var(--p-badge-color,var(--p-accent)) 60%,white))!important}
+            @media(prefers-reduced-motion:reduce){.badge{animation:none!important;transition:none!important}}
+          \`;this.shadowRoot.append(badgeStyle);}
+      }
+      if(this.integration==='native'){this._syncNativeFooter();this._syncNativeBadgeColors(prefs);}
       const newCss=pfxStyles(prefs);
       let node=document.getElementById(PFX_STYLE_ID);
       if(!newCss){node?.remove();return;}
@@ -3926,6 +3966,18 @@ md-filled-select {
       n.style.setProperty('--pala-native-text-size',(12*typography).toFixed(1)+'px');
       n.style.setProperty('--pala-native-badge-size',(10*typography).toFixed(1)+'px');
     }
+    _syncNativeBadgeColors(raw=this._pfxDraft||this.saved.ui_style||PFX_DEFAULT){
+      const n=this.integration==='native'?this._drawer():null;
+      if(!n)return;
+      const p=pfxClean(raw);
+      const color=p.enabled&&p.nativeBadgeMode==='custom'?p.nativeBadgeColor:
+        p.enabled&&p.nativeBadgeMode==='ha'?'var(--accent-color,#38bdf8)':
+        (this.style.getPropertyValue('--p-accent').trim()||colour(this.saved.accent||this._resolved().appearance.accent));
+      n.style.setProperty('--pala-badge-accent',color);
+      n.style.setProperty('--pala-native-badge-ink',p.enabled&&p.nativeBadgeMode==='custom'?p.nativeBadgeText:'#0b1822');
+      n.style.setProperty('--pala-native-badge-radius',(p.enabled?p.nativeBadgeRadius:8)+'px');
+      n.style.setProperty('--pala-native-badge-border',(p.enabled?p.nativeBadgeBorder:1)+'px');
+    }
     _syncHaHeader(){
       const n=this.integration==='native' ? (this.native?.isConnected?this.native:deepFindSidebar()) : null;
       if(!n?.shadowRoot){this._restoreHaHeader();return;}
@@ -3939,9 +3991,7 @@ md-filled-select {
       this._syncNativeTypography(n);
       // HA's bottom fixed-navigation is rendered OUTSIDE the PalaSidebar
       // shadow DOM. Feed it the same live accent as badges in the custom menu.
-      n.style.setProperty('--pala-badge-accent',
-        this.style.getPropertyValue('--p-accent').trim() ||
-        colour(this.saved.accent||this._resolved().appearance.accent));
+      this._syncNativeBadgeColors();
       // Only sidebarTitle is used; never remove HA's menu component or overwrite global styles.
       const desired=h.ha_title||this._haHeaderOriginal;
       if(n.sidebarTitle!==desired)n.sidebarTitle=desired;
@@ -3980,10 +4030,10 @@ md-filled-select {
         .panels-list ha-list-item-button .badge,
         .panels-list ha-list-item-base .badge {
           background-color:var(--pala-badge-accent,var(--accent-color))!important;
-          color:#0b1822!important;
-          border-radius:8px!important;
+          color:var(--pala-native-badge-ink,#0b1822)!important;
+          border-radius:var(--pala-native-badge-radius,8px)!important;
           font-weight:800!important;
-          border:1px solid #ffffff25!important;
+          border:var(--pala-native-badge-border,1px) solid #ffffff25!important;
         }
       `;
       // Native HA fixed footer lives outside the PalaSidebar shadow tree.
