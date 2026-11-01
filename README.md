@@ -49,6 +49,8 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 
 **HACS:** schakel prereleases/testversies in. Gebruik *Opnieuw downloaden* en kies `v2.0.0-rc.11` wanneer een oudere HACS-versie geen automatische melding toont. Installeren blijft handmatig via HACS; PalaSidebar meldt alleen beschikbare versies.
 
+**Let op — HACS 2.x updatevolgorde:** GitHub REST retourneert sommige RC-releases niet op semantische versievolgorde. HACS neemt deze volgorde over en kan hierdoor RC9 als nieuwste voorstellen, terwijl RC10 en RC.11 al bestaan. De overstap naar `rc.11` lost dit op oudere HACS-versies niet vanzelf op. Kies daarom onder **PalaSidebar → Opnieuw downloaden → Andere versie nodig?** expliciet `v2.0.0-rc.11` en herstart Home Assistant. Dit is een [bekend HACS-probleem (#5655)](https://github.com/hacs/integration/issues/5655); we wijzigen oudere releases of tags niet om de volgorde te manipuleren.
+
 ## Mogelijkheden
 
 - Zelf je sidebar indelen met menu's, categorieën, dashboards en favorieten.
