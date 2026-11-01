@@ -2502,7 +2502,7 @@ md-filled-select {
       if(this.shadowRoot){
         let badgeStyle=this.shadowRoot.querySelector('style[data-pala-badge-studio]');
         if(!badgeStyle){badgeStyle=document.createElement('style');badgeStyle.dataset.palaBadgeStudio='';
-          badgeStyle.textContent=String.raw\`
+          badgeStyle.textContent=String.raw`
             .nav-row{border:var(--pala-nav-border-width,0px) solid var(--pala-nav-border-color,transparent)}
             .badge:not([data-style="dot"]):not([data-style="plain"]){border:var(--pala-badge-border-width,0px) solid var(--pala-badge-border-color,transparent);border-radius:var(--pala-badge-radius,7px);padding-inline:var(--pala-badge-pad,5px);box-shadow:var(--pala-badge-glow,none);opacity:var(--pala-badge-alpha,1)}
             :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"]:not([data-style="dot"]):not([data-style="plain"]):not([data-style="outline"]){background:var(--pala-badge-fill)!important;color:var(--pala-badge-ink)!important}
@@ -2513,7 +2513,7 @@ md-filled-select {
             .badge[data-style="glass"]:is([data-color="sensor"],[data-color="custom"]){background:color-mix(in srgb,var(--p-badge-color,var(--p-accent)) 19%,transparent)!important}
             .badge[data-style="gradient"]:is([data-color="sensor"],[data-color="custom"]){background:linear-gradient(130deg,var(--p-badge-color,var(--p-accent)),color-mix(in srgb,var(--p-badge-color,var(--p-accent)) 60%,white))!important}
             @media(prefers-reduced-motion:reduce){.badge{animation:none!important;transition:none!important}}
-          \`;this.shadowRoot.append(badgeStyle);}
+          `;this.shadowRoot.append(badgeStyle);}
       }
       if(this.integration==='native'){this._syncNativeFooter();this._syncNativeBadgeColors(prefs);}
       const newCss=pfxStyles(prefs);
