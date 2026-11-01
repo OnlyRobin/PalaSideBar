@@ -34,7 +34,8 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 
 | Versie | Betekenis |
 | --- | --- |
-| **v2.0.0-rc.13 (RC-testrelease)** | Duidelijke Home Assistant-badges en één visuele achtergrondkeuze. [RC13 release-instructies](docs/RELEASE-v2.0.0-rc.13.md) |
+| **v2.0.0-rc.14 (RC-testrelease)** | Sectie Design Studio, complete blok- en itemranden en vier overzichtelijke instellingencategorieën. [RC14 release-instructies](docs/RELEASE-v2.0.0-rc.14.md) |
+| [v2.0.0-rc.13](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.13) | Eén achtergrondgalerij en duidelijkere Home Assistant-badges |
 | [v2.0.0-rc.12](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.12) | Badge Design Studio, kleuren, randen, gradient en meerdere achtergronden |
 | [v2.0.0-rc.11](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.11) | Eigen lettertypen, premium presets, herstelde footer-tekstgrootte |
 | [v2.0.0-rc10](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc10) | Screenshot-voorbeeld in bugmelding en eerste footer-tekstgroottefix |
@@ -182,6 +183,21 @@ Onder **PalaSidebar → Instellingen → PalaSidebar UI** staat nu een aparte **
 
 Alle nieuwe instellingen gebruiken begrensde waarden en veilige standaardwaarden. Wijzigingen worden pas definitief met **Vormgeving opslaan**. Test kleurwisseling op telefoon/tablet en controleer ook je bestaande sensorbadges voordat je een RC als geschikt voor Stable beoordeelt.
 
+## Sectie Design Studio en opgeruimde instellingen (RC14)
+
+**Instellingen zijn nu in vier groepen verdeeld** in plaats van zestien gelijkwaardige tabs naast elkaar:
+
+| Categorie | Instellingen |
+| --- | --- |
+| **Basis & weergave** | Algemeen, Header, Snelmenu |
+| **Menu & inhoud** | Indeling, Dashboards, Acties, Sensoren, Agenda, Control Center |
+| **Vormgeving** | Thema’s, Design, PalaSidebar UI, Badges |
+| **Onderhoud** | Diagnose, Performance, Backup |
+
+Alle bestaande functies, tab-ID's, instellingen en opslag blijven behouden. Open **Vormgeving → PalaSidebar UI** voor de nieuwe **Sectie Design Studio**. Hiermee geef je START, BEHEER en andere secties één doorlopende kaart rondom kop en inhoud, met keuze uit Uit, Outline, Soft, Glass of Accent. Randkleur, -dikte en -stijl, afgeronde hoeken, achtergrond, transparantie, binnenruimte en gloed zijn apart instelbaar. Daaronder vind je **Sectiekoppen** (titelkleur, grootte en achtergrond) en **Items binnen secties** (itemranden, afronding, padding, tussenruimte en actieve randkleur). Het live voorbeeld toont de wijzigingen vóór opslaan. **Standaard blijft deze nieuwe styling uitgeschakeld**, zodat je bestaande menu en badgekleuren ongewijzigd blijven.
+
+Op mobiele apparaten tonen de vier hoofdcategorieën in een compacte tweekolomsindeling. Voor het testen op echte apparaten, inclusief secties inklappen, swipe, backpress, F1- en warmtepompbadges, zie [RC14 release-instructies](https://github.com/OnlyRobin/PalaSideBar/blob/rc/docs/RELEASE-v2.0.0-rc.14.md).
+
 ## Instellingen en compatibiliteit
 
 Open het instellingenmenu van PalaSidebar om dashboards, badges, thema's, snelkoppelingen en **PalaSidebar UI** aan te passen. Eerdere vormgevingsinstellingen worden bij het inladen indien mogelijk overgenomen.
@@ -192,7 +208,7 @@ PalaSidebar is gebouwd als Home Assistant-customintegratie. Lokale logo's worden
 
 - **[`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main):** beschermde hoofdbranch en projectdocumentatie.
 - **[`beta`](https://github.com/OnlyRobin/PalaSideBar/tree/beta):** vaste betabranch, momenteel gebaseerd op Beta8.
-- **[`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc):** permanente testbranch, momenteel RC13; hieruit publiceren we nieuwe testreleases via HACS.
+- **[`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc):** permanente testbranch, momenteel RC14; hieruit publiceren we nieuwe testreleases via HACS.
 
 Oude GitHub-releases en tags blijven beschikbaar, ook als de oude tijdelijke branches zijn verwijderd. Stable wordt pas op basis van een door de gebruiker goedgekeurde RC voorbereid.
 
