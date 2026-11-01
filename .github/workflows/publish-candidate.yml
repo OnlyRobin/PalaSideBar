@@ -1,0 +1,113 @@
+name: Publiceer PalaSidebar RC-testrelease via HACS
+on:
+  push:
+    branches:
+      - release/candidate
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: palasidebar-rc-publish
+  cancel-in-progress: false
+
+jobs:
+  rc-controleren-en-publiceren:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout vaste RC-branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Controleer oplopend RC-nummer en pakketstructuur
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re,os
+          from pathlib import Path
+          root=Path('custom_components/pala_sidebar')
+          meta=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          v=json.loads((root/'frontend/pala-sidebar-version.json').read_text(encoding='utf-8'))
+          source=(root/'frontend/pala-sidebar.js').read_text(encoding='utf-8')
+          version=meta['version']
+          assert re.fullmatch(r'2\.0\.0-rc[1-9]\d*',version),version
+          assert meta['domain']=='pala_sidebar'
+          assert v['version']==version,(meta['version'],v['version'])
+          assert f"const VERSION = '{version}'" in source,version
+          assert (root/'frontend/pala-sidebar-loader.js').is_file()
+          assert (Path('docs')/f'RELEASE-v{version}.md').is_file(),version
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
+              out.write(f'version={version}\n')
+              out.write(f'tag=v{version}\n')
+          print(f'RC-testversie is consistent: {version}')
+          PY
+          python -m compileall -q custom_components/pala_sidebar
+          node --check custom_components/pala_sidebar/frontend/pala-sidebar.js
+          node --check custom_components/pala_sidebar/frontend/pala-sidebar-loader.js
+          python tests/test_github_layout.py
+          python tests/test_brand_files.py
+      - name: Hassfest validatie
+        uses: home-assistant/actions/hassfest@master
+      - name: HACS-integratie controleren
+        uses: hacs/action@main
+        with:
+          category: integration
+      - name: Installeer headless Chromium voor alle regressietests
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install --with-deps chromium
+          CHROME_BINARY="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+          sudo ln -sf "$CHROME_BINARY" /usr/bin/chromium
+      - name: Alle Python- en browsertests (ook issue 6 en RC6)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for test in tests/test_*.py; do
+            echo "::group::$test"
+            python "$test"
+            echo "::endgroup::"
+          done
+      - name: Bouw controleerbaar herstelpakket
+        run: |
+          mkdir -p dist/custom_components
+          cp -R custom_components/pala_sidebar dist/custom_components/
+          (cd dist && zip -qr "../PalaSidebar-${{ steps.version.outputs.version }}.zip" custom_components)
+          unzip -t "PalaSidebar-${{ steps.version.outputs.version }}.zip" | tail -1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PalaSidebar-${{ steps.version.outputs.version }}-testpakket
+          path: PalaSidebar-${{ steps.version.outputs.version }}.zip
+          retention-days: 30
+      - name: Publiceer uitsluitend een nieuwe RC; herschrijf NOOIT oude tags
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RC_TAG: ${{ steps.version.outputs.tag }}
+          RC_VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$RC_TAG" >/dev/null 2>&1; then
+            echo "::error::Release $RC_TAG bestaat al. Verhoog EERST het RC-nummer (bijv. RC7) in de JS, manifest en versie-JSON; oude RC's worden nooit overschreven."
+            exit 1
+          fi
+          if gh api "repos/$GH_REPO/git/ref/tags/$RC_TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $RC_TAG bestaat al. Een gepubliceerde RC-tag mag niet worden gewijzigd."
+            exit 1
+          fi
+          gh release create "$RC_TAG" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "PalaSidebar $RC_VERSION — HACS-testversie" \
+            --notes-file "docs/RELEASE-$RC_TAG.md" \
+            "PalaSidebar-$RC_VERSION.zip"
+          gh release view "$RC_TAG" --json tagName,isPrerelease,isDraft,url
