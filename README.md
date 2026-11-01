@@ -6,7 +6,7 @@
 
 ## PalaSidebar in beeld
 
-Drie compacte voorbeelden van de standaardweergave, een eigen inrichting en dynamische sensorbadges. *Illustratieve impressies: de daadwerkelijke weergave hangt af van je thema, instellingen en Home Assistant-versie.*
+Klik op een voorbeeld om het **groot en scherp** te openen. De afbeeldingen zijn nu schaalbare SVG-bestanden (1800 × 1000 als uitgangsformaat): ook bij inzoomen blijven tekst, iconen en instellingen duidelijk. De voorbeelden blijven compact op deze voorpagina.
 
 <table>
   <tr>
@@ -15,11 +15,18 @@ Drie compacte voorbeelden van de standaardweergave, een eigen inrichting en dyna
     <th>Live sensoren</th>
   </tr>
   <tr>
-    <td><img src="docs/images/palasidebar-standaard.webp" alt="PalaSidebar standaardweergave" width="240"></td>
-    <td><img src="docs/images/palasidebar-aangepast.webp" alt="PalaSidebar met eigen header en persoonlijke instellingen" width="240"></td>
-    <td><img src="docs/images/palasidebar-sensoren.webp" alt="PalaSidebar met zichtbare sensorwaarden en eigen header" width="240"></td>
+    <td align="center"><a href="https://raw.githubusercontent.com/OnlyRobin/PalaSideBar/main/docs/images/palasidebar-standaard-scherp.svg"><img src="docs/images/palasidebar-standaard-scherp.svg" alt="Standaard PalaSidebar met overzichtelijk menu en instellingen" width="285"></a></td>
+    <td align="center"><a href="https://raw.githubusercontent.com/OnlyRobin/PalaSideBar/main/docs/images/palasidebar-aangepast-scherp.svg"><img src="docs/images/palasidebar-aangepast-scherp.svg" alt="Aangepaste PalaSidebar met persoonlijke fotoheader en instellingen" width="285"></a></td>
+    <td align="center"><a href="https://raw.githubusercontent.com/OnlyRobin/PalaSideBar/main/docs/images/palasidebar-sensoren-scherp.svg"><img src="docs/images/palasidebar-sensoren-scherp.svg" alt="PalaSidebar met live sensorbadges en verborgen Home Assistant-header" width="285"></a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/images/palasidebar-standaard-scherp.svg">Volledig formaat bekijken</a></td>
+    <td align="center"><a href="docs/images/palasidebar-aangepast-scherp.svg">Volledig formaat bekijken</a></td>
+    <td align="center"><a href="docs/images/palasidebar-sensoren-scherp.svg">Volledig formaat bekijken</a></td>
   </tr>
 </table>
+
+*Illustratieve voorbeelden die nauw aansluiten bij PalaSidebar; het uiterlijk hangt af van je Home Assistant-thema, gekozen instellingen en beschikbare sensoren.*
 
 ## Huidige versies
 
