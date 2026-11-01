@@ -5348,8 +5348,8 @@ md-filled-select {
           native.shadowRoot.append(style);
         }
         const selector='#sidebar-config > .item-text[slot="headline"],#sidebar-notifications > .item-text[slot="headline"],#sidebar-profile > .item-text[slot="headline"]';
-        const css=selector+'{font-size:calc(14px * '+desktop+')!important;}'+
-          '@media(max-width:700px){'+selector+'{font-size:calc(14px * '+mobile+')!important;}}';
+        const css=selector+'{font-size:calc(var(--pala-native-text-size,14px) * '+desktop+')!important;}'+
+          '@media(max-width:700px){'+selector+'{font-size:calc(var(--pala-native-text-size,14px) * '+mobile+')!important;}}';
         if(style.textContent!==css)style.textContent=css;
       }else{
         style?.remove();
