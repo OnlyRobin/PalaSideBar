@@ -1142,6 +1142,15 @@ md-filled-select {
 .pala-rc-notice[hidden]{display:none!important}
 .pala-rc-notice .btnrow{margin-top:5px;display:flex;gap:6px;flex-wrap:wrap}
 .pala-rc-notice button{cursor:pointer;border:1px solid var(--divider-color,#586273);background:var(--card-background-color,#182631);color:inherit;border-radius:7px;padding:6px 9px;font:inherit}
+/* Updatebericht is uitsluitend voor de open sidebar. In de native iconenrail
+   klapt ook de ruimte in; de melding blijft beschikbaar na uitklappen. */
+:host([data-integration="native"]) .pala-rc-notice{
+  min-width:0;max-height:180px;overflow:hidden;
+  transition:opacity 180ms ease,max-height var(--p-rail-duration,280ms) var(--p-rail-ease,ease),
+    margin var(--p-rail-duration,280ms) var(--p-rail-ease,ease),
+    padding var(--p-rail-duration,280ms) var(--p-rail-ease,ease),
+    border-width var(--p-rail-duration,280ms) var(--p-rail-ease,ease),visibility 0s linear
+}
 .search{margin:3px 9px 10px;display:flex;align-items:center;gap:6px;border-radius:9px;background:var(--secondary-background-color,#2b3645);padding:7px 9px;border:1px solid var(--divider-color,#445);}
 .search input{background:transparent;border:0;outline:none;color:inherit;min-width:0;width:100%;font-size:12px}.search input::placeholder{color:var(--secondary-text-color,#9ba6b7)}
 .list{display:flex;flex-direction:column;gap:3px;padding:0 7px 8px;min-width:0}
@@ -1292,6 +1301,12 @@ md-filled-select {
 }
 :host([data-compact="true"][data-integration="native"]) .health{
   opacity:0;max-height:0;margin-block:0;padding-block:0;pointer-events:none;visibility:hidden;transition:opacity 160ms ease,max-height var(--p-rail-duration) var(--p-rail-ease),margin var(--p-rail-duration) var(--p-rail-ease),padding var(--p-rail-duration) var(--p-rail-ease),visibility 0s linear var(--p-rail-duration)
+}
+:host([data-compact="true"][data-integration="native"]) .pala-rc-notice{
+  opacity:0;max-height:0;margin:0;padding:0;border-width:0;pointer-events:none;visibility:hidden;
+  transition:opacity 160ms ease,max-height var(--p-rail-duration) var(--p-rail-ease),
+    margin var(--p-rail-duration) var(--p-rail-ease),padding var(--p-rail-duration) var(--p-rail-ease),
+    border-width var(--p-rail-duration) var(--p-rail-ease),visibility 0s linear var(--p-rail-duration)
 }
 :host([data-compact="true"][data-integration="native"]) .footer .footlabel{
   opacity:0;max-width:0;pointer-events:none;visibility:hidden;transition:opacity 160ms ease,max-width var(--p-rail-duration) var(--p-rail-ease),visibility 0s linear var(--p-rail-duration)
@@ -2559,7 +2574,7 @@ md-filled-select {
         if(!sectionStyle){
           sectionStyle=document.createElement('style');sectionStyle.dataset.palaSectionStudio='';
           sectionStyle.textContent=String.raw`
-            .section-frame{min-width:0;display:block}
+            .section-frame{min-width:0;display:block;transition:border-width var(--p-rail-duration,280ms) ease,padding var(--p-rail-duration,280ms) ease,margin-bottom var(--p-rail-duration,280ms) ease}
             :host([data-pfx-section-studio="true"]) .section-frame{
               border:var(--pala-section-border-width,0px) var(--pala-section-border-style,solid) var(--pala-section-border-color,transparent);
               border-radius:var(--pala-section-radius,14px);
@@ -2567,6 +2582,11 @@ md-filled-select {
               margin-bottom:var(--pala-section-gap,0px);
               background:var(--pala-section-background,transparent);
               box-shadow:var(--pala-section-glow,none)
+            }
+            /* Sectiekaarten mogen de 42px iconenrail niet vernauwen of verspringen. */
+            :host([data-integration="native"][data-compact="true"]) .section-frame{
+              border-width:0;padding:0;margin-bottom:0;background:transparent;box-shadow:none;
+              backdrop-filter:none;-webkit-backdrop-filter:none
             }
             :host([data-pfx-section-mode="glass"]) .section-frame{backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px) saturate(120%)}
             :host([data-pfx-section-studio="true"]) .section-frame > .group-title{
