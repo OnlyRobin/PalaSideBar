@@ -2459,7 +2459,7 @@ md-filled-select {
       // without multiplying the saved Design Studio typography a second time.
       // CSS media queries pick desktop/mobile on resize with no listener.
       for(const root of [this,this._dialogPortal]){
-        if(!root)return;
+        if(!root)continue;
         root.style.setProperty('--pfx-desktop-text-scale',(prefs.enabled?prefs.fontScale/100:1).toFixed(2));
         root.style.setProperty('--pfx-mobile-text-scale',(prefs.enabled?prefs.mobileScale/100:1).toFixed(2));
       }
