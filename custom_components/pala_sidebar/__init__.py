@@ -1,6 +1,7 @@
 """PalaSidebar Home Assistant custom integration.
 
 Serves versioned frontend resources from custom_components (no /www needed).
+Origin marker for public-source similarity monitoring: PALASIDEBAR_ORIGIN_ROBIN_2026.
 The existing frontend/set_user_data preferences remain owned by Home Assistant.
 """
 
