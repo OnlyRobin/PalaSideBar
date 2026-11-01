@@ -34,17 +34,20 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 
 | Versie | Betekenis |
 | --- | --- |
-| **[v2.0.0-rc7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc7)** | Nieuwste RC: zelftests, bugs melden via GitHub, updatebericht en broncodecontrole |
-| [v2.0.0-rc6](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc6) | Vorige RC; tekstgrootte, headerfoto en stabilisatietests |
-| [v2.0.0-rc5](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc5) | Vorige RC; beschikbaar voor terugzetten |
-| [v2.0.0-rc4](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc4) | Oudere RC; beschikbaar voor terugzetten |
-| [v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) | Laatste beta |
-| [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) | Oudere beta |
-| **v2.0.0 Stable** | Nog niet uitgebracht; pas na goedkeuring van de geteste RC |
+| **v2.0.0-rc.11 (RC-testrelease)** | Premium UI, eigen lettertypen, extra profielen en reparatie van de drie native Home Assistant-footerlabels. [RC11 release-instructies](https://github.com/OnlyRobin/PalaSideBar/blob/rc/docs/RELEASE-v2.0.0-rc.11.md) |
+| [v2.0.0-rc10](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc10) | Screenshot-voorbeeld in bugmelding en eerste footer-tekstgroottefix |
+| [v2.0.0-rc9](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc9) | Zichtbare feedback bij handmatige updatecontrole |
+| [v2.0.0-rc8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc8) | Kanaalbewuste updatemeldingen |
+| [v2.0.0-rc7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc7) | Zelftest, bugmelden en broncodebewaking |
+| [Oudere RC-releases](https://github.com/OnlyRobin/PalaSideBar/releases) | Blijven beschikbaar voor terugval |
+| [v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) | Laatste bèta |
+| **v2.0.0 Stable** | Nog niet uitgebracht; vereist tests op echte apparaten en expliciet akkoord |
 
-**Vaste RC-werkwijze:** De branch [`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc) blijft altijd bestaan. Elke volgende wijziging krijgt **een nieuw RC-nummer en een HACS-testrelease**. We overschrijven of verwijderen eerdere RC-releases of tags niet. **Jij test de RC; pas na jouw goedkeuring volgt de stabiele uitgave vanuit die RC.** Zie de [RC7-release-informatie](docs/RELEASE-v2.0.0-rc7.md).
+**Onze werkwijze:** veranderingen eerst op de permanente [`rc`-branch](https://github.com/OnlyRobin/PalaSideBar/tree/rc), daarna een nieuwe HACS-prerelease. We verplaatsen of verwijderen **nooit bestaande RC-tags of -releases**. De `beta`- en `main`-branches blijven behouden. Een stabiele release volgt alleen na goedkeuring.
 
-**HACS:** schakel testversies / prereleases in en kies bewust de nieuwste RC. HACS heeft geen afzonderlijke beta- en RC-kanalen. De standaardbranch wordt niet als los releasepakket aangeboden.
+**Versionering:** vanaf RC11 gebruiken we de numeriek sorteervriendelijke Semantic Versioning-notatie `2.0.0-rc.11`, `2.0.0-rc.12` enzovoort. Historische tags zoals `v2.0.0-rc10` blijven ongewijzigd. HACS biedt geen volledig afzonderlijke bèta- en RC-updatekanalen; kies de gewenste prerelease expliciet.
+
+**HACS:** schakel prereleases/testversies in. Gebruik *Opnieuw downloaden* en kies `v2.0.0-rc.11` wanneer een oudere HACS-versie geen automatische melding toont. Installeren blijft handmatig via HACS; PalaSidebar meldt alleen beschikbare versies.
 
 ## Mogelijkheden
 
@@ -95,22 +98,22 @@ Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer ee
 
 ## Wat is nieuw in RC7?
 
-- Via **Instellingen → Diagnose** kun je een lokale zelftest uitvoeren, een bugmelding invullen en de tekst vooraf controleren. GitHub opent daarna een issueformulier; je bevestigt zelf het indienen.
-- **Updateberichten:** als een nieuwe RC is gepubliceerd, kan PalaSidebar dat met een discrete melding in de sidebar laten zien. Installeren gebeurt handmatig via HACS.
-- **Openbare broncodecontrole:** een wekelijkse GitHub Action kijkt naar twee herkenbare codekenmerken in andere openbare repositories en maakt bij overeenkomsten een issue ter beoordeling. Deze detectie is beperkt en bewijst geen inbreuk; MIT staat hergebruik onder voorwaarden toe.
-- De vorige RC6 blijft beschikbaar voor terugzetten.
+- **Instellingen → Diagnose:** lokaal een zelftest uitvoeren, vervolgens een bug via een gecontroleerd GitHub-issueformulier melden. De melding wordt pas op GitHub ingediend als jij op Submit klikt.
+- **RC-updatebericht:** PalaSidebar kan via openbare GitHub-release-informatie een nieuwere RC melden. Je installeert zelf via HACS.
+- **Publieke codebewaking:** een wekelijkse GitHub Action zoekt naar twee herkenbare broncodemarkeringen in openbare repositories en maakt een controle-issue als die ergens samen voorkomen. Dit is best-effort en kan hernoemde of aangepaste kopieën missen. MIT blijft van kracht.
+- Vorige RC's, inclusief RC6, blijven bestaan om terug te zetten.
 
-Bekijk de [volledige RC7-release notes](docs/RELEASE-v2.0.0-rc7.md).
+Zie de [Nederlandstalige RC7-release notes](docs/RELEASE-v2.0.0-rc7.md).
 
 ## Wat is nieuw in RC6?
 
-- De **tekstgrootte-schuifregelaars voor desktop en mobiel** werken nu ook zichtbaar op PalaSidebar-menuteksten, badges, sensorwaarden, secties en agenda.
-- Percentages worden als `80%`, `100%` en `120%` weergegeven in plaats van als pixels.
-- De headerfoto-upload is robuuster geworden bij het kiezen van een ongeldig bestand.
-- Opslag per account en live sensorprestaties hebben extra automatische tests gekregen.
-- RC5 is gewoon beschikbaar als terugvaloptie.
+- De **desktop- en mobielsliders voor tekstgrootte** werken nu echt in de eigen sidebar, niet alleen in het voorbeeld en de Home Assistant-tokens.
+- Labels, badges, sensorwaarden, zoektekst, secties en agenda schalen direct mee. Waarden worden correct als percentages weergegeven.
+- De headerfoto-upload en opslag bij accountwisseling zijn robuuster gemaakt.
+- Meer regressietests en belastingtests met 120 badges.
+- **RC5 blijft beschikbaar**. Deze RC6 is bedoeld om eerst op je eigen apparaten te testen.
 
-Zie de [Nederlandse RC6-release notes](docs/RELEASE-v2.0.0-rc6.md).
+Zie [alle RC6-release-opmerkingen](docs/RELEASE-v2.0.0-rc6.md).
 
 ## Wat is nieuw in RC5?
 
@@ -153,6 +156,16 @@ Deze functies zijn opgenomen in de huidige RC4 en RC5. Controleer sensorselectie
 
 Zie de [beta8-release](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) voor de volledige toelichting. Beta8 bevat de herstelde instellingenweergave, ondertitel en beheerschermen.
 
+## Premium vormgeving en eigen lettertypen
+
+Open **PalaSidebar → Instellingen → PalaSidebar UI**. De live-voorvertoning laat wijzigingen zien voordat je ze opslaat. Gebruik een van de profielen **HA standaard**, **Klassieke stijl**, **Premium glas**, **Compact**, **AMOLED**, **Midnight Gold**, **Nordic Ice** of **Zonsondergang**. Je kunt vervolgens onder andere accentkleur, glassterkte, kaart-/knopafronding, schaduw, premium knop-gloed en responsieve tekstgroottes aanpassen.
+
+**Lettertype uploaden:** kies een eigen WOFF2-, WOFF-, TTF- of OTF-bestand van maximaal **160 kB**, selecteer **Eigen lettertype (upload)** en klik **Vormgeving opslaan**. Het bestand wordt als gegevens-URL opgeslagen in je PalaSidebar-accountvoorkeuren (dus niet naar GitHub verzonden). Grote fontbestanden zijn bewust beperkt om opslag en prestaties te beschermen. Kies alleen een font dat je vertrouwt en waarvoor je gebruiksrechten hebt. Met **Verwijder eigen lettertype** kun je het terugzetten.
+
+**Tekstgrootte van onderste knoppen:** de desktop- en mobielregelaar beïnvloeden ook de **originele** Home Assistant-knoppen **Instellingen**, **Meldingen** en **Profiel**. Gebruik desgewenst **Onderste Home Assistant-knoppen** om uitsluitend dit gedeelte extra te vergroten/verkleinen. Deze drie onderdelen zijn geen gewone PalaSidebar-menu-items.
+
+**Bugs en screenshots:** in **Instellingen → Diagnose → Bug melden** kun je een screenshot selecteren en lokaal bekijken. Voeg het bestand daarna zelf toe aan het GitHub-issue. Een gekozen afbeelding wordt niet automatisch verstuurd. Controleer zelf altijd eerst op gevoelige informatie.
+
 ## Instellingen en compatibiliteit
 
 Open het instellingenmenu van PalaSidebar om dashboards, badges, thema's, snelkoppelingen en **PalaSidebar UI** aan te passen. Eerdere vormgevingsinstellingen worden bij het inladen indien mogelijk overgenomen.
@@ -163,7 +176,7 @@ PalaSidebar is gebouwd als Home Assistant-customintegratie. Lokale logo's worden
 
 - **[`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main):** beschermde hoofdbranch en projectdocumentatie.
 - **[`beta`](https://github.com/OnlyRobin/PalaSideBar/tree/beta):** vaste betabranch, momenteel gebaseerd op Beta8.
-- **[`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc):** permanente testbranch, momenteel RC6; hieruit publiceren we elke nieuwe RC via HACS.
+- **[`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc):** permanente testbranch, momenteel RC11; hieruit publiceren we nieuwe testreleases via HACS.
 
 Oude GitHub-releases en tags blijven beschikbaar, ook als de oude tijdelijke branches zijn verwijderd. Stable wordt pas op basis van een door de gebruiker goedgekeurde RC voorbereid.
 
