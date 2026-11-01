@@ -2535,6 +2535,7 @@ md-filled-select {
         root.style.setProperty('--pfx-mobile-text-scale',(prefs.enabled?prefs.mobileScale/100:1).toFixed(2));
       }
       this.setAttribute('data-pfx-section-studio',String(prefs.enabled&&prefs.sectionMode!=='none'));
+      this.setAttribute('data-pfx-section-mode',prefs.enabled?prefs.sectionMode:'none');
       this.setAttribute('data-pfx-item-studio',String(prefs.enabled&&(prefs.itemRadius!==10||prefs.itemPadding!==8||prefs.itemGap!==3||prefs.itemBgOpacity>0||prefs.navBorderWidth>0)));
       this.setAttribute('data-pfx-badge-custom',String(prefs.enabled&&prefs.badgeMode==='custom'));
       if(this.shadowRoot){
@@ -2567,6 +2568,7 @@ md-filled-select {
               background:var(--pala-section-background,transparent);
               box-shadow:var(--pala-section-glow,none)
             }
+            :host([data-pfx-section-mode="glass"]) .section-frame{backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px) saturate(120%)}
             :host([data-pfx-section-studio="true"]) .section-frame > .group-title{
               margin:0 0 5px;min-width:0;
               border-radius:calc(var(--pala-section-radius,14px) / 2);
