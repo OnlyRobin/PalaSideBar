@@ -1763,6 +1763,26 @@ md-filled-select {
 .pfx-intro{margin:0;padding:15px;border:1px solid var(--divider-color,#ffffff2a);border-radius:17px;background:color-mix(in srgb,var(--card-background-color,#1c2530) 92%,var(--primary-color,#38bdf8) 8%);margin:12px 0 16px}
 .pfx-intro h3{margin:0 0 6px}.pfx-intro p{margin:0;color:var(--secondary-text-color,#64748b)}
 .pfx-preview{margin:0;padding:12px;border:1px solid var(--divider-color,#ffffff33);border-radius:15px;background:var(--card-background-color,#26303b);display:grid;gap:10px}
+/* Issue #6: the PalaSidebar UI sliders previously affected HA tokens and the
+   preview, but not fixed-size text inside our Shadow DOM. Apply the same scale
+   to the sidebar, AFTER Design Studio base sizes; never scale icons or touch
+   hit targets. Header title/subtitle retain their independent size controls. */
+:host{--pfx-active-text-scale:var(--pfx-desktop-text-scale,1)}
+@media(max-width:700px){:host{--pfx-active-text-scale:var(--pfx-mobile-text-scale,1)}}
+:host(:not([data-compact="true"])) .nav-label{font-size:calc(var(--p-ui-text-size,12px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .nav-link .badge:is(:not([data-size]),[data-size="normal"]){font-size:calc(var(--p-ui-badge-font,10px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .nav-link .badge[data-size="small"]{font-size:calc(var(--p-ui-badge-small,9px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .nav-link .badge[data-size="large"]{font-size:calc(var(--p-ui-badge-large,12px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) :is(.group-toggle,.health-title){font-size:calc(var(--p-ui-group-font,10px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) :is(.clock,.footer,.entity,.entity .value,.pala-agenda-head .pala-agenda-title,.pala-agenda-entry .pala-agenda-copy strong){font-size:calc(var(--p-ui-small-font,11px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) :is(.pala-agenda-entry .pala-agenda-copy small,.pala-agenda-entry .pala-agenda-relative){font-size:calc(var(--p-ui-agenda-small,9px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .pala-agenda-entry .pala-agenda-date strong{font-size:calc(var(--p-ui-agenda-date,13px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) :is(.pala-agenda[data-size="compact"] .pala-agenda-copy strong,.pala-agenda[data-size="mini"] .pala-agenda-copy strong,.pala-agenda[data-size="mini"] .pala-agenda-title,.pala-agenda[data-size="mini"] .pala-agenda-date strong){font-size:calc(var(--p-ui-compact-font,10px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .pala-agenda[data-size="compact"] .pala-agenda-date strong{font-size:calc(var(--p-ui-small-font,11px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .search input{font-size:calc(12px * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .header-extra{font-size:calc(11px * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .footer .pala-restart{font-size:calc(var(--p-ui-text-size,12px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .quick-tile{font-size:calc(12px * var(--pfx-active-text-scale))}
 .pfx-preview .pfx-sample{border-radius:var(--pfx-card-radius,20px);padding:13px;border:1px solid var(--divider-color,#ffffff38);background:var(--primary-background-color,#18232d);font-family:var(--pfx-font,inherit);font-size:var(--pfx-size,14px)}
 .pfx-sample .pfx-title{font-size:1.16em;font-weight:750}.pfx-sample small{font-size:.75em;color:var(--secondary-text-color,#64748b)}
 .pfx-presets{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 2px}.pfx-presets .btn{font-size:12px;min-height:36px}.pfx-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.pfx-pill{display:inline-block;background:var(--pfx-accent,#38bdf8);color:var(--pfx-ink,#06141e);padding:5px 9px;border-radius:var(--pfx-control-radius,13px);font-size:.85em;font-weight:750}
@@ -2433,7 +2453,17 @@ md-filled-select {
       this.saved.ui_style=pfxLegacy(old);return true;
     }
     _pfxApply(raw=this.saved.ui_style||PFX_DEFAULT){
-      const newCss=pfxStyles(raw);
+      const prefs=pfxClean(raw);
+      // Home Assistant global typography lives outside our Shadow DOM. Keep
+      // the OWN sidebar and its dialog portal in sync with the same sliders,
+      // without multiplying the saved Design Studio typography a second time.
+      // CSS media queries pick desktop/mobile on resize with no listener.
+      for(const root of [this,this._dialogPortal]){
+        if(!root)return;
+        root.style.setProperty('--pfx-desktop-text-scale',(prefs.enabled?prefs.fontScale/100:1).toFixed(2));
+        root.style.setProperty('--pfx-mobile-text-scale',(prefs.enabled?prefs.mobileScale/100:1).toFixed(2));
+      }
+      const newCss=pfxStyles(prefs);
       let node=document.getElementById(PFX_STYLE_ID);
       if(!newCss){node?.remove();return;}
       if(!node){node=document.createElement('style');node.id=PFX_STYLE_ID;document.head?.append(node);}
@@ -2475,7 +2505,7 @@ md-filled-select {
       const preview=$('div','pfx-preview');preview.id='pala-pfx-preview';preview.append($('strong',null,'Live voorbeeld'));
       const sample=$('div','pfx-sample');sample.append($('div','pfx-title','PalaSidebar · Mijn Home Assistant'),$('small',null,'Een voorbeeldkaart met energiekleuren, vormgeving en typografie'));
       const pills=$('div','pfx-pills');for(const key of ['energyGrid','energySolar','energyReturn']){const t=$('span','pfx-pill',PFX_ENERGY[key][2]);t.dataset.pfxSwatch=key;pills.append(t);}sample.append(pills);preview.append(sample);page.append(preview);
-      this._pfxSection(page,'Lettertype en responsieve grootte','De grootte werkt voor Home Assistant op mobiel en desktop. Met ‘Klassieke stijl’ herstel je ook de oude compacte lettergroottes.',[
+      this._pfxSection(page,'Lettertype en responsieve grootte','Desktop en mobiel passen nu ook direct de PalaSidebar-menu-items, secties, badges en sensorteksten aan. De aparte titel- en subtitelgroottes in Header blijven zelfstandig instelbaar. Met ‘Klassieke stijl’ herstel je ook de oude compacte lettergroottes.',[
         ['toggle','enabled','PalaSidebar-vormgeving actief'],
         ['select','font','Lettertype',Object.entries({ha:'Home Assistant-thema',supercell:'Supercell Magic',roboto:'Roboto',system:'Systeemfont',arial:'Arial'})],
         ['range','fontScale','Desktop tekstgrootte',[75,160,5,'%']],
@@ -2539,7 +2569,8 @@ md-filled-select {
       });
       this.dialog.querySelectorAll('[data-pfx-key]').forEach(el=>{
         const out=el.parentElement.querySelector('output');if(out){
-          out.textContent=el.type==='range'?el.value+(el.max<=100&&el.dataset.pfxKey!=='cardRadius'&&el.dataset.pfxKey!=='controlRadius'?'%':'px'):el.value;
+          const unit=['fontScale','mobileScale','glass'].includes(el.dataset.pfxKey)?'%':'px';
+          out.textContent=el.type==='range'?el.value+unit:el.value;
         }
       });
       this._pfxApply(v);
