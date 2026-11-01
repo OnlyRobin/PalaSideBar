@@ -1,12 +1,12 @@
 /**
- * PalaSidebar 2.0.0-rc4 – custom_components integratie met AutoLoader.
+ * PalaSidebar 2.0.0-rc5 – custom_components integratie met AutoLoader.
  * Copyright (c) 2026 Robin Bouwman. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
  * Leest uitsluitend HA-status; voert geen services uit zonder interactie.
  * Integratie via native ha-sidebar slot indien beschikbaar; anders overlay.
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc4';
+  const VERSION = '2.0.0-rc5';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -878,6 +878,9 @@ md-filled-select {
   const isEntity = value => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(value||'');
   const serviceName = value => /^[a-z][a-z0-9_]{1,63}$/.test(value||'');
   // Override only known display options; values are plain text and never HTML.
+  // Only a compact locally encoded JPEG is accepted; no remote URL, SVG or script.
+  const safeHeaderImage = value => typeof value==='string' && value.length<=110000 &&
+    /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(value)?value:'';
   function cleanHeader(v){
     const x=v&&typeof v==='object'&&!Array.isArray(v)?v:{};
     return {
@@ -893,6 +896,7 @@ md-filled-select {
       logo_text:text(x.logo_text||'P').slice(0,3),logo_icon:isSafeIcon(x.logo_icon)?x.logo_icon:'',
       logo_bg:safeHex(x.logo_bg),logo_color:safeHex(x.logo_color),
       background_color:safeHex(x.background_color),clock_color:safeHex(x.clock_color),
+      image:safeHeaderImage(x.image),image_position:['center','top','bottom'].includes(x.image_position)?x.image_position:'center',
       show_quick:x.show_quick!==false,show_settings:x.show_settings!==false
     };
   }
@@ -1361,6 +1365,15 @@ md-filled-select {
 :host([data-header-mode="app"]) .top .iconbtn{min-width:38px;min-height:38px}
 /* Personal header style variables applied only within PalaSidebar. */
 .top{background:var(--p-header-background,transparent)}
+/* Optionele foto: uitsluitend in de eigen PalaSidebar-header, nooit in de HA-header. */
+.top[data-header-picture="true"]{min-height:94px;padding-top:14px;padding-bottom:10px;background-size:cover;background-repeat:no-repeat;background-position:center;align-items:flex-end;isolation:isolate}
+.top[data-header-picture="true"] .brand strong,.top[data-header-picture="true"] .brand small,.top[data-header-picture="true"] .iconbtn{color:#fff!important;text-shadow:0 1px 5px #000c}
+.top[data-header-picture="true"] .logo{box-shadow:0 2px 10px #0009}
+:host([data-header-mode="compact"]) .top[data-header-picture="true"]{min-height:82px}
+:host([data-header-mode="app"]) .top[data-header-picture="true"]{min-height:82px}
+:host([data-header-mode="minimal"]) .top[data-header-picture="true"]{min-height:72px}
+:host([data-compact="true"][data-integration="native"]) .top[data-header-picture="true"]{min-height:36px;padding:4px 7px}
+@media(prefers-reduced-motion:reduce){.top[data-header-picture="true"]{transition:none!important}}
 .top .logo{background:var(--p-header-logo-background,var(--p-accent));color:var(--p-header-logo-color,#06151e)}
 .clock{color:var(--p-header-clock-color,var(--secondary-text-color,#9ca9b9))}
 :host([data-header-mode="hidden"]) .header-extra{display:none}
@@ -1519,6 +1532,12 @@ md-filled-select {
 .settings-dialog .optional-color-field .badge-color-control input[type="color"]{flex:0 0 58px;width:58px;height:45px;background:var(--secondary-background-color,#263442)}
 .settings-dialog .optional-color-field .badge-color-control input[type="text"]{max-width:none;min-width:0;flex:1}
 .settings-dialog .optional-color-field input[aria-invalid="true"]{border-color:#ef4444!important}
+.header-image-editor{border:1px solid var(--divider-color,#6679);padding:12px;border-radius:13px;display:flex;flex-direction:column;gap:9px;background:var(--secondary-background-color,#283647);min-width:0}
+.header-image-editor .header-image-thumbnail{height:92px;width:100%;display:flex;align-items:center;justify-content:center;border:1px dashed var(--divider-color,#667);border-radius:10px;overflow:hidden;background:var(--card-background-color,#171e29);color:var(--secondary-text-color,#aab3c0)}
+.header-image-editor .header-image-thumbnail img{width:100%;height:100%;object-fit:cover}
+.header-image-editor input[type=file]{width:100%;max-width:100%;font-size:12px;color:inherit}
+.header-image-editor .btnrow{justify-content:flex-start}
+.header-image-editor .field-note{font-size:11px!important;line-height:1.45}
 .optional-color-preview{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:39px;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:750;border:1px solid var(--divider-color,#6679)}
 .optional-color-preview span{font:600 11px monospace;opacity:.85}
 .optional-color-field .field-clear{flex:0 0 42px;width:42px;min-width:42px;min-height:44px;font-size:21px}
@@ -2181,6 +2200,7 @@ md-filled-select {
       const style=$('style');style.textContent=CSS;
       this.shadowRoot.append(style);const themeStyle=$('style');themeStyle.textContent=THEME_CSS;this.shadowRoot.append(themeStyle);
       this.config=defaults();this.error='';this.saved=EMPTY_PREFS();this.hass=null;this._pfxDraft=null;
+      this._headerImageDraft=undefined;this._headerImageBusy=false;this._headerImageSequence=0;
       // Per HA account: the in-browser copy is a fallback, NOT the source of truth.
       // No extra HA integration needed: frontend/get_user_data is built into Core.
       this._prefsStore=null;this._recoveryPoints=[];this._recoveryStatus="nog geladen";this._lastDialogHaTheme="";
@@ -4428,6 +4448,11 @@ md-filled-select {
         this._closeOwnedDialog(this.actionDialog,()=>this._runAction({type:'more-info',entity:target.dataset.entity}));return;
       }
       if(cmd==='save-prefs'){this._saveDialog();return;}
+      if(cmd==='header-image-remove'){
+        this._headerImageSequence++;this._headerImageBusy=false;this._headerImageDraft='';
+        const file=this.dialog?.querySelector('#pala-head-image-file');if(file)file.value='';
+        this._previewHeaderImage();this._editorNotice('Headerfoto wordt verwijderd zodra je Header opslaan kiest.');return;
+      }
       if(cmd==='optional-color-clear'){
         const id=target.dataset.field;
         const input=this.dialog.querySelector('#'+id+'-hex');
@@ -4481,6 +4506,7 @@ md-filled-select {
     }
     _change(e) {
       const id=e.target?.id;
+      if(id==='pala-head-image-file'){const file=e.target.files?.[0];if(file)void this._loadHeaderImage(file);return;}
       if(id==='pala-layout-section')this._layoutFillSection();
       if(id==='pala-layout-item')this._layoutFillItem();
       if(id==='pala-menu-select')this._fillMenuEditor(e.target.value);
@@ -4644,6 +4670,10 @@ md-filled-select {
       this._syncHaHeader();
       this.setAttribute('data-density',this.saved.density||(['normal','compact'].includes(app.density)?app.density:'compact'));
       this.head.replaceChildren();this.head.dataset.align=hdr.align;
+      const image=safeHeaderImage(hdr.image);
+      this.head.dataset.headerPicture=String(!!image);
+      this.head.style.backgroundImage=image?('linear-gradient(180deg,rgba(5,12,18,.26),rgba(5,12,18,.72)),url("'+image+'")'):'';
+      this.head.style.backgroundPosition=hdr.image_position||'center';
       this.style.setProperty('--p-header-title-size',hdr.title_size+'px');
       this.style.setProperty('--p-header-subtitle-size',hdr.subtitle_size+'px');
       for(const [name,value] of [['title',hdr.title_color],['subtitle',hdr.subtitle_color],['extra',hdr.extra_color]]){
@@ -6643,6 +6673,7 @@ md-filled-select {
       general.append($('p',null,'De originele Home Assistant-drawer blijft zelf verantwoordelijk voor de breedte en mobiele terugknop. De instellingen regelen alleen de PalaSidebar-inhoud en eigen dialogen. Systeeminstelling ‘verminder beweging’ heeft altijd voorrang.'));
       general.append($('p',null,'Android-terug: PalaSidebar-menu en eigen dialogen gebruiken elk één tijdelijke geschiedenisstap. Home Assistant- en Browser Mod-dialogen worden door Home Assistant zelf beheerd. Op Android bepaalt de Companion App/WebView uiteindelijk of de fysieke terugknop aan de pagina wordt doorgegeven.'));
       const headPage=page('header');const hh=this._header();
+      this._headerImageDraft=undefined;this._headerImageBusy=false;this._headerImageSequence++;
       headPage.append($('h3',null,'Home Assistant header'),
         $('p',null,'De aanpassing geldt alleen voor de linker Home Assistant-sidebar. De titelbalk boven een dashboard blijft intact.'));
       headPage.append(this._formField('Originele Home Assistant-header','pala-ha-header',hh.ha,
@@ -6656,6 +6687,18 @@ md-filled-select {
       headPage.append(this._formField('Eigen titel (leeg = standaard)','pala-head-title',hh.title));
       headPage.append(this._formField('Eigen subtitel (leeg = standaard)','pala-head-subtitle',hh.subtitle));
       headPage.append(this._formField('Extra sensorregel onder header','pala-head-extra',hh.extra));
+      const photoEditor=$('div','header-image-editor');photoEditor.id='pala-header-image-editor';
+      photoEditor.append($('strong',null,'Headerafbeelding (optioneel)'));
+      const photoPreview=$('div','header-image-thumbnail');photoEditor.append(photoPreview);
+      const photoLabel=$('label','field');photoLabel.append($('span',null,'Foto kiezen vanaf je apparaat'));
+      const photoInput=$('input');photoInput.type='file';photoInput.id='pala-head-image-file';
+      photoInput.accept='image/jpeg,image/png,image/webp';photoInput.setAttribute('aria-label','Headerafbeelding uploaden');
+      photoLabel.append(photoInput);photoEditor.append(photoLabel);
+      photoEditor.append(this._formField('Uitsnede positioneren','pala-head-image-position',hh.image_position,[['center','Midden'],['top','Bovenkant'],['bottom','Onderkant']]));
+      const imageButtons=$('div','btnrow');imageButtons.append(this._button('Foto verwijderen','header-image-remove'));photoEditor.append(imageButtons);
+      const photoInfo=$('p','field-note','');photoInfo.dataset.imageInfo='1';photoInfo.setAttribute('role','status');photoEditor.append(photoInfo);
+      photoEditor.append($('p','field-note','JPG, PNG of WebP tot 4 MB. Wordt lokaal verkleind en privé met je Home Assistant-accountinstellingen gesynchroniseerd. Geen aparte www-map nodig.'));
+      headPage.append(photoEditor);this._previewHeaderImage();
       const tokenPane=$('div','layout-dynamic-panel');
       tokenPane.append($('h4',null,'Sensor of attribuut aan de header toevoegen'));
       tokenPane.append($('p','field-note','Zoek een Home Assistant-entiteit op naam, kies eventueel een attribuut en voeg de waarde toe aan de titel, subtitel of extra sensorregel. De actuele waarde wordt automatisch ververst.'));
@@ -6956,7 +6999,59 @@ md-filled-select {
       this._saveSettings();this.redraw();this._rebuildSettingsAtSamePosition('layout');this._editorNotice('Indeling hersteld.');
     }
     _button(label,cmd,cls=''){const b=$('button','btn '+cls,label);b.type='button';b.dataset.do=cmd;return b;}
+    _previewHeaderImage(){
+      const editor=this.dialog?.querySelector('#pala-header-image-editor');if(!editor)return;
+      const preview=editor.querySelector('.header-image-thumbnail');
+      const info=editor.querySelector('[data-image-info]');
+      const value=this._headerImageDraft===undefined?this._header().image:this._headerImageDraft;
+      const image=safeHeaderImage(value);
+      preview.replaceChildren();
+      if(image){const pic=$('img');pic.src=image;pic.alt='Voorbeeld van de gekozen headerfoto';preview.append(pic);}
+      else preview.append($('span',null,'Geen headerfoto · standaard header'));
+      if(info)info.textContent=this._headerImageBusy?'Afbeelding verwerken…':image?'De foto verschijnt na Header opslaan.':'De standaardkleur van je thema blijft actief.';
+    }
+    async _loadHeaderImage(file){
+      if(!file||!this.dialog)return;
+      const sequence=++this._headerImageSequence;
+      if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>4*1024*1024||file.size===0){
+        this._editorNotice('Kies een JPG, PNG of WebP van maximaal 4 MB.');return;
+      }
+      this._headerImageBusy=true;this._previewHeaderImage();
+      let url='';
+      try{
+        url=URL.createObjectURL(file);
+        const image=new Image();image.decoding='async';image.src=url;
+        await image.decode();
+        if(sequence!==this._headerImageSequence)return;
+        if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>12000||image.naturalHeight>12000)throw Error('Afmetingen ongeldig');
+        const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');if(!ctx)throw Error('Geen afbeeldingsverwerking');
+        // JPEG-strip van ca. 3:1; EXIF/metadata worden niet opgeslagen.
+        const sourceRatio=3.1,iw=image.naturalWidth,ih=image.naturalHeight;
+        const sw=Math.min(iw,ih*sourceRatio),sh=sw/sourceRatio;
+        const sx=(iw-sw)/2,sy=(ih-sh)/2;
+        let result='';
+        for(const width of [720,580,460,340]){
+          canvas.width=width;canvas.height=Math.round(width/sourceRatio);
+          ctx.drawImage(image,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+          for(const quality of [0.76,0.60,0.45]){
+            result=canvas.toDataURL('image/jpeg',quality);
+            if(result.length<=100000)break;
+          }
+          if(result.length<=100000)break;
+        }
+        if(!safeHeaderImage(result))throw Error('Afbeelding te groot');
+        if(sequence!==this._headerImageSequence)return;
+        this._headerImageDraft=result;
+        this._editorNotice('Headerfoto klaar. Druk op Header opslaan om te bewaren.');
+      }catch(error){
+        if(sequence===this._headerImageSequence)this._editorNotice('Foto kon niet worden geladen. Kies een andere JPG, PNG of WebP.');
+      }finally{
+        if(url)URL.revokeObjectURL(url);
+        if(sequence===this._headerImageSequence){this._headerImageBusy=false;this._previewHeaderImage();}
+      }
+    }
     _saveHeader(){
+      if(this._headerImageBusy){this._editorNotice('De headerfoto wordt nog verwerkt.');return;}
       const q=id=>this.dialog.querySelector('#'+id);
       const colors=['pala-head-title-color','pala-head-subtitle-color','pala-head-extra-color',
         'pala-head-background-color','pala-head-logo-bg','pala-head-logo-color','pala-head-clock-color'];
@@ -6979,7 +7074,10 @@ md-filled-select {
         show_quick:q('pala-head-quick').checked,show_settings:q('pala-head-settings').checked,
         logo_icon:q('pala-head-logo-icon').value,background_color:color('pala-head-background-color'),
         logo_bg:color('pala-head-logo-bg'),logo_color:color('pala-head-logo-color'),
-        clock_color:color('pala-head-clock-color')});
+        clock_color:color('pala-head-clock-color'),
+        image:this._headerImageDraft===undefined?this._header().image:this._headerImageDraft,
+        image_position:q('pala-head-image-position').value});
+      this._headerImageDraft=undefined;
       this._saveSettings();this.redraw();this._editorNotice('Header opgeslagen.');
     }
     _saveDialog(){
