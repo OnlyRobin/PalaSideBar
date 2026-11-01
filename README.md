@@ -34,13 +34,16 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 
 | Versie | Betekenis |
 | --- | --- |
-| **[v2.0.0-rc5](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc5)** | Nieuwste **release candidate**: eigen headerfoto, preview, bewerken en opslaan bij je account; HACS-testrelease |
-| [v2.0.0-rc4](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc4) | Vorige RC: kleurkiezers met HEX-code en live voorbeeld in Algemeen en Header |
-| **[v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8)** | Nieuwste **beta** met de herstelde PalaSidebar UI, ondertitel en BEHEER-opties |
-| [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) | Oudere beta, met drie inmiddels bekende fouten |
-| **v2.0.0 Stable** | Nog **niet uitgebracht**; eerst testen op echte apparaten |
+| **[v2.0.0-rc6](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc6)** | Nieuwste RC om via HACS te testen: tekstgrootte, verbeterde headerfoto en extra controles |
+| [v2.0.0-rc5](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc5) | Vorige RC; beschikbaar voor terugzetten |
+| [v2.0.0-rc4](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc4) | Oudere RC; beschikbaar voor terugzetten |
+| [v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) | Laatste beta |
+| [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) | Oudere beta |
+| **v2.0.0 Stable** | Nog niet uitgebracht; pas na goedkeuring van de geteste RC |
 
-> **Belangrijk bij HACS-updates:** HACS heeft geen afzonderlijk beta- en RC-updatekanaal. Bij versievergelijking staat `2.0.0-rc5` boven `2.0.0-rc4` en doorgaans ook boven `2.0.0-beta8`. De automatisch aangeboden update hoeft dus niet uit dezelfde beta-reeks te komen. Kies **altijd bewust de gewenste versie** via HACS → PalaSidebar → Downloaden/Opnieuw downloaden → testversies. In `hacs.json` is de standaardbranch verborgen voor releasekeuzes.
+**Vaste RC-werkwijze:** De branch [`release/candidate`](https://github.com/OnlyRobin/PalaSideBar/tree/release/candidate) blijft altijd bestaan. Elke volgende wijziging krijgt **een nieuw RC-nummer en een HACS-testrelease**. We overschrijven of verwijderen eerdere RC-releases of tags niet. **Jij test de RC; pas na jouw goedkeuring volgt de stabiele uitgave vanuit die RC.** Zie de [RC6-release-informatie](docs/RELEASE-v2.0.0-rc6.md).
+
+**HACS:** schakel testversies / prereleases in en kies bewust de nieuwste RC. HACS heeft geen afzonderlijke beta- en RC-kanalen. De standaardbranch wordt niet als los releasepakket aangeboden.
 
 ## Mogelijkheden
 
@@ -60,7 +63,7 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 1. Zorg dat **HACS** is geïnstalleerd in Home Assistant.
 2. Open **HACS → drie puntjes → Aangepaste repositories** (of *Custom repositories*).
 3. Voeg `https://github.com/OnlyRobin/PalaSideBar` toe als type **Integratie** (*Integration*).
-4. Open **PalaSidebar**, schakel de weergave van testversies (*pre-releases / beta versions*) in en kies **v2.0.0-rc5** (nieuwste RC) of bewust een eerdere testversie.
+4. Open **PalaSidebar**, schakel de weergave van testversies (*pre-releases / beta versions*) in en kies **v2.0.0-rc6** (nieuwste RC) of bewust een eerdere testversie.
 5. Klik op **Downloaden** en herstart Home Assistant **volledig**.
 6. Open **Instellingen → Apparaten en diensten → Integratie toevoegen** en voeg **PalaSidebar** toe, als deze nog niet is toegevoegd.
 7. Verwijder eventuele oude, handmatig ingestelde PalaSidebar-JavaScript-resources om dubbel laden te voorkomen.
@@ -88,6 +91,16 @@ Bij RC5 moet hier `2.0.0-rc5` staan nadat je deze release hebt gekozen; bij RC4 
 ### Teruggaan naar een eerdere versie
 
 Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer een nog beschikbare release (bijvoorbeeld beta8 of RC4). Herstart Home Assistant en herstel zo nodig je back-up. Een andere versie kiezen is geen vervanging voor een back-up van je instellingen.
+
+## Wat is nieuw in RC6?
+
+- De **tekstgrootte-schuifregelaars voor desktop en mobiel** werken nu ook zichtbaar op PalaSidebar-menuteksten, badges, sensorwaarden, secties en agenda.
+- Percentages worden als `80%`, `100%` en `120%` weergegeven in plaats van als pixels.
+- De headerfoto-upload is robuuster geworden bij het kiezen van een ongeldig bestand.
+- Opslag per account en live sensorprestaties hebben extra automatische tests gekregen.
+- RC5 is gewoon beschikbaar als terugvaloptie.
+
+Zie de [Nederlandse RC6-release notes](docs/RELEASE-v2.0.0-rc6.md).
 
 ## Wat is nieuw in RC5?
 
