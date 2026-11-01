@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc9';
+  const VERSION = '2.0.0-rc10';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -2471,6 +2471,7 @@ md-filled-select {
         root.style.setProperty('--pfx-desktop-text-scale',(prefs.enabled?prefs.fontScale/100:1).toFixed(2));
         root.style.setProperty('--pfx-mobile-text-scale',(prefs.enabled?prefs.mobileScale/100:1).toFixed(2));
       }
+      if(this.integration==='native')this._syncNativeFooter();
       const newCss=pfxStyles(prefs);
       let node=document.getElementById(PFX_STYLE_ID);
       if(!newCss){node?.remove();return;}
@@ -2652,6 +2653,14 @@ md-filled-select {
       for(const [label,id,placeholder] of [['Wat gaat er fout?','pala-issue-description','Omschrijf de fout'],['Stappen om de fout na te doen','pala-issue-steps','1. Open... 2. Klik...']]){
         const field=$('label','field');field.append($('span',null,label));const area=$('textarea');area.id=id;area.rows=3;area.maxLength=1500;area.placeholder=placeholder;field.append(area);page.append(field);
       }
+      const screenshotField=$('label','field');
+      screenshotField.append($('span',null,'Screenshot (optioneel, PNG of JPG)'));
+      const screenshot=$('input');screenshot.type='file';screenshot.id='pala-issue-screenshot';screenshot.accept='image/png,image/jpeg,image/webp';
+      screenshotField.append(screenshot);page.append(screenshotField);
+      const screenshotHint=$('p','field-note','Je afbeelding wordt alleen lokaal bekeken. Klik na het openen van GitHub op het bijlagegedeelte en voeg hetzelfde bestand toe. De screenshot wordt niet automatisch verzonden.');
+      screenshotHint.id='pala-issue-screenshot-status';page.append(screenshotHint);
+      const screenshotPreview=$('img');screenshotPreview.id='pala-issue-screenshot-preview';screenshotPreview.hidden=true;
+      screenshotPreview.alt='Voorbeeld gekozen screenshot';screenshotPreview.style.cssText='max-width:100%;max-height:240px;object-fit:contain;border-radius:8px';page.append(screenshotPreview);
       const check=$('label','check'),consent=$('input');consent.type='checkbox';consent.id='pala-issue-consent';check.append(consent,$('span',null,'Ik heb de tekst gecontroleerd op privégegevens.'));page.append(check);
       const issueButtons=$('div','btnrow');issueButtons.append(this._button('Voorbeeld bekijken','support-preview'),this._button('Issue openen op GitHub','support-report','primary'));page.append(issueButtons);
       const preview=$('textarea');preview.id='pala-issue-preview';preview.rows=8;preview.readOnly=true;preview.setAttribute('aria-label','Voorbeeld GitHub-issue');preview.placeholder='Klik op Voorbeeld bekijken';page.append(preview);
@@ -2694,6 +2703,7 @@ md-filled-select {
       if(!this.dialog.querySelector('#pala-issue-consent')?.checked){this._editorNotice('Controleer de tekst en bevestig eerst de privacycontrole.');return;}
       const link=PALA_REPO+'/issues/new?title='+encodeURIComponent('[Bug] '+report.title)+'&body='+encodeURIComponent(report.body);
       window.open(link,'_blank','noopener,noreferrer');
+      if(this.dialog.querySelector('#pala-issue-screenshot')?.files?.length)this._editorNotice('Voeg je gekozen screenshot zelf toe in het GitHub-formulier voordat je indient.');
     }
     _paintRcNotice(){
       const info=this._rcCheck.latest;
@@ -4639,6 +4649,19 @@ md-filled-select {
     }
     _change(e) {
       const id=e.target?.id;
+      if(id==='pala-issue-screenshot'){
+        const file=e.target.files?.[0],preview=this.dialog?.querySelector('#pala-issue-screenshot-preview'),status=this.dialog?.querySelector('#pala-issue-screenshot-status');
+        if(this._issueImageUrl){URL.revokeObjectURL(this._issueImageUrl);this._issueImageUrl=null;}
+        if(preview){preview.hidden=true;preview.removeAttribute('src');}
+        if(!file){if(status)status.textContent='Geen screenshot gekozen.';return;}
+        if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>10*1024*1024){
+          e.target.value='';if(status)status.textContent='Kies PNG/JPG/WebP van maximaal 10 MB.';return;
+        }
+        this._issueImageUrl=URL.createObjectURL(file);
+        if(preview){preview.src=this._issueImageUrl;preview.hidden=false;}
+        if(status)status.textContent='Geselecteerd: '+file.name+' · Voeg deze afbeelding op GitHub handmatig toe voordat je het issue indient.';
+        return;
+      }
       if(id==='pala-head-image-file'){const file=e.target.files?.[0];if(file)void this._loadHeaderImage(file);return;}
       if(id==='pala-layout-section')this._layoutFillSection();
       if(id==='pala-layout-item')this._layoutFillItem();
@@ -5301,11 +5324,25 @@ md-filled-select {
         for(const element of root.querySelectorAll('*'))if(element.shadowRoot)visit(element.shadowRoot,depth+1);
       };
       visit(native.shadowRoot);
+      const ui=pfxClean(this._pfxDraft||this.saved.ui_style||PFX_DEFAULT);
+      const scale=ui.enabled?(matchMedia('(max-width:700px)').matches?ui.mobileScale:ui.fontScale)/100:1;
+      const footerSize=(13*scale).toFixed(2)+'px';
       for(const anchor of found){
         const href=anchor.getAttribute('href');let path='';
         try{path=href?.startsWith('/')&&!href.startsWith('//')?href.split(/[?#]/)[0]:(new URL(href,location.href)).pathname;path=path.replace(/\/+$/,'')||'/';}catch{continue;}
         if(!Object.prototype.hasOwnProperty.call(visibility,path))continue;
         const node=anchor.closest('ha-list-item-button,ha-list-item-base')||anchor;
+        // Native HA bottom entries have their own Shadow DOM and ignore our
+        // PalaSidebar text-scale variables. Apply only to these three routes.
+        for(const element of [anchor,node]){
+          element.style.setProperty('--md-sys-typescale-label-large-size',footerSize);
+          element.style.setProperty('--mdc-typography-body1-font-size',footerSize);
+          element.style.setProperty('--pala-native-footer-size',footerSize);
+        }
+        if(node.shadowRoot){
+          let style=node.shadowRoot.querySelector('style[data-pala-footer-font]');
+          if(!style){style=document.createElement('style');style.dataset.palaFooterFont='';style.textContent='span:not(.icon):not([class*="icon"]),.label,.name,.primary,.text{font-size:var(--pala-native-footer-size,13px)!important}';node.shadowRoot.append(style);}
+        }
         if(!this._haFooterStyles.has(node))this._haFooterStyles.set(node,[node.style.getPropertyValue('display'),node.style.getPropertyPriority('display')]);
         if(visibility[path]===false)node.style.setProperty('display','none','important');
         else{const [value,priority]=this._haFooterStyles.get(node);value?node.style.setProperty('display',value,priority):node.style.removeProperty('display');this._haFooterStyles.delete(node);}
