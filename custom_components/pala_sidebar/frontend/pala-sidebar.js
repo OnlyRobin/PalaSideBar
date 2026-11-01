@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc.12';
+  const VERSION = '2.0.0-rc.13';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -2574,16 +2574,21 @@ md-filled-select {
       page.append(this._button('Verwijder eigen lettertype','pfx-remove-font'));
 
       const fontInfo=$('p','field-note',this._pfxPrefs().customFont?'Eigen lettertype beschikbaar. Kies Eigen lettertype en sla op.':'Upload blijft lokaal tot je op Vormgeving opslaan klikt. Grote fonts zijn niet geschikt voor accountopslag.');fontInfo.id='pala-custom-font-status';page.append(fontInfo);
-      this._pfxSection(page,'Thema en achtergrond','‘Home Assistant’ respecteert het actieve thema. ‘Klassieke vormgeving’ herstelt de oude volledige styling. AMOLED is een donkere override.',[
-        ['select','background','Dashboardachtergrond',[['ha','Volg Home Assistant'],['classic','Klassieke vormgeving'],['glass','Glas · zacht verloop'],['flat','Effen · HA-achtergrond'],['solid','Effen · eigen kleur'],['midnight','Midnight · diepblauw'],['aurora','Aurora · groen/blauw'],['sunset','Sunset · warm verloop'],['amoled','AMOLED zwart']]],
-        ['select','accentMode','Accentkleur',[['ha','Volg Home Assistant'],['custom','Eigen accentkleur']]],
-        ['color','accent','Eigen accentkleur'],['color','backgroundColor','Eigen achtergrondkleur'],['range','glass','Glassterkte',[15,95,5,'%']]
-      ]);
-      const backgrounds=$('section','pfx-section');backgrounds.append($('h3',null,'Achtergrondgalerij'),$('p','pfx-description','Alle achtergronden zijn ook hierboven selecteerbaar. Tik op een voorbeeld om direct te wisselen.'));
+      const backgrounds=$('section','pfx-section');
+      backgrounds.append($('h3',null,'Dashboardachtergrond'),$('p','pfx-description','Kies je achtergrond via één overzichtelijke galerij. De geselecteerde stijl krijgt een accentkleurige rand.'));
+      // Single source of truth for the background: the gallery updates this
+      // hidden form value. Existing saved preferences/presets still work.
+      const backgroundValue=$('input');backgroundValue.type='hidden';backgroundValue.id='pala-pfx-background';
+      backgroundValue.dataset.pfxKey='background';backgroundValue.value=this._pfxPrefs().background;
+      backgrounds.append(backgroundValue);
       const bgGrid=$('div','pfx-background-choices');bgGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;max-width:100%';
       for(const [key,label,bg] of [['ha','Home Assistant','var(--card-background-color,#354354)'],['classic','Klassiek','#252334'],['glass','Glas','linear-gradient(135deg,#223149,#485b6b)'],['flat','Effen HA','#343c46'],['solid','Eigen kleur','linear-gradient(135deg,#2b3550,#121927)'],['midnight','Midnight','linear-gradient(135deg,#070d1d,#172849)'],['aurora','Aurora','linear-gradient(135deg,#06231f,#173750,#0c162e)'],['sunset','Zonsondergang','linear-gradient(135deg,#311b38,#72465b,#18233a)'],['amoled','AMOLED','#030303']]){
         const b=this._button(label,'pfx-background');b.dataset.background=key;b.style.cssText='min-height:52px;border-radius:13px;background:'+bg+';color:#fff;border:1px solid #ffffff35;text-shadow:0 1px 3px #000;transition:border-color .2s,transform .2s';bgGrid.append(b);
       }backgrounds.append(bgGrid);page.append(backgrounds);
+      this._pfxSection(page,'Accentkleur en achtergronddetails','Pas je accentkleur aan. Eigen achtergrondkleur is van toepassing bij Effen · eigen kleur; glassterkte geldt voor glasachtergronden.',[
+        ['select','accentMode','Accentkleur',[['ha','Volg Home Assistant'],['custom','Eigen accentkleur']]],
+        ['color','accent','Eigen accentkleur'],['color','backgroundColor','Eigen achtergrondkleur'],['range','glass','Glassterkte',[15,95,5,'%']]
+      ]);
       this._pfxSection(page,'Vormgeving en beweging','Kaarten, knoppen, schaduwen en subtiele effecten.',[
         ['range','cardRadius','Kaarten en dialogen',[0,44,2,'px']],
         ['range','controlRadius','Knoppen en invoervelden',[0,32,2,'px']],
@@ -2603,10 +2608,10 @@ md-filled-select {
       badgeChip.id='pala-pfx-badge-demo-chip';
       badgeChip.style.cssText='display:inline-block;align-self:start;font-weight:750;font-size:13px;transition:background .2s,border-radius .2s';
       badgeDemo.append(badgeChip);page.append(badgeDemo);
-      this._pfxSection(page,'Originele Home Assistant-tellers','Instellingen en Meldingen zijn Home Assistant-knoppen. Stel hun tellers apart in zonder de waarde of werking te veranderen.',[
-        ['select','nativeBadgeMode','Kleur tellers',[['sidebar','PalaSidebar-accent'],['ha','Home Assistant-kleur'],['custom','Eigen tellerkleur']]],
-        ['color','nativeBadgeColor','Eigen tellerachtergrond'],['color','nativeBadgeText','Eigen tellertekstkleur'],
-        ['range','nativeBadgeBorder','Tellerrand',[0,4,1,'px']],['range','nativeBadgeRadius','Tellerafronding',[0,24,1,'px']]
+      this._pfxSection(page,'Home Assistant-badges','De badges naast Instellingen en Meldingen zijn van Home Assistant. Pas hun vormgeving aan zonder de badgewaarden of de knoppen te veranderen.',[
+        ['select','nativeBadgeMode','Kleur Home Assistant-badges',[['sidebar','PalaSidebar-accent'],['ha','Volg Home Assistant'],['custom','Eigen badgekleur']]],
+        ['color','nativeBadgeColor','Eigen badge-achtergrond'],['color','nativeBadgeText','Eigen badge-tekstkleur'],
+        ['range','nativeBadgeBorder','Badge-randdikte',[0,4,1,'px']],['range','nativeBadgeRadius','Badge-afronding',[0,24,1,'px']]
       ]);
       this._pfxSection(page,'Sidebar randen','Accentueer menu-items zonder de gewone navigatie of je badges te verstoren.',[
         ['range','navBorderWidth','Menurand-dikte',[0,4,1,'px']],['color','navBorderColor','Menurandkleur']
