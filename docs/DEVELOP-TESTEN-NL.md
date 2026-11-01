@@ -1,39 +1,38 @@
-# PalaSidebar RC5-stabilisatie veilig testen
+# PalaSidebar veilig testen: Beta, RC en Stable
 
-## Wat staat momenteel waar?
+De repository heeft **precies drie vaste branches**:
 
-- **Gepubliceerde HACS-testrelease:** [v2.0.0-rc5](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc5).
-- **Stabilisatiecode:** [stabilization/rc5-to-v2](https://github.com/OnlyRobin/PalaSideBar/tree/stabilization/rc5-to-v2) en [draft-pull-request #10](https://github.com/OnlyRobin/PalaSideBar/pull/10). Bevat RC5 met aanvullende reparaties en tests.
-- **main:** bevat voorlopig nog Beta7-code met recentere documentatie.
-- **release/v2.0.0:** voorbereidingsbranch voor de nog **niet gepubliceerde** stabiele versie.
-- De huidige stabilisatie-testbouw heeft intern nog hetzelfde versienummer `2.0.0-rc5` als de oorspronkelijke RC5. Daarom is **een schone testomgeving verplicht**, zodat browsercaches niet tot verwarring leiden.
+- [`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main): beschermde standaardbranch en officiële projectdocumentatie.
+- [`beta`](https://github.com/OnlyRobin/PalaSideBar/tree/beta): bètabranch, momenteel gebaseerd op v2.0.0-beta8.
+- [`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc): permanente release-candidatebranch, momenteel gebaseerd op v2.0.0-rc6.
 
-## Installatie in een afzonderlijke Home Assistant-testomgeving
+**Wijzigingen in de app verschijnen altijd eerst als een nieuwe, hoger genummerde RC.** RC6 wordt RC7, RC8 enzovoort, met voor elke versie een nieuwe GitHub-prerelease. De vorige RC-tags en releases blijven permanent bestaan als herstelopties. Alleen nadat je zelf op je apparaten akkoord hebt gegeven, wordt een gecontroleerde RC uitgebracht als Stable.
 
-1. Download een recente [Home Assistant-back-up](https://www.home-assistant.io/common-tasks/general/#backups), bewaar die buiten je HA-apparaat en exporteer je PalaSidebar-instellingen.
-2. Bewaar eventueel een eigen `pala-sidebar-config.json` apart van de integratiemap.
-3. Open op GitHub de workflow [PalaSidebar RC5 naar stabiel — integrale audit](https://github.com/OnlyRobin/PalaSideBar/actions/workflows/stabilization-audit.yml).
-4. Kies de **nieuwste geslaagde run van `stabilization/rc5-to-v2`**. Onder *Artifacts* download je `PalaSidebar-stabilisatie-test`.
-5. Pak de GitHub Actions-download uit en pak daarna `PalaSidebar-stabilisatie-test.zip` uit.
-6. Kopieer de map `custom_components/pala_sidebar` naar de testinstallatie, zonder parallel een tweede PalaSidebar-integratie aan te maken.
-7. Herstart Home Assistant volledig. Controleer de frontendconsole op opstartfouten en of de eigen header correct wordt getoond.
-8. Voer de onderstaande praktijktesten uit en noteer per test of hij geslaagd is.
+## Een RC via HACS testen
 
-**Let op:** Omdat het interne versienummer nog RC5 is, kan een al eerder bezochte HA-installatie een verouderde gecachete JS-versie laden. Gebruik voor dit testpakket bij voorkeur een schone HA-testinstantie en een nieuwe browsercontext. Op je normale installatie blijft de gepubliceerde RC5 de veilige hersteloptie. Deze test-ZIP is geen HACS-release.
+1. Maak een back-up van Home Assistant en exporteer de PalaSidebar-accountinstellingen.
+2. Open HACS (of vanaf Home Assistant 2026.11 de Marketplace) en zoek **PalaSidebar**.
+3. Kies **Downloaden / Opnieuw downloaden**, schakel **testversies / prereleases** in en selecteer de nieuwste `v2.0.0-rcN`.
+4. Installeer de update en herstart Home Assistant volledig.
+5. Controleer het versienummer in de integratie en test op desktop, telefoon en tablet.
+6. Meld eventuele fouten via [GitHub Issues](https://github.com/OnlyRobin/PalaSideBar/issues).
 
-## Praktijkcontrole
+### Praktijktesten
 
-- [ ] Verbergen oorspronkelijke Home Assistant-sidebarheader, met behoud van de eigen PalaSidebar-header.
-- [ ] Mobiel: open/dicht swipen, lang indrukken, Android-backpress en veilige dialoogsluiting.
-- [ ] Desktop: inklappen, uitklappen, scrollen met muiswiel, keyboardfocus en thema's.
-- [ ] Tablet/PalaKiosk: compacte layout, lange lijsten, scrollen en vloeiende live sensoren/F1-countdown.
-- [ ] Foto in header: selecteren, voorbeeld, opslaan, foutief bestand kiezen, verwijderen en herladen.
-- [ ] Home Assistant-accountwisseling: instellingen blijven privé per account.
-- [ ] Offline gaan en terugkomen: synchronisatie, export/import en herstelpunten.
-- [ ] Favorieten, menuvolgorde, badges, contextmenu, snelmenu en Live Control Center.
-- [ ] Upgrade van Beta8 en RC5 via een **aparte testinstallatie**; instellingen blijven behouden.
-- [ ] Geen structurele geheugengroei of vastlopende UI na langdurig openen/sluiten.
+- [ ] Desktop en mobiel: tekstgrootte, menu en dynamische badges.
+- [ ] Android: swipe open en dicht, terugknop, lang indrukken en dialogen.
+- [ ] Tablet/PalaKiosk: scrollen, animaties en vloeiend aftellen bij live F1-badges.
+- [ ] Home Assistant: verborgen originele sidebarheader en zichtbare eigen PalaSidebar-header.
+- [ ] Headerfoto kiezen, bewaren, terugladen en verwijderen.
+- [ ] Instellingen per account, export/import en herstellen.
+- [ ] Geen geheugen- of prestatieproblemen bij langdurig gebruik.
 
-## Wanneer mogen we v2.0.0 publiceren?
+Bij problemen kun je via HACS een **vorige RC-release** opnieuw installeren; de branch `rc` zelf is geen herstelpunt voor oudere code, daarvoor dienen de onveranderlijke release-tags.
 
-Zie [het stabilisatierapport](STABILISATIE-RC5-NAAR-V2-NL.md). Een geslaagde geautomatiseerde run is noodzakelijk, maar **niet voldoende** zonder praktijkbevestiging. Na die bevestiging werken we de versiebestanden tegelijk bij en laten we de definitieve commit opnieuw testen, voordat de GitHub-release `v2.0.0` wordt aangemaakt.
+## Belangrijk bij het icoon in de Updates-pagina
+
+PalaSidebar levert de correcte lokale `custom_components/pala_sidebar/brand/`-afbeeldingen mee. Het ontbreken van een logo in de oude HACS-updateweergave is een bekend probleem van de HACS-frontend, niet van die bestanden. De nieuwere Home Assistant Marketplace vanaf 2026.11 gebruikt het nieuwe brands-systeem. Voor dit visuele probleem is geen codepatch of nieuwe RC nodig.
+
+## Stable
+
+Een stabiele versie wordt pas voorbereid na expliciete goedkeuring van de meest recent geteste RC en een nieuwe, geslaagde controle van alle tests. De open [concept-pull-request](https://github.com/OnlyRobin/PalaSideBar/pull/12) is uitsluitend bedoeld voor dat toekomstige besluit; er wordt niets automatisch samengevoegd.
