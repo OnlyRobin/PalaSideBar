@@ -6,7 +6,7 @@
 
 ## PalaSidebar in beeld
 
-Klik op een voorbeeld om het **groot en scherp** te openen. De afbeeldingen zijn nu schaalbare SVG-bestanden (1800 × 1000 als uitgangsformaat): ook bij inzoomen blijven tekst, iconen en instellingen duidelijk. De voorbeelden blijven compact op deze voorpagina.
+Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te openen. Op deze voorpagina blijven de voorbeelden compact. Voor onbeperkt scherp zoomen is er daarnaast een schaalbare SVG-versie.
 
 <table>
   <tr>
@@ -15,14 +15,14 @@ Klik op een voorbeeld om het **groot en scherp** te openen. De afbeeldingen zijn
     <th>Live sensoren</th>
   </tr>
   <tr>
-    <td align="center"><a href="https://raw.githubusercontent.com/OnlyRobin/PalaSideBar/main/docs/images/palasidebar-standaard-scherp.svg"><img src="docs/images/palasidebar-standaard-scherp.svg" alt="Standaard PalaSidebar met overzichtelijk menu en instellingen" width="285"></a></td>
-    <td align="center"><a href="https://raw.githubusercontent.com/OnlyRobin/PalaSideBar/main/docs/images/palasidebar-aangepast-scherp.svg"><img src="docs/images/palasidebar-aangepast-scherp.svg" alt="Aangepaste PalaSidebar met persoonlijke fotoheader en instellingen" width="285"></a></td>
-    <td align="center"><a href="https://raw.githubusercontent.com/OnlyRobin/PalaSideBar/main/docs/images/palasidebar-sensoren-scherp.svg"><img src="docs/images/palasidebar-sensoren-scherp.svg" alt="PalaSidebar met live sensorbadges en verborgen Home Assistant-header" width="285"></a></td>
+    <td align="center"><a href="https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/images/palasidebar-standaard-groot.png"><img src="docs/images/palasidebar-standaard-groot.png" alt="Standaard PalaSidebar met overzichtelijk menu en instellingen" width="285"></a></td>
+    <td align="center"><a href="https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/images/palasidebar-aangepast-groot.png"><img src="docs/images/palasidebar-aangepast-groot.png" alt="Aangepaste PalaSidebar met persoonlijke fotoheader en instellingen" width="285"></a></td>
+    <td align="center"><a href="https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/images/palasidebar-sensoren-groot.png"><img src="docs/images/palasidebar-sensoren-groot.png" alt="PalaSidebar met live sensorbadges en verborgen Home Assistant-header" width="285"></a></td>
   </tr>
   <tr>
-    <td align="center"><a href="docs/images/palasidebar-standaard-scherp.svg">Volledig formaat bekijken</a></td>
-    <td align="center"><a href="docs/images/palasidebar-aangepast-scherp.svg">Volledig formaat bekijken</a></td>
-    <td align="center"><a href="docs/images/palasidebar-sensoren-scherp.svg">Volledig formaat bekijken</a></td>
+    <td align="center"><a href="docs/images/palasidebar-standaard-groot.png">Grote afbeelding</a> · <a href="docs/images/palasidebar-standaard-scherp.svg">Scherpe SVG</a></td>
+    <td align="center"><a href="docs/images/palasidebar-aangepast-groot.png">Grote afbeelding</a> · <a href="docs/images/palasidebar-aangepast-scherp.svg">Scherpe SVG</a></td>
+    <td align="center"><a href="docs/images/palasidebar-sensoren-groot.png">Grote afbeelding</a> · <a href="docs/images/palasidebar-sensoren-scherp.svg">Scherpe SVG</a></td>
   </tr>
 </table>
 
