@@ -1,18 +1,18 @@
 {
-    "domain": "pala_sidebar",
-    "name": "PalaSidebar",
-    "codeowners": [
-        "@OnlyRobin"
-    ],
-    "config_flow": true,
-    "dependencies": [
-        "frontend",
-        "http"
-    ],
-    "documentation": "https://github.com/OnlyRobin/PalaSideBar#readme",
-    "integration_type": "service",
-    "iot_class": "local_push",
-    "issue_tracker": "https://github.com/OnlyRobin/PalaSideBar/issues",
-    "requirements": [],
-    "version": "2.0.0-rc10"
+  "domain": "pala_sidebar",
+  "name": "PalaSidebar",
+  "codeowners": [
+    "@OnlyRobin"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "frontend",
+    "http"
+  ],
+  "documentation": "https://github.com/OnlyRobin/PalaSideBar#readme",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/OnlyRobin/PalaSideBar/issues",
+  "requirements": [],
+  "version": "2.0.0-rc10"
 }
