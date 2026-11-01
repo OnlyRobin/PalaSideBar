@@ -1,18 +1,20 @@
 /**
- * PalaSidebar 2.0.0-rc6 – custom_components integratie met AutoLoader.
+ * PalaSidebar 2.0.0-rc7 – custom_components integratie met AutoLoader.
  * Copyright (c) 2026 Robin Bouwman. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
  * Leest uitsluitend HA-status; voert geen services uit zonder interactie.
  * Integratie via native ha-sidebar slot indien beschikbaar; anders overlay.
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc6';
+  const VERSION = '2.0.0-rc7';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
   const SERVER_PREFS_KEY = 'palasidebar.preferences.v1';
   const KEY = 'palas.sidebar.v1';
   const CONFIG_URL = '/pala_sidebar/config.json';
+  const PALA_REPO='https://github.com/OnlyRobin/PalaSideBar';
+  const PALA_API='https://api.github.com/repos/OnlyRobin/PalaSideBar/releases?per_page=15';
   // Production console: one startup record and meaningful warnings only.
   // Call PalaSidebarDiagnostics() manually for details. Never log user IDs,
   // private configuration, sensor values, access tokens or settings contents.
@@ -1108,6 +1110,10 @@ md-filled-select {
 .iconbtn{border:0;color:inherit;background:transparent;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:0 0 32px}.iconbtn:hover,.group-toggle:hover,.nav-link:hover{background:var(--p-soft)}.iconbtn:focus-visible,.group-toggle:focus-visible,.nav-link:focus-visible{outline:2px solid var(--p-accent);outline-offset:-2px}
 .ico{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;flex:0 0 23px}.ico ha-icon{--mdc-icon-size:21px;width:21px;height:21px}.ico .fallback{font-size:16px}
 .clock{font-variant-numeric:tabular-nums;color:var(--secondary-text-color,#9ca9b9);font-size:11px;padding:0 10px 8px}
+.pala-rc-notice{margin:4px 9px 10px;border:1px solid var(--p-accent,#38bdf8);border-radius:11px;padding:9px;font-size:12px;background:var(--secondary-background-color,#253341);line-height:1.5}
+.pala-rc-notice[hidden]{display:none!important}
+.pala-rc-notice .btnrow{margin-top:5px;display:flex;gap:6px;flex-wrap:wrap}
+.pala-rc-notice button{cursor:pointer;border:1px solid var(--divider-color,#586273);background:var(--card-background-color,#182631);color:inherit;border-radius:7px;padding:6px 9px;font:inherit}
 .search{margin:3px 9px 10px;display:flex;align-items:center;gap:6px;border-radius:9px;background:var(--secondary-background-color,#2b3645);padding:7px 9px;border:1px solid var(--divider-color,#445);}
 .search input{background:transparent;border:0;outline:none;color:inherit;min-width:0;width:100%;font-size:12px}.search input::placeholder{color:var(--secondary-text-color,#9ba6b7)}
 .list{display:flex;flex-direction:column;gap:3px;padding:0 7px 8px;min-width:0}
@@ -2221,6 +2227,7 @@ md-filled-select {
       this.shadowRoot.append(style);const themeStyle=$('style');themeStyle.textContent=THEME_CSS;this.shadowRoot.append(themeStyle);
       this.config=defaults();this.error='';this.saved=EMPTY_PREFS();this.hass=null;this._pfxDraft=null;
       this._headerImageDraft=undefined;this._headerImageBusy=false;this._headerImageSequence=0;
+      this._rcCheck={latest:null,status:'Nog niet gecontroleerd',checked:0,busy:false};
       // Per HA account: the in-browser copy is a fallback, NOT the source of truth.
       // No extra HA integration needed: frontend/get_user_data is built into Core.
       this._prefsStore=null;this._recoveryPoints=[];this._recoveryStatus="nog geladen";this._lastDialogHaTheme="";
@@ -2322,9 +2329,10 @@ md-filled-select {
       this.searchBox.append(sIcon,this.searchInput);
       this.head=$('div','top');this.headerExtra=$('div','header-extra');this.clock=$('div','clock');this.liveCenter=$('section','pala-live-center');this.liveCenter.hidden=true;this.liveCenter.setAttribute('aria-label','Live Control Center');this.agenda=$('section','pala-agenda');this.agenda.hidden=true;this.agenda.setAttribute('aria-label','Aankomende agenda-afspraken');this.health=$('div','health');this.footer=$('div','footer');
       this.banner=$('div','message');this.banner.hidden=true;
+      this.rcNotice=$('div','pala-rc-notice');this.rcNotice.hidden=true;this.rcNotice.setAttribute('role','status');
       const dlg=$('dialog','dialog');dlg.setAttribute('aria-label','PalaSidebar instellingen');this.dialog=dlg;
       this.weatherLayer=$('div','weather-layer');this.weatherLayer.hidden=true;this.weatherLayer.setAttribute('aria-hidden','true');
-      this.shell.append(this.weatherLayer,this.head,this.headerExtra,this.clock,this.searchBox,this.liveCenter,this.banner,this.list,this.agenda,this.health,this.footer);
+      this.shell.append(this.weatherLayer,this.head,this.headerExtra,this.clock,this.searchBox,this.liveCenter,this.banner,this.rcNotice,this.list,this.agenda,this.health,this.footer);
       this.actionDialog=$('dialog','dialog action-dialog');this.actionDialog.setAttribute('aria-label','PalaSidebar dialoog');
       this.quickDialog=$('dialog','dialog quick-dialog');this.quickDialog.setAttribute('aria-label','Van alles · Dashboardkeuze');
       this.shadowRoot.append(this.scrim,this.launch,this.shell);
@@ -2636,9 +2644,83 @@ md-filled-select {
         'Ontbrekend: de sensor bestaat niet onder die entity_id. Niet beschikbaar: Home Assistant meldt unknown of unavailable. Dubbele route: twee knoppen verwijzen naar dezelfde pagina; soms is dat bewust. Opslagstatus geeft aan of jouw persoonlijke instellingen veilig naar Home Assistant zijn geschreven.'));
 
       const holder=$('div');holder.id='pala-diagnostic-results';page.append(holder);
-      const actions=$('div','btnrow');actions.append(this._button('Opnieuw controleren','diagnostic-refresh','primary'),this._button('Rapport kopiëren','diagnostic-copy'));page.append(actions);
+      const actions=$('div','btnrow');actions.append(this._button('Opnieuw controleren','diagnostic-refresh','primary'),this._button('Rapport kopiëren','diagnostic-copy'),this._button('Zelftest uitvoeren','support-test'));page.append(actions);
+      const results=$('div','diagnostic-list');results.id='pala-selftest-results';results.setAttribute('role','status');page.append(results);
+      page.append($('h3',null,'Bug melden via GitHub'));
+      page.append($('p','field-note','Je ziet eerst een voorbeeld. Alleen na jouw privacybevestiging opent GitHub met een ingevuld issue; je moet daar zelf nog op Submit klikken. Er worden geen tokens, sensorwaarden of configuraties automatisch toegevoegd.'));
+      page.append(this._formField('Titel van het probleem','pala-issue-title',''));
+      for(const [label,id,placeholder] of [['Wat gaat er fout?','pala-issue-description','Omschrijf de fout'],['Stappen om de fout na te doen','pala-issue-steps','1. Open... 2. Klik...']]){
+        const field=$('label','field');field.append($('span',null,label));const area=$('textarea');area.id=id;area.rows=3;area.maxLength=1500;area.placeholder=placeholder;field.append(area);page.append(field);
+      }
+      const check=$('label','check'),consent=$('input');consent.type='checkbox';consent.id='pala-issue-consent';check.append(consent,$('span',null,'Ik heb de tekst gecontroleerd op privégegevens.'));page.append(check);
+      const issueButtons=$('div','btnrow');issueButtons.append(this._button('Voorbeeld bekijken','support-preview'),this._button('Issue openen op GitHub','support-report','primary'));page.append(issueButtons);
+      const preview=$('textarea');preview.id='pala-issue-preview';preview.rows=8;preview.readOnly=true;preview.setAttribute('aria-label','Voorbeeld GitHub-issue');preview.placeholder='Klik op Voorbeeld bekijken';page.append(preview);
+      page.append($('h3',null,'Updatecontrole'));
+      const update=$('p','field-note',this._rcCheck.status);update.id='pala-rc-status';update.setAttribute('role','status');page.append(update);
+      page.append(this._button('Controleer nieuwere RC','support-updates'));
       page.append($('p','field-note','De controle toont alleen entiteiten die PalaSidebar zelf gebruikt, niet alle Home Assistant-entiteiten. Een verdwenen dashboardlink is niet altijd een dubbele menuverwijzing.'));
       this._fillDiagnostic(holder);
+    }
+    _supportTest(){
+      const checks=[['PalaSidebar geladen',this.isConnected&&!!this.shadowRoot?.querySelector('.shell')],
+        ['Integratie gereed',bootInfo.phase==='gereed'],['Home Assistant verbonden',!!this.hass?.user],
+        ['Accountopslag geladen',!!this._prefsStore?.ready],
+        ['Navigatie',!!this.list&&this._navData(true,true).length>0],
+        ['Instellingen',!!this.dialog?.open]];
+      const result=this.dialog.querySelector('#pala-selftest-results');
+      if(result){result.replaceChildren();for(const [name,ok] of checks)result.append($('div','diagnostic-line',(ok?'✓ ':'⚠ ')+name));}
+      return checks;
+    }
+    _supportReportText(){
+      const get=id=>String(this.dialog.querySelector('#pala-issue-'+id)?.value||'').trim().slice(0,1500);
+      const title=get('title').slice(0,100),description=get('description'),steps=get('steps');
+      const checks=this._supportTest();
+      const body=['## Probleem',description,'','## Stappen om te reproduceren',steps,'','## Diagnose zonder privégegevens',
+        '- PalaSidebar: '+VERSION,'- Home Assistant: '+String(this.hass?.config?.version||'onbekend').slice(0,30),
+        '- Weergave: '+(this.integration==='native'?'ingebouwd':'zwevend'),
+        '- Accountopslag: '+(this._prefsStore?.ready?'geladen':'niet geladen'),
+        '- Zelftest: '+checks.map(([name,ok])=>name+' '+(ok?'OK':'controle nodig')).join('; '),
+        '','Controleer deze melding vóór publicatie op GitHub.'].join('\n');
+      return {title,description,steps,body};
+    }
+    _supportPreview(){
+      const report=this._supportReportText();
+      const field=this.dialog.querySelector('#pala-issue-preview');if(field)field.value=report.body;
+      return report;
+    }
+    _supportSubmit(){
+      const report=this._supportPreview();
+      if(!report.title||!report.description||!report.steps){this._editorNotice('Vul eerst titel, beschrijving en stappen in.');return;}
+      if(!this.dialog.querySelector('#pala-issue-consent')?.checked){this._editorNotice('Controleer de tekst en bevestig eerst de privacycontrole.');return;}
+      const link=PALA_REPO+'/issues/new?title='+encodeURIComponent('[Bug] '+report.title)+'&body='+encodeURIComponent(report.body);
+      window.open(link,'_blank','noopener,noreferrer');
+    }
+    _paintRcNotice(){
+      const info=this._rcCheck.latest;
+      let ignored='';try{ignored=localStorage.getItem('palasidebar.rc.dismissed')||'';}catch{}
+      this.rcNotice.replaceChildren();this.rcNotice.hidden=!info||ignored===info;
+      if(this.rcNotice.hidden)return;
+      const buttons=$('div','btnrow');buttons.append(this._button('Bekijk '+info,'rc-open-update'),this._button('Later','rc-dismiss-update'));
+      this.rcNotice.append($('strong',null,'Nieuwe PalaSidebar '+info+' beschikbaar'),buttons);
+    }
+    async _checkRcUpdates(force=false){
+      if(this._rcCheck.busy||(!force&&Date.now()-this._rcCheck.checked<21600000))return;
+      this._rcCheck.busy=true;this._rcCheck.status='Controleren…';
+      const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),6000);
+      try{
+        // Public GitHub release metadata only. Never send HA identifiers/tokens.
+        const response=await fetch(PALA_API,{signal:abort.signal,credentials:'omit',headers:{Accept:'application/vnd.github+json'}});
+        if(!response.ok)throw Error('GitHub tijdelijk onbereikbaar');
+        const raw=await response.text();if(raw.length>120000)throw Error('Antwoord te groot');
+        const data=JSON.parse(raw);if(!Array.isArray(data))throw Error('Ongeldig overzicht');
+        const installed=Number(VERSION.match(/^2\.0\.0-rc(\d+)$/)?.[1]||0);
+        const releases=data.filter(r=>!r.draft&&r.prerelease&&/^v2\.0\.0-rc[1-9]\d*$/.test(r.tag_name||'')&&Number(r.tag_name.match(/rc(\d+)$/)[1])>installed);
+        releases.sort((a,b)=>Number(b.tag_name.match(/rc(\d+)$/)[1])-Number(a.tag_name.match(/rc(\d+)$/)[1]));
+        this._rcCheck.latest=releases[0]?.tag_name||null;
+        this._rcCheck.status=this._rcCheck.latest?'Nieuwe RC beschikbaar: '+this._rcCheck.latest:'Je gebruikt de nieuwste RC.';
+        this._rcCheck.checked=Date.now();this._paintRcNotice();
+      }catch{this._rcCheck.status='Controle niet mogelijk; bekijk updates in HACS.';this._rcCheck.checked=Date.now();}
+      finally{clearTimeout(timer);this._rcCheck.busy=false;const node=this.dialog?.querySelector('#pala-rc-status');if(node)node.textContent=this._rcCheck.status;}
     }
     _fillDiagnostic(holder=this.dialog.querySelector('#pala-diagnostic-results')){
       if(!holder)return;holder.replaceChildren();const d=this._diagnosticData(),store=this._prefsStore;
@@ -4368,7 +4450,13 @@ md-filled-select {
       if(cmd==='pfx-cancel'){this._pfxDraft=null;this._pfxApply();this._editorNotice('Voorbeeld gestopt; opgeslagen instelling blijft actief.');return;}
       if(cmd==='design-save'){this._designSave();return;}
       if(cmd==='design-reset'){this._designReset();return;}
-      if(cmd==='diagnostic-refresh'){this._fillDiagnostic();return;}
+      if(cmd==='support-test'){this._supportTest();return;}
+       if(cmd==='support-preview'){this._supportPreview();return;}
+       if(cmd==='support-report'){this._supportSubmit();return;}
+       if(cmd==='support-updates'){void this._checkRcUpdates(true);return;}
+       if(cmd==='rc-open-update'){const tag=this._rcCheck.latest;if(tag&&/^v2\.0\.0-rc[1-9]\d*$/.test(tag))window.open(PALA_REPO+'/releases/tag/'+tag,'_blank','noopener,noreferrer');return;}
+       if(cmd==='rc-dismiss-update'){if(this._rcCheck.latest){try{localStorage.setItem('palasidebar.rc.dismissed',this._rcCheck.latest);}catch{}this._paintRcNotice();}return;}
+       if(cmd==='diagnostic-refresh'){this._fillDiagnostic();return;}
       if(cmd==='diagnostic-copy'){navigator.clipboard?.writeText(this._diagnosticText()).then(()=>this._editorNotice('Rapport gekopieerd.')).catch(()=>this._editorNotice('Kopiëren niet toegestaan door browser.'));return;}
       if(cmd==='recovery-refresh'){this._loadRecoveryPoints(true);return;}
       if(cmd==='recovery-restore'){this._restoreRecoveryPoint(Number(target.dataset.index));return;}
@@ -7268,6 +7356,7 @@ md-filled-select {
       logStartup(sidebar);
       if(error)logWarning('config','Configbestand niet geladen; veilige standaardconfiguratie actief. '+error);
       checkLegacySource();
+      setTimeout(()=>{if(sidebar?.isConnected)void sidebar._checkRcUpdates();},3000);
       // Delayed resource scan: extra_module_url can load after the sidebar.
       setTimeout(checkLegacySource,1700);
     }catch(error){
