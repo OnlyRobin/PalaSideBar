@@ -2,7 +2,9 @@
 
 **Een aanpasbare sidebar voor Home Assistant.** Met eigen menu's, slimme badges, thema's, snelkoppelingen en bediening voor desktop, telefoon en tablet.
 
-**© 2026 Robin Bouwman** · Uitgebracht onder de [MIT-licentie](LICENSE) voor de oorspronkelijke PalaSidebar-bijdragen.
+**Officieel project van Robin Bouwman** · [Officiële GitHub-repository](https://github.com/OnlyRobin/PalaSideBar) · [Gepubliceerde versies](https://github.com/OnlyRobin/PalaSideBar/releases)
+
+**© 2026 Robin Bouwman** · De oorspronkelijke PalaSidebar-bijdragen worden verspreid onder de [MIT-licentie](LICENSE). [Herkomst, officiële releases en naamsvermelding](OFFICIEEL-PROJECT.md).
 
 ## PalaSidebar in beeld
 
@@ -155,8 +157,10 @@ Lees het [volledige Nederlandstalige veiligheidsverslag](docs/VEILIGHEIDSCONTROL
 
 ## Licentie en auteursrecht
 
-**© 2026 Robin Bouwman.** De eigen PalaSidebar-bijdragen vallen onder de [MIT-licentie](LICENSE). De rechten en naamsvermeldingen van eventueel materiaal van derden blijven behouden. Meer informatie staat in [Herkomst en licenties](PROVENANCE.md) en de [publicatiecontrole](docs/PUBLICATION-AUDIT-2026-10-31.md).
+**© 2026 Robin Bouwman.** De eigen PalaSidebar-bijdragen vallen onder de [MIT-licentie](LICENSE). Dit is de enige actieve projectlicentie voor deze bijdragen; er worden **geen nieuwe beperkingen** op gebruik, forks of doorverkoop ingevoerd. De rechten en naamsvermeldingen van eventueel materiaal van derden blijven behouden. Meer informatie staat in [Herkomst en licenties](PROVENANCE.md) en de [publicatiecontrole](docs/PUBLICATION-AUDIT-2026-10-31.md).
 
 **Wat betekent MIT precies?** Lees de [Nederlandstalige uitleg over gebruik, auteursrecht en verspreiding](docs/LICENTIE-EN-GEBRUIK-NL.md). Hierin staat ook wat MIT toestaat bij forks en doorverkoop, en welke opties er zijn als toekomstige versies strengere voorwaarden zouden moeten krijgen. Deze uitleg voegt géén nieuwe beperkingen toe aan MIT.
+
+Lees ook [hoe je officiële uitgaven herkent](OFFICIEEL-PROJECT.md) en controleer de herkomst als je een fork of download van een andere bron tegenkomt. De MIT-licentie staat ook commerciële distributie toe, mits de licentievoorwaarden worden gevolgd.
 
 De juridische tekst van het bestand `LICENSE` blijft bewust in de oorspronkelijke Engelstalige MIT-formulering. Technische bestandsnamen, programmeeridentificaties en vereiste Home Assistant/HACS-sleutels worden niet vertaald.
