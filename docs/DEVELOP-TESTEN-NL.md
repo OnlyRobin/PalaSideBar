@@ -1,53 +1,39 @@
-# PalaSidebar: develop testen zonder je werkende installatie te verliezen
+# PalaSidebar RC5-stabilisatie veilig testen
 
-## Welke versie staat waar?
+## Wat staat momenteel waar?
 
-- **main / GitHub-release:** `v2.0.0-beta7` is de gepubliceerde prerelease. De `main`-branch bevat ook latere documentatieupdates.
-- **develop:** `2.0.0-rc1` is de *release candidate* voor een toekomstige stabiele `v2.0.0`. **Nog geen stabiele release.**
-- Beide branches hebben het Home Assistant-domein `pala_sidebar` en dezelfde interne URL's en opslag-ID's: installeer ze **niet tegelijk in dezelfde Home Assistant-instantie**.
+- **Gepubliceerde HACS-testrelease:** [v2.0.0-rc5](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc5).
+- **Stabilisatiecode:** [stabilization/rc5-to-v2](https://github.com/OnlyRobin/PalaSideBar/tree/stabilization/rc5-to-v2) en [draft-pull-request #10](https://github.com/OnlyRobin/PalaSideBar/pull/10). Bevat RC5 met aanvullende reparaties en tests.
+- **main:** bevat voorlopig nog Beta7-code met recentere documentatie.
+- **release/v2.0.0:** voorbereidingsbranch voor de nog **niet gepubliceerde** stabiele versie.
+- De huidige stabilisatie-testbouw heeft intern nog hetzelfde versienummer `2.0.0-rc5` als de oorspronkelijke RC5. Daarom is **een schone testomgeving verplicht**, zodat browsercaches niet tot verwarring leiden.
 
-## Aanbevolen: test in aparte Home Assistant-testomgeving
+## Installatie in een afzonderlijke Home Assistant-testomgeving
 
-1. Maak een volledige Home Assistant-back-up; download die ook naar je computer.
-2. Maak apart een kopie van de huidige map `/config/custom_components/pala_sidebar/`, vooral van een eventueel eigen `pala-sidebar-config.json` bestand.
-3. Exporteer je PalaSidebar-instellingen vanuit de sidebar.
-4. Open de GitHub Actions-pagina [Development browser regression and test package](https://github.com/OnlyRobin/PalaSideBar/actions/workflows/develop-regression.yml).
-5. Selecteer de **nieuwste geslaagde** run voor branch `develop` (groene vink); onder **Artifacts** download je `PalaSidebar-develop-test`. GitHub kan hiervoor een ingelogd account verlangen.
-6. Pak de GitHub-artifact uit en pak daarna `PalaSidebar-develop-test.zip` uit. Daarin staat `custom_components/pala_sidebar/`. Kopieer uitsluitend die map naar de testinstantie op `/config/custom_components/pala_sidebar/`.
-7. Herstart de **testinstantie** volledig en controleer dat de integratie is toegevoegd via Instellingen → Apparaten en diensten. Open `/pala_sidebar/assets/pala-sidebar-version.json` op de URL van jouw Home Assistant: daar moet `2.0.0-rc1` staan.
-8. Test het uiterlijk en de werking op desktop, Android Companion en indien van toepassing PalaKiosk.
+1. Download een recente [Home Assistant-back-up](https://www.home-assistant.io/common-tasks/general/#backups), bewaar die buiten je HA-apparaat en exporteer je PalaSidebar-instellingen.
+2. Bewaar eventueel een eigen `pala-sidebar-config.json` apart van de integratiemap.
+3. Open op GitHub de workflow [PalaSidebar RC5 naar stabiel — integrale audit](https://github.com/OnlyRobin/PalaSideBar/actions/workflows/stabilization-audit.yml).
+4. Kies de **nieuwste geslaagde run van `stabilization/rc5-to-v2`**. Onder *Artifacts* download je `PalaSidebar-stabilisatie-test`.
+5. Pak de GitHub Actions-download uit en pak daarna `PalaSidebar-stabilisatie-test.zip` uit.
+6. Kopieer de map `custom_components/pala_sidebar` naar de testinstallatie, zonder parallel een tweede PalaSidebar-integratie aan te maken.
+7. Herstart Home Assistant volledig. Controleer de frontendconsole op opstartfouten en of de eigen header correct wordt getoond.
+8. Voer de onderstaande praktijktesten uit en noteer per test of hij geslaagd is.
 
-Alternatief zonder GitHub Actions-artifact: [download de actuele develop-branch als ZIP](https://github.com/OnlyRobin/PalaSideBar/archive/refs/heads/develop.zip). Daarin staat de integratiemap onder `PalaSideBar-develop/custom_components/pala_sidebar/`. De artifactmethode heeft de voorkeur, omdat het ZIP-bestand **pas wordt aangeboden als de automatische regressietests slagen**.
+**Let op:** Omdat het interne versienummer nog RC5 is, kan een al eerder bezochte HA-installatie een verouderde gecachete JS-versie laden. Gebruik voor dit testpakket bij voorkeur een schone HA-testinstantie en een nieuwe browsercontext. Op je normale installatie blijft de gepubliceerde RC5 de veilige hersteloptie. Deze test-ZIP is geen HACS-release.
 
-## Alleen je bestaande Home Assistant beschikbaar?
+## Praktijkcontrole
 
-Dan is testen mogelijk, maar **niet parallel**. Plan een kort onderhoudsmoment en maak eerst de back-ups hierboven.
+- [ ] Verbergen oorspronkelijke Home Assistant-sidebarheader, met behoud van de eigen PalaSidebar-header.
+- [ ] Mobiel: open/dicht swipen, lang indrukken, Android-backpress en veilige dialoogsluiting.
+- [ ] Desktop: inklappen, uitklappen, scrollen met muiswiel, keyboardfocus en thema's.
+- [ ] Tablet/PalaKiosk: compacte layout, lange lijsten, scrollen en vloeiende live sensoren/F1-countdown.
+- [ ] Foto in header: selecteren, voorbeeld, opslaan, foutief bestand kiezen, verwijderen en herladen.
+- [ ] Home Assistant-accountwisseling: instellingen blijven privé per account.
+- [ ] Offline gaan en terugkomen: synchronisatie, export/import en herstelpunten.
+- [ ] Favorieten, menuvolgorde, badges, contextmenu, snelmenu en Live Control Center.
+- [ ] Upgrade van Beta8 en RC5 via een **aparte testinstallatie**; instellingen blijven behouden.
+- [ ] Geen structurele geheugengroei of vastlopende UI na langdurig openen/sluiten.
 
-1. Stop met wijzigen van de sidebar tijdens het vervangen van de integratiemap.
-2. Bewaar de huidige map als een afzonderlijke back-up buiten `custom_components` (anders kan HA dubbele integraties ontdekken).
-3. Kopieer de ontwikkelmap `pala_sidebar` naar `/config/custom_components/`; behoud een eventueel eigen `pala-sidebar-config.json` door die na de kopie te herstellen.
-4. Herstart Home Assistant volledig. Controleer de versie-URL en test alle functies.
-5. **Terugzetten:** herstel de oorspronkelijke map of gebruik HACS → PalaSidebar → drie puntjes → **Redownload** → kies `v2.0.0-beta7` als beschikbare versie. Herstart HA opnieuw. Herstel zo nodig je aparte configuratieback-up.
+## Wanneer mogen we v2.0.0 publiceren?
 
-Let op: een handmatig geplaatste ontwikkelversie is geen HACS-release. HACS kan die later bij een update overschrijven. HACS toont standaard de recente GitHub-releases en de **default branch** (`main`), niet willekeurig de `develop`-branch; voor de echte `develop`-code gebruik je daarom de ZIP-testmethode.
-
-## Testchecklist voor v2.0.0
-
-- [ ] Nieuwe installatie en update vanaf `v2.0.0-beta7` starten zonder Home Assistant-fouten.
-- [ ] Desktop: menu openen, sluiten, secties in-/uitklappen, dashboardnavigatie en rechtermuisknop-menu.
-- [ ] Android Companion: live swipe-open/-dicht, terugknop bij sidebar, dashboard en geopende dialogs.
-- [ ] Lang indrukken: contextmenu opent zonder per ongeluk te navigeren.
-- [ ] Dynamische badges, iconen en sensorwaarden verversen zonder haperingen.
-- [ ] Theme Studio: thema kiezen, bewerken en opslaan; accountinstellingen blijven na herstart bewaard.
-- [ ] Live Control Center, snelmenu's en dashboardvolgorde werken.
-- [ ] PalaKiosk/tablet: performance, navigatie, landscape en eventuele kiosk-interactie.
-- [ ] AutoLoader toont de juiste versie en veroorzaakt geen dubbele resource.
-- [ ] Terugzetten van de oude versie en herstellen van voorkeuren werkt.
-
-Noteer als iets misgaat de versie, Home Assistant-versie, toestel, stappen om de fout te reproduceren en geanonimiseerde logregels. Zet geen wachtwoorden, tokens of lokale adressen in openbare GitHub Issues.
-
-## Wanneer wordt v2.0.0 echt stabiel?
-
-Pas als **Code checks, Hassfest, HACS-validation en de Chromium-regressietests groen zijn** én de werking op echte apparaten en de HACS-migratie bevestigd is. Dan maken we van deze kandidaat de definitieve `2.0.0` in `main` en publiceren we een normale (niet-prerelease) GitHub-release `v2.0.0`.
-
-De bestaande `v2.0.0-beta7`-tag blijft onveranderd voor terugrollen.
+Zie [het stabilisatierapport](STABILISATIE-RC5-NAAR-V2-NL.md). Een geslaagde geautomatiseerde run is noodzakelijk, maar **niet voldoende** zonder praktijkbevestiging. Na die bevestiging werken we de versiebestanden tegelijk bij en laten we de definitieve commit opnieuw testen, voordat de GitHub-release `v2.0.0` wordt aangemaakt.
