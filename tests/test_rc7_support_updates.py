@@ -20,7 +20,7 @@ with sync_playwright() as pw:
             window.__requests.push({url:String(url),credentials:options.credentials||''});
             if(String(url).startsWith('https://api.github.com/')){
               return {ok:true,text:async()=>JSON.stringify([
-                {tag_name:'v2.0.0-rc.13',prerelease:true,draft:false},
+                {tag_name:'v2.0.0-rc.14',prerelease:true,draft:false},
                 {tag_name:'v2.0.0-rc7',prerelease:true,draft:false},
                 {tag_name:'v2.0.0-rc5',prerelease:true,draft:false}
               ])};
@@ -59,7 +59,7 @@ with sync_playwright() as pw:
           const u=new URL(window.__opens[0]);
           if(!u.searchParams.get('body').includes('Sidebar sluit niet'))throw Error('Geen issue inhoud');
           await s._checkRcUpdates(true);
-          if(s._rcCheck.latest!=='v2.0.0-rc.13'||s.rcNotice.hidden)throw Error('RC8 update niet herkend');
+          if(s._rcCheck.latest!=='v2.0.0-rc.14'||s.rcNotice.hidden)throw Error('RC8 update niet herkend');
           if(!window.__requests.some(x=>x.url.includes('/releases?per_page=15')&&x.credentials==='omit'))throw Error('GitHub verzoek niet geanonimiseerd');
           s._click({target:{closest:()=>({dataset:{do:'rc-dismiss-update'}})}});
           if(!s.rcNotice.hidden)throw Error('Later verbergen mislukt');
@@ -68,7 +68,7 @@ with sync_playwright() as pw:
           if(window.__requests.length!==before)throw Error('Te vaak updatecontrole');
           return {tests:test.length,issue:window.__opens[0],latest:s._rcCheck.latest,version:window.PalaSidebarDiagnostics().version};
         }""")
-        assert result["tests"]>=5 and result["version"]=="2.0.0-rc.12",result
+        assert result["tests"]>=5 and result["version"]=="2.0.0-rc.13",result
         assert not errors,{"width":width,"errors":errors}
         print("PASS RC7 zelftest, issue privacy, toestemming, release check en cache",width)
         page.close()
