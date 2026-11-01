@@ -34,7 +34,8 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 
 | Versie | Betekenis |
 | --- | --- |
-| **v2.0.0-rc6 (HACS-testrelease)** | Nieuwste RC: [issue #6](https://github.com/OnlyRobin/PalaSideBar/issues/6) tekstgrootte reparatie, headerfoto-stabiliteit, extra tests; [wijzigingen](docs/RELEASE-v2.0.0-rc6.md) |
+| **v2.0.0-rc7 (HACS-testrelease)** | Nieuwste RC: bugs melden vanuit Diagnose, zelftests, updatesignalen en openbare broncodecontrole; [wijzigingen](docs/RELEASE-v2.0.0-rc7.md) |
+| [v2.0.0-rc6](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc6) | Vorige RC: tekstgrootte, headerfoto en stabilisatietests |
 | [v2.0.0-rc5](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc5) | Vorige RC, blijft beschikbaar voor terugzetten |
 | [v2.0.0-rc4](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc4) | Oudere RC, blijft beschikbaar |
 | [v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) | Laatste beta |
@@ -63,7 +64,7 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 1. Zorg dat **HACS** is geïnstalleerd in Home Assistant.
 2. Open **HACS → drie puntjes → Aangepaste repositories** (of *Custom repositories*).
 3. Voeg `https://github.com/OnlyRobin/PalaSideBar` toe als type **Integratie** (*Integration*).
-4. Open **PalaSidebar**, schakel de weergave van testversies (*pre-releases / beta versions*) in en kies **v2.0.0-rc6** (nieuwste RC) of bewust een eerdere testversie.
+4. Open **PalaSidebar**, schakel de weergave van testversies (*pre-releases / beta versions*) in en kies **v2.0.0-rc7** (nieuwste RC) of bewust een eerdere testversie.
 5. Klik op **Downloaden** en herstart Home Assistant **volledig**.
 6. Open **Instellingen → Apparaten en diensten → Integratie toevoegen** en voeg **PalaSidebar** toe, als deze nog niet is toegevoegd.
 7. Verwijder eventuele oude, handmatig ingestelde PalaSidebar-JavaScript-resources om dubbel laden te voorkomen.
@@ -91,6 +92,15 @@ Bij RC5 moet hier `2.0.0-rc5` staan nadat je deze release hebt gekozen; bij RC4 
 ### Teruggaan naar een eerdere versie
 
 Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer een nog beschikbare release (bijvoorbeeld beta8 of RC4). Herstart Home Assistant en herstel zo nodig je back-up. Een andere versie kiezen is geen vervanging voor een back-up van je instellingen.
+
+## Wat is nieuw in RC7?
+
+- **Instellingen → Diagnose:** lokaal een zelftest uitvoeren, vervolgens een bug via een gecontroleerd GitHub-issueformulier melden. De melding wordt pas op GitHub ingediend als jij op Submit klikt.
+- **RC-updatebericht:** PalaSidebar kan via openbare GitHub-release-informatie een nieuwere RC melden. Je installeert zelf via HACS.
+- **Publieke codebewaking:** een wekelijkse GitHub Action zoekt naar twee herkenbare broncodemarkeringen in openbare repositories en maakt een controle-issue als die ergens samen voorkomen. Dit is best-effort en kan hernoemde of aangepaste kopieën missen. MIT blijft van kracht.
+- Vorige RC's, inclusief RC6, blijven bestaan om terug te zetten.
+
+Zie de [Nederlandstalige RC7-release notes](docs/RELEASE-v2.0.0-rc7.md).
 
 ## Wat is nieuw in RC6?
 
