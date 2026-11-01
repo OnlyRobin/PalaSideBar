@@ -72,7 +72,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.info(
             "PalaSidebar %s: legacy configuration copied to %s; user settings "
             "and recovery points remain untouched",
-            "2.0.0-rc7",
+            "2.0.0-rc8",
             config_file,
         )
     _LOGGER.info(
