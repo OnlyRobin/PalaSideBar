@@ -4672,8 +4672,13 @@ md-filled-select {
       this.head.replaceChildren();this.head.dataset.align=hdr.align;
       const image=safeHeaderImage(hdr.image);
       this.head.dataset.headerPicture=String(!!image);
-      this.head.style.backgroundImage=image?('linear-gradient(180deg,rgba(5,12,18,.26),rgba(5,12,18,.72)),url("'+image+'")'):'';
-      this.head.style.backgroundPosition=hdr.image_position||'center';
+      if(this._renderedHeaderImage!==image){
+        this.head.style.backgroundImage=image?('linear-gradient(180deg,rgba(5,12,18,.26),rgba(5,12,18,.72)),url("'+image+'")'):'';
+        this._renderedHeaderImage=image;
+      }
+      if(this._renderedHeaderPosition!==hdr.image_position){
+        this.head.style.backgroundPosition=hdr.image_position||'center';this._renderedHeaderPosition=hdr.image_position;
+      }
       this.style.setProperty('--p-header-title-size',hdr.title_size+'px');
       this.style.setProperty('--p-header-subtitle-size',hdr.subtitle_size+'px');
       for(const [name,value] of [['title',hdr.title_color],['subtitle',hdr.subtitle_color],['extra',hdr.extra_color]]){
@@ -6698,7 +6703,7 @@ md-filled-select {
       const imageButtons=$('div','btnrow');imageButtons.append(this._button('Foto verwijderen','header-image-remove'));photoEditor.append(imageButtons);
       const photoInfo=$('p','field-note','');photoInfo.dataset.imageInfo='1';photoInfo.setAttribute('role','status');photoEditor.append(photoInfo);
       photoEditor.append($('p','field-note','JPG, PNG of WebP tot 4 MB. Wordt lokaal verkleind en privé met je Home Assistant-accountinstellingen gesynchroniseerd. Geen aparte www-map nodig.'));
-      headPage.append(photoEditor);this._previewHeaderImage();
+      headPage.append(photoEditor);
       const tokenPane=$('div','layout-dynamic-panel');
       tokenPane.append($('h4',null,'Sensor of attribuut aan de header toevoegen'));
       tokenPane.append($('p','field-note','Zoek een Home Assistant-entiteit op naam, kies eventueel een attribuut en voeg de waarde toe aan de titel, subtitel of extra sensorregel. De actuele waarde wordt automatisch ververst.'));
@@ -6749,7 +6754,7 @@ md-filled-select {
       backup.append($('p',null,'De oorspronkelijke Home Assistant-rechten blijven altijd van toepassing. Dit is geen beheerinterface voor HA-dashboards zelf.'));
       backup.append($('p',null,'HA '+(this.hass?.config?.version||'?')+' · PalaSidebar '+VERSION+' · '+(this.integration==='native'?'Ingebouwd':'Zwevend')));
       const footer=$('div','btnrow');footer.append(this._button('Sluiten','settings-close'));pane.append(footer);
-      this.dialog.append(pane);this._generalAccentPreview();
+      this.dialog.append(pane);this._generalAccentPreview();this._previewHeaderImage();
       for(const input of this.dialog.querySelectorAll('.optional-color-field [data-badge-color-hex]'))
         this._optionalColorPreview(input);
       this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);
