@@ -37,7 +37,7 @@ with sync_playwright() as pw:
           get('sectionPadding').value='12';
           get('sectionGap').value='9';
           s._pfxPreview();
-          s._rcCheck.latest='v2.0.0-rc.15';
+          s._rcCheck.latest='v2.0.1-rc.2';
           s._rcCheck.channel='rc';
           s._paintRcNotice();
           if(s.rcNotice.hidden||!s.rcNotice.textContent.includes('rc.15'))throw Error('Updatebericht ontbreekt');
