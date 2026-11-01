@@ -2673,9 +2673,37 @@ md-filled-select {
         ['color','nativeBadgeColor','Eigen badge-achtergrond'],['color','nativeBadgeText','Eigen badge-tekstkleur'],
         ['range','nativeBadgeBorder','Badge-randdikte',[0,4,1,'px']],['range','nativeBadgeRadius','Badge-afronding',[0,24,1,'px']]
       ]);
-      this._pfxSection(page,'Sidebar randen','Accentueer menu-items zonder de gewone navigatie of je badges te verstoren.',[
-        ['range','navBorderWidth','Menurand-dikte',[0,4,1,'px']],['color','navBorderColor','Menurandkleur']
+      this._pfxSection(page,'Sectie Design Studio · complete blokken','Geef START, BEHEER en andere secties een complete kaart of subtiele rand. Standaard blijft alles ongewijzigd.',[
+        ['select','sectionMode','Sectiestijl',[['none','Uit · huidige weergave'],['outline','Alleen een rand'],['soft','Zachte achtergrond'],['glass','Glas · transparant'],['accent','Accentkleur · subtiel']]],
+        ['select','sectionBorderStyle','Randstijl',[['solid','Doorgetrokken'],['dashed','Gestreept'],['dotted','Gestippeld']]],
+        ['color','sectionBorderColor','Sectierandkleur'],['range','sectionBorderWidth','Sectieranddikte',[0,5,1,'px']],
+        ['range','sectionRadius','Afronding sectie',[0,28,1,'px']],['range','sectionPadding','Binnenruimte sectie',[0,20,1,'px']],
+        ['range','sectionGap','Ruimte tussen secties',[0,28,1,'px']],['color','sectionBgColor','Achtergrondkleur sectie'],
+        ['range','sectionBgOpacity','Achtergronddekking',[0,85,5,'%']],['range','sectionGlow','Schaduw / gloed',[0,24,2,'px']]
       ]);
+      this._pfxSection(page,'Sectiekoppen · START en BEHEER','Pas de titel en de headerstrook aan. Het uitklappen, de pijltjes en animaties blijven werken.',[
+        ['select','sectionTitleColorMode','Titelkleur',[['ha','Volg huidig thema'],['custom','Eigen titeltekst']]],
+        ['color','sectionTitleColor','Eigen titelkleur'],['range','sectionTitleSize','Grootte sectietitel',[9,20,1,'px']],
+        ['color','sectionHeaderColor','Header-achtergrond'],['range','sectionHeaderOpacity','Dekking header',[0,85,5,'%']]
+      ]);
+      this._pfxSection(page,'Items binnen secties','Stel de rijranden, afgeronde hoeken, binnenruimte en actieve items in. Werkt samen met de bestaande Badge Design Studio.',[
+        ['range','navBorderWidth','Itemrand-dikte',[0,4,1,'px']],['color','navBorderColor','Itemrandkleur'],
+        ['range','itemRadius','Afronding items',[0,24,1,'px']],['range','itemPadding','Hoogte / padding items',[3,16,1,'px']],
+        ['range','itemGap','Afstand tussen items',[0,18,1,'px']],['color','itemBgColor','Achtergrondkleur items'],
+        ['range','itemBgOpacity','Dekking itemachtergrond',[0,85,5,'%']],['color','itemActiveBorderColor','Actieve itemrand']
+      ]);
+      const sectionPreview=$('div','pfx-preview');sectionPreview.id='pala-pfx-section-preview';
+      sectionPreview.append($('strong',null,'Live voorbeeld · sectie en items'));
+      const mini=$('div');mini.id='pala-pfx-section-card';
+      mini.style.cssText='padding:8px;border-radius:14px;min-width:0;display:flex;flex-direction:column;gap:5px';
+      const header=$('div',null,'START  ⌄');header.id='pala-pfx-section-heading';
+      header.style.cssText='font-weight:750;letter-spacing:.06em;padding:7px 9px';
+      mini.append(header);
+      for(const title of ['CV Verwarmen   21°C','Netafname   4.2 kWh']){
+        const item=$('div',null,title);item.className='pala-pfx-section-demo-row';
+        item.style.cssText='padding:8px 9px;border-radius:10px;font-size:12px;font-weight:650';mini.append(item);
+      }
+      sectionPreview.append(mini);page.append(sectionPreview);
       const energy=$('section','pfx-section');energy.append($('h3',null,'Energiepalet'),$('p','pfx-description','Stel de acht Home Assistant Energy Dashboard-kleuren in. Alle zeven kleurtrappen lopen automatisch mee.'));
       const grid=$('div','pfx-grid');grid.append(this._pfxField('select','energyMode','Energiekleuren',[['ha','Volg Home Assistant'],['custom','Eigen kleurenpalet']]));
       for(const key of Object.keys(PFX_ENERGY))grid.append(this._pfxField('color',key,PFX_ENERGY[key][2]));energy.append(grid);page.append(energy);
@@ -2714,6 +2742,26 @@ md-filled-select {
       if(!this.dialog?.querySelector('#pala-pfx-preview'))return;
       this._pfxDraft=this._pfxReadForm();
       const v=this._pfxDraft,preview=this.dialog.querySelector('#pala-pfx-preview');
+      const sectionDemo=this.dialog.querySelector('#pala-pfx-section-card');
+      if(sectionDemo){
+        const active=v.enabled&&v.sectionMode!=='none';
+        const c=v.sectionMode==='accent'?(v.accentMode==='custom'?v.accent:'#38bdf8'):v.sectionBgColor;
+        const bg=v.sectionMode==='outline'?'transparent':'color-mix(in srgb,'+c+' '+v.sectionBgOpacity+'%,transparent)';
+        sectionDemo.style.background=active?bg:'transparent';
+        sectionDemo.style.border=active?v.sectionBorderWidth+'px '+v.sectionBorderStyle+' '+v.sectionBorderColor:'0px solid transparent';
+        sectionDemo.style.borderRadius=v.sectionRadius+'px';sectionDemo.style.padding=(active?v.sectionPadding:0)+'px';
+        sectionDemo.style.boxShadow=active&&v.sectionGlow?'0 0 '+v.sectionGlow+'px '+v.sectionBorderColor:'none';
+        const header=sectionDemo.querySelector('#pala-pfx-section-heading');
+        if(header){header.style.color=v.sectionTitleColorMode==='custom'?v.sectionTitleColor:'inherit';
+          header.style.fontSize=v.sectionTitleSize+'px';
+          header.style.background='color-mix(in srgb,'+v.sectionHeaderColor+' '+v.sectionHeaderOpacity+'%,transparent)';}
+        for(const item of sectionDemo.querySelectorAll('.pala-pfx-section-demo-row')){
+          item.style.border=v.navBorderWidth+'px solid '+v.navBorderColor;
+          item.style.borderRadius=v.itemRadius+'px';item.style.padding=v.itemPadding+'px 9px';
+          item.style.background='color-mix(in srgb,'+v.itemBgColor+' '+v.itemBgOpacity+'%,transparent)';
+        }
+        sectionDemo.style.gap=v.itemGap+'px';
+      }
       const demo=this.dialog.querySelector('#pala-pfx-badge-demo-chip');
       if(demo){
         const c=v.badgeMode==='custom'?v.badgeColor:(v.accentMode==='custom'?v.accent:'#38bdf8');
