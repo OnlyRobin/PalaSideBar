@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc8';
+  const VERSION = '2.0.0-rc9';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -2704,9 +2704,15 @@ md-filled-select {
       const buttons=$('div','btnrow');buttons.append(this._button('Bekijk '+label,'rc-open-update'),this._button('Later','rc-dismiss-update'));
       this.rcNotice.append($('strong',null,'Nieuwe PalaSidebar '+label+' beschikbaar: '+info),buttons);
     }
+    _paintUpdateStatus(){
+      const node=this.dialog?.querySelector('#pala-rc-status');
+      if(node)node.textContent=this._rcCheck.status;
+      const button=this.dialog?.querySelector('[data-do="support-updates"]');
+      if(button){button.disabled=this._rcCheck.busy;button.textContent=this._rcCheck.busy?'Controleren…':'Controleer op updates';}
+    }
     async _checkRcUpdates(force=false){
       if(this._rcCheck.busy||(!force&&Date.now()-this._rcCheck.checked<21600000))return;
-      this._rcCheck.busy=true;this._rcCheck.status='Controleren…';
+      this._rcCheck.busy=true;this._rcCheck.status='Controleren op GitHub…';this._paintUpdateStatus();
       const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),6000);
       try{
         const response=await fetch(PALA_API,{signal:abort.signal,credentials:'omit',headers:{Accept:'application/vnd.github+json'}});
@@ -2728,7 +2734,7 @@ md-filled-select {
         this._rcCheck.status=match?'Nieuwe '+(match.version.channel==='stable'?'stabiele versie':match.version.channel==='beta'?'bèta':'RC')+' beschikbaar: '+match.release.tag_name:'Geen nieuwere versie beschikbaar binnen jouw updatekanaal.';
         this._rcCheck.checked=Date.now();this._paintRcNotice();
       }catch{this._rcCheck.status='Controle niet mogelijk; bekijk updates in HACS.';this._rcCheck.checked=Date.now();}
-      finally{clearTimeout(timer);this._rcCheck.busy=false;const node=this.dialog?.querySelector('#pala-rc-status');if(node)node.textContent=this._rcCheck.status;}
+      finally{clearTimeout(timer);this._rcCheck.busy=false;this._paintUpdateStatus();}
     }
     _fillDiagnostic(holder=this.dialog.querySelector('#pala-diagnostic-results')){
       if(!holder)return;holder.replaceChildren();const d=this._diagnosticData(),store=this._prefsStore;
