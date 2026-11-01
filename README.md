@@ -159,4 +159,6 @@ Lees het [volledige Nederlandstalige veiligheidsverslag](docs/VEILIGHEIDSCONTROL
 
 **Wat betekent MIT precies?** Lees de [Nederlandstalige uitleg over gebruik, auteursrecht en verspreiding](docs/LICENTIE-EN-GEBRUIK-NL.md). Hierin staat ook wat MIT toestaat bij forks en doorverkoop, en welke opties er zijn als toekomstige versies strengere voorwaarden zouden moeten krijgen. Deze uitleg voegt géén nieuwe beperkingen toe aan MIT.
 
+**Voorstel voor toekomstige versies (niet van kracht):** er staat een [concept van de PalaSidebar Community License](docs/COMMUNITY-LICENSE-CONCEPT.md) klaar met gratis privé- en intern zakelijk gebruik, maar zonder ongeautoriseerde doorverkoop of herpublicatie. De [overstapchecklist](docs/COMMUNITY-LICENSE-OVERSTAP.md) beschrijft de noodzakelijke rechtencontrole, juridische toets en HACS-test. **De bestaande MIT-licentie en eerder uitgegeven MIT-rechten blijven ongewijzigd.** Dit voorstel maakt PalaSidebar nog niet minder open source.
+
 De juridische tekst van het bestand `LICENSE` blijft bewust in de oorspronkelijke Engelstalige MIT-formulering. Technische bestandsnamen, programmeeridentificaties en vereiste Home Assistant/HACS-sleutels worden niet vertaald.
