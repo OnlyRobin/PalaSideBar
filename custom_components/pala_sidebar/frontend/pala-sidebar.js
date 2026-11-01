@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc7';
+  const VERSION = '2.0.0-rc8';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -2227,7 +2227,7 @@ md-filled-select {
       this.shadowRoot.append(style);const themeStyle=$('style');themeStyle.textContent=THEME_CSS;this.shadowRoot.append(themeStyle);
       this.config=defaults();this.error='';this.saved=EMPTY_PREFS();this.hass=null;this._pfxDraft=null;
       this._headerImageDraft=undefined;this._headerImageBusy=false;this._headerImageSequence=0;
-      this._rcCheck={latest:null,status:'Nog niet gecontroleerd',checked:0,busy:false};
+      this._rcCheck={latest:null,channel:null,status:'Nog niet gecontroleerd',checked:0,busy:false};
       // Per HA account: the in-browser copy is a fallback, NOT the source of truth.
       // No extra HA integration needed: frontend/get_user_data is built into Core.
       this._prefsStore=null;this._recoveryPoints=[];this._recoveryStatus="nog geladen";this._lastDialogHaTheme="";
@@ -2657,7 +2657,7 @@ md-filled-select {
       const preview=$('textarea');preview.id='pala-issue-preview';preview.rows=8;preview.readOnly=true;preview.setAttribute('aria-label','Voorbeeld GitHub-issue');preview.placeholder='Klik op Voorbeeld bekijken';page.append(preview);
       page.append($('h3',null,'Updatecontrole'));
       const update=$('p','field-note',this._rcCheck.status);update.id='pala-rc-status';update.setAttribute('role','status');page.append(update);
-      page.append(this._button('Controleer nieuwere RC','support-updates'));
+      page.append($('p','field-note','Geïnstalleerd: '+VERSION+' · Updatekanaal: '+(VERSION.includes('-beta')?'bèta':VERSION.includes('-rc')?'RC':'stabiel')+'. Installeren via HACS.'));page.append(this._button('Controleer op updates','support-updates'));
       page.append($('p','field-note','De controle toont alleen entiteiten die PalaSidebar zelf gebruikt, niet alle Home Assistant-entiteiten. Een verdwenen dashboardlink is niet altijd een dubbele menuverwijzing.'));
       this._fillDiagnostic(holder);
     }
@@ -2697,27 +2697,35 @@ md-filled-select {
     }
     _paintRcNotice(){
       const info=this._rcCheck.latest;
-      let ignored='';try{ignored=localStorage.getItem('palasidebar.rc.dismissed')||'';}catch{}
+      let ignored='';try{ignored=localStorage.getItem('palasidebar.updates.dismissed')||'';}catch{}
       this.rcNotice.replaceChildren();this.rcNotice.hidden=!info||ignored===info||this._dismissedRc===info;
       if(this.rcNotice.hidden)return;
-      const buttons=$('div','btnrow');buttons.append(this._button('Bekijk '+info,'rc-open-update'),this._button('Later','rc-dismiss-update'));
-      this.rcNotice.append($('strong',null,'Nieuwe PalaSidebar '+info+' beschikbaar'),buttons);
+      const label=this._rcCheck.channel==='stable'?'stabiele versie':this._rcCheck.channel==='beta'?'bèta':'RC';
+      const buttons=$('div','btnrow');buttons.append(this._button('Bekijk '+label,'rc-open-update'),this._button('Later','rc-dismiss-update'));
+      this.rcNotice.append($('strong',null,'Nieuwe PalaSidebar '+label+' beschikbaar: '+info),buttons);
     }
     async _checkRcUpdates(force=false){
       if(this._rcCheck.busy||(!force&&Date.now()-this._rcCheck.checked<21600000))return;
       this._rcCheck.busy=true;this._rcCheck.status='Controleren…';
       const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),6000);
       try{
-        // Public GitHub release metadata only. Never send HA identifiers/tokens.
         const response=await fetch(PALA_API,{signal:abort.signal,credentials:'omit',headers:{Accept:'application/vnd.github+json'}});
         if(!response.ok)throw Error('GitHub tijdelijk onbereikbaar');
         const raw=await response.text();if(raw.length>120000)throw Error('Antwoord te groot');
         const data=JSON.parse(raw);if(!Array.isArray(data))throw Error('Ongeldig overzicht');
-        const installed=Number(VERSION.match(/^2\.0\.0-rc(\d+)$/)?.[1]||0);
-        const releases=data.filter(r=>!r.draft&&r.prerelease&&/^v2\.0\.0-rc[1-9]\d*$/.test(r.tag_name||'')&&Number(r.tag_name.match(/rc(\d+)$/)[1])>installed);
-        releases.sort((a,b)=>Number(b.tag_name.match(/rc(\d+)$/)[1])-Number(a.tag_name.match(/rc(\d+)$/)[1]));
-        this._rcCheck.latest=releases[0]?.tag_name||null;
-        this._rcCheck.status=this._rcCheck.latest?'Nieuwe RC beschikbaar: '+this._rcCheck.latest:'Je gebruikt de nieuwste RC.';
+        const parse=v=>{const m=String(v||'').match(/^v?(\d+)\.(\d+)\.(\d+)(?:-(beta|rc)([1-9]\d*))?$/i);return m?{major:+m[1],minor:+m[2],patch:+m[3],channel:(m[4]||'stable').toLowerCase(),iteration:+(m[5]||0)}:null;};
+        const compareCore=(a,b)=>a.major-b.major||a.minor-b.minor||a.patch-b.patch;
+        const installed=parse(VERSION);if(!installed)throw Error('Onbekend versieformaat');
+        const found=data.map(r=>({release:r,version:parse(r.tag_name)})).filter(x=>x.version&&!x.release.draft&&(x.version.channel==='stable'?!x.release.prerelease:!!x.release.prerelease));
+        const candidates=found.filter(x=>{
+          const c=compareCore(x.version,installed);
+          if(x.version.channel==='stable')return c>0||(c===0&&installed.channel!=='stable');
+          return x.version.channel===installed.channel&&(c>0||(c===0&&x.version.iteration>installed.iteration));
+        });
+        candidates.sort((a,b)=>compareCore(b.version,a.version)||(a.version.channel!==b.version.channel?(a.version.channel==='stable'?-1:1):b.version.iteration-a.version.iteration));
+        const match=candidates[0];
+        this._rcCheck.latest=match?.release.tag_name||null;this._rcCheck.channel=match?.version.channel||null;
+        this._rcCheck.status=match?'Nieuwe '+(match.version.channel==='stable'?'stabiele versie':match.version.channel==='beta'?'bèta':'RC')+' beschikbaar: '+match.release.tag_name:'Geen nieuwere versie beschikbaar binnen jouw updatekanaal.';
         this._rcCheck.checked=Date.now();this._paintRcNotice();
       }catch{this._rcCheck.status='Controle niet mogelijk; bekijk updates in HACS.';this._rcCheck.checked=Date.now();}
       finally{clearTimeout(timer);this._rcCheck.busy=false;const node=this.dialog?.querySelector('#pala-rc-status');if(node)node.textContent=this._rcCheck.status;}
@@ -4454,8 +4462,8 @@ md-filled-select {
        if(cmd==='support-preview'){this._supportPreview();return;}
        if(cmd==='support-report'){this._supportSubmit();return;}
        if(cmd==='support-updates'){void this._checkRcUpdates(true);return;}
-       if(cmd==='rc-open-update'){const tag=this._rcCheck.latest;if(tag&&/^v2\.0\.0-rc[1-9]\d*$/.test(tag))window.open(PALA_REPO+'/releases/tag/'+tag,'_blank','noopener,noreferrer');return;}
-       if(cmd==='rc-dismiss-update'){if(this._rcCheck.latest){this._dismissedRc=this._rcCheck.latest;try{localStorage.setItem('palasidebar.rc.dismissed',this._rcCheck.latest);}catch{}this._paintRcNotice();}return;}
+       if(cmd==='rc-open-update'){const tag=this._rcCheck.latest;if(tag&&/^v?\d+\.\d+\.\d+(?:-(?:beta|rc)[1-9]\d*)?$/.test(tag))window.open(PALA_REPO+'/releases/tag/'+tag,'_blank','noopener,noreferrer');return;}
+       if(cmd==='rc-dismiss-update'){if(this._rcCheck.latest){this._dismissedRc=this._rcCheck.latest;try{localStorage.setItem('palasidebar.updates.dismissed',this._rcCheck.latest);}catch{}this._paintRcNotice();}return;}
        if(cmd==='diagnostic-refresh'){this._fillDiagnostic();return;}
       if(cmd==='diagnostic-copy'){navigator.clipboard?.writeText(this._diagnosticText()).then(()=>this._editorNotice('Rapport gekopieerd.')).catch(()=>this._editorNotice('Kopiëren niet toegestaan door browser.'));return;}
       if(cmd==='recovery-refresh'){this._loadRecoveryPoints(true);return;}
