@@ -5316,7 +5316,7 @@ md-filled-select {
       const native=this.integration==='native'?this._drawer():null;if(!native?.shadowRoot)return;
       if(!this._haFooterStyles)this._haFooterStyles=new Map();
       const fc=this.saved.footer_config;
-      if(fc.ha_settings&&fc.ha_notifications&&fc.ha_profile&&!this._haFooterStyles.size)return;
+      // Always scan native footer: text-size scaling also applies when all items remain visible.
       const visibility={'/config':fc.ha_settings,'/notifications':fc.ha_notifications,'/profile':fc.ha_profile};
       const found=[];const visit=(root,depth=0)=>{
         if(!root?.querySelectorAll||depth>3)return;
