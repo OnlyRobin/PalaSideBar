@@ -53,6 +53,8 @@ with sync_playwright() as pw:
                 border:f.borderTopWidth,padding:f.paddingTop,margin:f.marginBottom,
                 background:f.backgroundColor};
             }""")
+        # Het sectieframe animeert zijn padding; meet pas na de overgang.
+        page.wait_for_timeout(550)
         opened=styles()
         assert opened["border"]=="3px" and opened["padding"]=="12px",opened
         assert opened["visibility"]=="visible" and not opened["noticeHidden"],opened
