@@ -85,7 +85,7 @@ with sync_playwright() as pw:
         assert data['invalidBlocked'] and data['invalidCleared'],data
         assert data['headerSaved']=={'title':'#112233','logo':'#77aa22','clock':'','subtitle':''},data
         assert data['restored']=='#112233' and data['autoRestored'],data
-        assert data['badgeUnchanged'] and data['version']=='2.0.0-rc6',data
+        assert data['badgeUnchanged'] and data['version']=='2.0.0-rc7',data
         assert not errors,errors
         print('PASS RC4 kleurenkiezer Algemeen/Header, bewaren, wissen, validatie, badges',width,'px')
         page.close()
