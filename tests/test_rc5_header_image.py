@@ -61,7 +61,7 @@ with sync_playwright() as pw:
         assert result['preview'] and result['before']=='' and 0<result['afterLength']<=110000,result
         assert result['actual'] and result['position'] in ('bottom','center bottom') and result['restored'],result
         assert result['removedPreview'] and result['remainsBeforeSave'] and result['removed'],result
-        assert result['title']=='Mijn huis' and result['version']=='2.0.0-rc5',result
+        assert result['title']=='Mijn huis' and result['version']=='2.0.0-rc6',result
         assert not errors,errors
         print('PASS RC5 foto upload/uitsnede/opslaan/terugzetten/geen regressie',width,'px')
         page.close()
