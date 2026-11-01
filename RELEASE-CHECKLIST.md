@@ -1,44 +1,39 @@
-# Controlelijst voor GitHub- en HACS-releases
+# PalaSidebar — releasecontrole voor v2.0.0
 
-**Repository:** https://github.com/OnlyRobin/PalaSideBar  
-**Actuele beta:** [v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8)  
-**Stabiele v2.0.0:** nog niet uitgebracht; voorbereiding via [pull request #3](https://github.com/OnlyRobin/PalaSideBar/pull/3)
+**Laatste gepubliceerde release candidate:** [RC5](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc5)  
+**Werkbranch:** [stabilization/rc5-to-v2](https://github.com/OnlyRobin/PalaSideBar/tree/stabilization/rc5-to-v2)  
+**Vrijgave:** **nog niet goedgekeurd**. [Concept-PR #10](https://github.com/OnlyRobin/PalaSideBar/pull/10) mag niet automatisch worden samengevoegd.
 
-## Afgeronde stappen
+## Technische controles
 
-- [x] Openbare GitHub-repository ingericht met `custom_components/pala_sidebar`, `hacs.json`, tests en documentatie.
-- [x] MIT-auteursvermelding ingesteld op **© 2026 Robin Bouwman**.
-- [x] HACS-validatie, Hassfest en codecontrole ingericht en succesvol uitgevoerd.
-- [x] Aanvullende browser- en touchregressietests ingericht.
-- [x] De oorspronkelijke Custom Sidebar v17.3.0 vergeleken met de PalaSidebar-code; de bevindingen staan in [PROVENANCE.md](PROVENANCE.md).
-- [x] [Beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7), [RC1](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc1) en [RC2](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc2) gepubliceerd als testversies.
-- [x] Drie fouten in beta7 gereproduceerd: leeg tabblad PalaSidebar UI, ontbrekende standaardondertitel en onvolledige standaardsectie BEHEER.
-- [x] De reparaties via RC2 getest en als [**beta8**](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) uitgebracht.
-- [x] Beta8: Code checks, Hassfest, HACS-validatie en volledige Chromium-regressietests geslaagd. Zie [GitHub Actions](https://github.com/OnlyRobin/PalaSideBar/actions/runs/41214412301).
-- [x] `hide_default_branch: true` ingesteld, zodat HACS geen losse `main`-commit als nieuwe release aanbiedt.
-- [x] Nederlandstalige README en openbare gebruiksdocumentatie voorbereid.
+- [x] De gepubliceerde RC5-code als uitgangspunt gebruikt, niet de oudere broncode op `main`, `develop` of `release/v2.0.0`.
+- [x] De headerfoto-race gerepareerd: ongeldige selectie mag opslaan niet blokkeren.
+- [x] Maximaal totaal aantal afbeeldingspixels begrensd om geheugendruk te verkleinen.
+- [x] Nieuwe browserregressietests voor headerfoto, serveropslag en accountwissel.
+- [x] Losse HACS-, backend-, browser- en packaging-workflow ingericht, zonder automatische release.
+- [x] Conflicten met de oude releasebranch opgelost met behoud van RC5-code en recentere documentatie.
+- [ ] Alle automatische controles opnieuw geslaagd op de **uiteindelijke** releasecommit.
+- [ ] Versie `2.0.0` consistent in frontend-JS, versie-JSON, manifest en toelichtingen.
 
-## Betaversies en HACS
+## Praktijkacceptatie
 
-- [x] Beta8 is beschikbaar als GitHub-prerelease en kan handmatig in HACS worden gekozen.
-- [ ] Op een tweede Home Assistant-installatie testen of een bestaande **beta7**-installatie beta8 op de gewenste manier aangeboden krijgt.
-- [ ] Rekening houden met de versievolgorde: **RC2 kan door HACS als hoger dan beta8 worden gezien**. HACS heeft geen afzonderlijk beta-/RC-kanaal.
-- [ ] Bij een upgrade controleren of persoonlijke instellingen, badges, thema's en menu-indeling behouden blijven.
-- [ ] Testen of terugzetten naar een eerdere versie met een gemaakte back-up werkt.
+- [ ] Nieuwe installatie in afzonderlijke Home Assistant-testomgeving.
+- [ ] Upgrade van Beta8, RC4 en RC5 zonder verloren voorkeuren.
+- [ ] Correct serveropslag, herstelpunten, export/import en offline-synchronisatie.
+- [ ] Desktop Home Assistant: native sidebarheader, navigatie, scroll, thema's, instellingen.
+- [ ] Mobiele Android Companion: swipe, backpress, lang indrukken en HA-dialogen.
+- [ ] PalaKiosk/tablet: compacte weergave en stabiele animatie/prestaties.
+- [ ] F1-badges en live sensorwaarden bij wisselende Home Assistant-states.
+- [ ] Niet alleen kortstondige tests: langdurig herladen, uit-/inklappen en foutafhandeling.
+- [ ] Backup en terugzetten naar gepubliceerde RC5 daadwerkelijk getest.
 
-## Voor de definitieve stabiele versie
+## Veilig uitbrengen
 
-- [ ] De nieuwste code vanuit de gecontroleerde releasebranch naar `main` samenvoegen.
-- [ ] Vóór samenvoegen Code checks, Hassfest, HACS-validatie en browserregressies laten slagen.
-- [ ] Home Assistant op desktop en mobiel doorlopen: navigatie, swipen, Android-terugknop, dialogen, lang indrukken, badges en thema's.
-- [ ] PalaKiosk/tablet controleren op prestaties en navigatie.
-- [ ] Installatie en migratie vanaf een bestaande HACS- of handmatige versie testen.
-- [ ] Opgeslagen instellingen en terugzetten na een update controleren.
-- [ ] Rechten op logo's/overige assets en de Git-geschiedenis blijven controleren. Sluit [issue #1](https://github.com/OnlyRobin/PalaSideBar/issues/1) pas als de vragen zijn afgehandeld.
-- [ ] Na goedkeuring een normale GitHub-release `v2.0.0` publiceren, **zonder** het prerelease-vinkje.
+1. Bevestig de volledige [stabilisatiecontrole](docs/STABILISATIE-RC5-NAAR-V2-NL.md) en [testinstructies](docs/DEVELOP-TESTEN-NL.md).
+2. Werk pas na goedkeuring de versie en Nederlandstalige release notes bij en leg de definitieve broncommit vast.
+3. Draai de volledige testsuite en HACS/Hassfest **op precies die commit**.
+4. Review en merge de gecontroleerde wijzigingen via de beveiligde GitHub-branch.
+5. Publiceer `v2.0.0` als normale GitHub-release (geen prerelease), zonder bestaande MIT-tags of installaties te veranderen.
+6. Controleer de upgrade op HACS en bewaar RC5 als rollback.
 
-## Belangrijke afspraken
-
-Bestaande tags zoals `v2.0.0-beta7` en `v2.0.0-beta8` worden **niet achteraf aangepast**. Een nieuwe wijziging krijgt een nieuw versienummer. Bij updates van de integratie worden de domeinnaam `pala_sidebar` en bestaande opslaggegevens behouden.
-
-De juridische licentietekst en technische veldnamen blijven onvertaald waar dat voor hun geldigheid of de werking noodzakelijk is.
+De MIT-licentie blijft ongewijzigd. De oude RC1-, RC2- en RC3-releases zijn bewust verwijderd; oudere tests kunnen voor regressiecontrole behouden blijven zonder een downloadlink naar die versies te tonen.
