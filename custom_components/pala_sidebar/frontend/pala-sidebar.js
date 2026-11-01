@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc.13';
+  const VERSION = '2.0.0-rc.14';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -521,7 +521,11 @@ md-filled-select {
     enabled:true,font:'ha',customFont:'',footerScale:100,buttonGlow:false,fontScale:100,mobileScale:100,
     badgeMode:'ha',badgeColor:'#ffd700',badgeText:'#071925',badgeBorderColor:'#ffffff',badgeBorderWidth:0,badgeRadius:7,badgeGlow:0,badgeOpacity:100,badgePad:5,
     nativeBadgeMode:'sidebar',nativeBadgeColor:'#ffd700',nativeBadgeText:'#071925',nativeBadgeRadius:8,nativeBadgeBorder:1,
-    navBorderWidth:0,navBorderColor:'#ffd700',backgroundColor:'#1b2230',accentMode:'ha',accent:'#ffd700',
+    navBorderWidth:0,navBorderColor:'#ffd700',
+    sectionMode:'none',sectionBorderStyle:'solid',sectionBorderWidth:1,sectionBorderColor:'#38bdf8',sectionRadius:14,sectionPadding:8,sectionGap:10,sectionBgColor:'#203040',sectionBgOpacity:12,sectionGlow:0,
+    sectionTitleColorMode:'ha',sectionTitleColor:'#e2e8f0',sectionTitleSize:10,sectionHeaderColor:'#263648',sectionHeaderOpacity:0,
+    itemRadius:10,itemPadding:8,itemGap:3,itemBgColor:'#1b2b3b',itemBgOpacity:0,itemActiveBorderColor:'#38bdf8',
+    backgroundColor:'#1b2230',accentMode:'ha',accent:'#ffd700',
     background:'ha',glass:45,cardRadius:20,controlRadius:14,
     sidebarBlur:true,dialogBlur:true,shadows:true,energyGlow:true,energyMode:'ha',
     ...Object.fromEntries(Object.entries(PFX_ENERGY).map(([key,val])=>[key,val[1]]))
@@ -531,16 +535,19 @@ md-filled-select {
     const v={...PFX_DEFAULT};
     if(Object.prototype.hasOwnProperty.call(PFX_FONTS,r.font))v.font=r.font;
     if(['ha','glass','flat','amoled','classic','solid','midnight','aurora','sunset'].includes(r.background))v.background=r.background;
+    if(['none','outline','soft','glass','accent'].includes(r.sectionMode))v.sectionMode=r.sectionMode;
+    if(['solid','dashed','dotted'].includes(r.sectionBorderStyle))v.sectionBorderStyle=r.sectionBorderStyle;
+    if(['ha','custom'].includes(r.sectionTitleColorMode))v.sectionTitleColorMode=r.sectionTitleColorMode;
     if(['ha','custom'].includes(r.badgeMode))v.badgeMode=r.badgeMode;
     if(['ha','sidebar','custom'].includes(r.nativeBadgeMode))v.nativeBadgeMode=r.nativeBadgeMode;
     if(['ha','custom'].includes(r.accentMode))v.accentMode=r.accentMode;
     if(['ha','custom'].includes(r.energyMode))v.energyMode=r.energyMode;
     if(typeof r.customFont==='string' && /^data:font\/(?:woff2|woff|ttf|otf);base64,[A-Za-z0-9+/=]+$/.test(r.customFont) && r.customFont.length<=240000)v.customFont=r.customFont;
-    for(const [key,min,max] of [['footerScale',75,160],['fontScale',75,160],['mobileScale',75,160],['glass',15,95],['cardRadius',0,44],['controlRadius',0,32],['badgeBorderWidth',0,4],['badgeRadius',0,24],['badgeGlow',0,24],['badgeOpacity',30,100],['badgePad',0,14],['nativeBadgeRadius',0,24],['nativeBadgeBorder',0,4],['navBorderWidth',0,4]]){
+    for(const [key,min,max] of [['footerScale',75,160],['fontScale',75,160],['mobileScale',75,160],['glass',15,95],['cardRadius',0,44],['controlRadius',0,32],['badgeBorderWidth',0,4],['badgeRadius',0,24],['badgeGlow',0,24],['badgeOpacity',30,100],['badgePad',0,14],['nativeBadgeRadius',0,24],['nativeBadgeBorder',0,4],['navBorderWidth',0,4],['sectionBorderWidth',0,5],['sectionRadius',0,28],['sectionPadding',0,20],['sectionGap',0,28],['sectionBgOpacity',0,85],['sectionGlow',0,24],['sectionTitleSize',9,20],['sectionHeaderOpacity',0,85],['itemRadius',0,24],['itemPadding',3,16],['itemGap',0,18],['itemBgOpacity',0,85]]){
       if(r[key]!==''&&r[key]!=null&&Number.isFinite(Number(r[key])))v[key]=clamp(Math.round(Number(r[key])),min,max);
     }
     for(const k of ['enabled','sidebarBlur','dialogBlur','shadows','energyGlow','buttonGlow'])if(typeof r[k]==='boolean')v[k]=r[k];
-    for(const key of ['accent','badgeColor','badgeText','badgeBorderColor','nativeBadgeColor','nativeBadgeText','navBorderColor','backgroundColor',...Object.keys(PFX_ENERGY)])if(/^#[a-f0-9]{6}$/i.test(r[key]||''))v[key]=r[key].toLowerCase();
+    for(const key of ['accent','badgeColor','badgeText','badgeBorderColor','nativeBadgeColor','nativeBadgeText','navBorderColor','sectionBorderColor','sectionBgColor','sectionTitleColor','sectionHeaderColor','itemBgColor','itemActiveBorderColor','backgroundColor',...Object.keys(PFX_ENERGY)])if(/^#[a-f0-9]{6}$/i.test(r[key]||''))v[key]=r[key].toLowerCase();
     return v;
   };
   const pfxLegacy=(raw)=>{
@@ -2499,9 +2506,31 @@ md-filled-select {
         root.style.setProperty('--pala-badge-alpha',(prefs.badgeOpacity/100).toFixed(2));
         root.style.setProperty('--pala-nav-border-width',prefs.navBorderWidth+'px');
         root.style.setProperty('--pala-nav-border-color',prefs.navBorderColor);
+        const sectionOn=prefs.enabled&&prefs.sectionMode!=='none';
+        const sectionFill=prefs.sectionMode==='outline'?'transparent':prefs.sectionMode==='accent'
+          ?'color-mix(in srgb, '+(prefs.accentMode==='custom'?prefs.accent:'var(--p-accent)')+' '+prefs.sectionBgOpacity+'%,transparent)'
+          :'color-mix(in srgb,'+prefs.sectionBgColor+' '+prefs.sectionBgOpacity+'%,transparent)';
+        root.style.setProperty('--pala-section-border-width',sectionOn?prefs.sectionBorderWidth+'px':'0px');
+        root.style.setProperty('--pala-section-border-style',prefs.sectionBorderStyle);
+        root.style.setProperty('--pala-section-border-color',prefs.sectionBorderColor);
+        root.style.setProperty('--pala-section-radius',prefs.sectionRadius+'px');
+        root.style.setProperty('--pala-section-padding',sectionOn?prefs.sectionPadding+'px':'0px');
+        root.style.setProperty('--pala-section-gap',sectionOn?prefs.sectionGap+'px':'0px');
+        root.style.setProperty('--pala-section-background',sectionOn?sectionFill:'transparent');
+        root.style.setProperty('--pala-section-glow',sectionOn&&prefs.sectionGlow?'0 0 '+prefs.sectionGlow+'px color-mix(in srgb,'+prefs.sectionBorderColor+' 55%,transparent)':'none');
+        root.style.setProperty('--pala-section-title-color',prefs.sectionTitleColorMode==='custom'?prefs.sectionTitleColor:'var(--secondary-text-color,#aab5c5)');
+        root.style.setProperty('--pala-section-title-size',prefs.sectionTitleSize+'px');
+        root.style.setProperty('--pala-section-header-background','color-mix(in srgb,'+prefs.sectionHeaderColor+' '+prefs.sectionHeaderOpacity+'%,transparent)');
+        root.style.setProperty('--pala-item-radius',prefs.itemRadius+'px');
+        root.style.setProperty('--pala-item-padding',prefs.itemPadding+'px');
+        root.style.setProperty('--pala-item-gap',prefs.itemGap+'px');
+        root.style.setProperty('--pala-item-bg','color-mix(in srgb,'+prefs.itemBgColor+' '+prefs.itemBgOpacity+'%,transparent)');
+        root.style.setProperty('--pala-item-active-border',prefs.itemActiveBorderColor);
         root.style.setProperty('--pfx-desktop-text-scale',(prefs.enabled?prefs.fontScale/100:1).toFixed(2));
         root.style.setProperty('--pfx-mobile-text-scale',(prefs.enabled?prefs.mobileScale/100:1).toFixed(2));
       }
+      this.setAttribute('data-pfx-section-studio',String(prefs.enabled&&prefs.sectionMode!=='none'));
+      this.setAttribute('data-pfx-item-studio',String(prefs.enabled&&(prefs.itemRadius!==10||prefs.itemPadding!==8||prefs.itemGap!==3||prefs.itemBgOpacity>0||prefs.navBorderWidth>0)));
       this.setAttribute('data-pfx-badge-custom',String(prefs.enabled&&prefs.badgeMode==='custom'));
       if(this.shadowRoot){
         let badgeStyle=this.shadowRoot.querySelector('style[data-pala-badge-studio]');
@@ -2518,6 +2547,37 @@ md-filled-select {
             .badge[data-style="gradient"]:is([data-color="sensor"],[data-color="custom"]){background:linear-gradient(130deg,var(--p-badge-color,var(--p-accent)),color-mix(in srgb,var(--p-badge-color,var(--p-accent)) 60%,white))!important}
             @media(prefers-reduced-motion:reduce){.badge{animation:none!important;transition:none!important}}
           `;this.shadowRoot.append(badgeStyle);}
+      }
+      if(this.shadowRoot){
+        let sectionStyle=this.shadowRoot.querySelector('style[data-pala-section-studio]');
+        if(!sectionStyle){
+          sectionStyle=document.createElement('style');sectionStyle.dataset.palaSectionStudio='';
+          sectionStyle.textContent=String.raw`
+            .section-frame{min-width:0;display:block}
+            :host([data-pfx-section-studio="true"]) .section-frame{
+              border:var(--pala-section-border-width,0px) var(--pala-section-border-style,solid) var(--pala-section-border-color,transparent);
+              border-radius:var(--pala-section-radius,14px);
+              padding:var(--pala-section-padding,0px);
+              margin-bottom:var(--pala-section-gap,0px);
+              background:var(--pala-section-background,transparent);
+              box-shadow:var(--pala-section-glow,none)
+            }
+            :host([data-pfx-section-studio="true"]) .section-frame > .group-title{
+              margin:0 0 5px;min-width:0;
+              border-radius:calc(var(--pala-section-radius,14px) / 2);
+              background:var(--pala-section-header-background,transparent)
+            }
+            :host([data-pfx-section-studio="true"]) .section-frame .group-toggle{color:var(--pala-section-title-color);font-size:calc(var(--pala-section-title-size,10px) * var(--pfx-active-text-scale,1))}
+            :host([data-pfx-section-studio="true"]) .section-frame .group-toggle:focus-visible{outline:2px solid var(--pala-section-border-color);outline-offset:2px}
+            :host([data-pfx-item-studio="true"]) .section-frame .group-content-inner{gap:var(--pala-item-gap,3px)}
+            :host([data-pfx-item-studio="true"]) .section-frame .nav-row{border-radius:var(--pala-item-radius,10px)}
+            :host([data-pfx-item-studio="true"]) .section-frame .nav-row:not(.active){background:var(--pala-item-bg,transparent)}
+            :host([data-pfx-item-studio="true"]) .section-frame .nav-row.active{border-color:var(--pala-item-active-border,var(--p-accent))}
+            :host([data-pfx-item-studio="true"]) .section-frame .nav-link{border-radius:var(--pala-item-radius,10px);padding-block:var(--pala-item-padding,8px)}
+            @media(prefers-reduced-motion:reduce){.section-frame .nav-row{transition:none!important}}
+          `;
+          this.shadowRoot.append(sectionStyle);
+        }
       }
       if(this.integration==='native'){this._syncNativeFooter();this._syncNativeBadgeColors(prefs);}
       const newCss=pfxStyles(prefs);
@@ -5166,14 +5226,15 @@ md-filled-select {
         const filtered=group.items.filter(i=>!query||(i.label+' '+this._itemDynamicTitle(i)+' '+i.path).toLocaleLowerCase('nl').includes(query));if(!filtered.length)continue;
         const collapsed=this.saved.closed.includes(group.id)&&!query;
         const {header}=this._makeSectionHeader(group.title,'group',collapsed,group.id);
-        this.list.append(header);
+        const frame=$('div','section-frame');frame.dataset.sectionId=group.id;
+        frame.append(header);
         // Keep section rows mounted even when collapsed. The grid track
         // smoothly collapses to zero without disconnecting/recreating badges.
         const body=$('div','group-content');body.dataset.collapsed=String(collapsed);
         body.setAttribute('aria-hidden',String(collapsed));body.inert=collapsed;
         const inner=$('div','group-content-inner');
         for(const item of filtered){inner.append(this._renderLink(item));count++;}
-        body.append(inner);this.list.append(body);
+        body.append(inner);frame.append(body);this.list.append(frame);
       }
       if(count===0&&query)this.list.append($('div','empty','Geen menuonderdelen gevonden.'));
       else if(count===0 && !rows.length)this.list.append($('div','empty','Geen menuonderdelen beschikbaar.'));
@@ -5577,7 +5638,7 @@ md-filled-select {
         this._liveTiles.push({button,val:value,entity:tile.entity});
       }
       if(!cfg.tiles.length)inner.append($('div','empty','Voeg sensoren toe via Instellingen → Control Center.'));
-      body.append(inner);this.liveCenter.append(header,body);
+      body.append(inner);const frame=$('div','section-frame');frame.append(header,body);this.liveCenter.append(frame);
       this._liveGrid=inner;this._setLiveCenterCollapsed(cfg.collapsed,false);
       this._refreshLiveCenter();
     }
