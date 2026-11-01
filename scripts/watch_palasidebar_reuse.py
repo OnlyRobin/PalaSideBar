@@ -73,7 +73,7 @@ def notify(token: str, repository: str, candidates: dict):
             "@OnlyRobin — automatische wekelijkse controle van openbare GitHub-code.\n\n"
             f"**Controleer repository:** https://github.com/{suspect}\n\n"
             "**Overeenkomende publieke broncodemarkeringen:**\n"
-            + "".join(f"- \`{mark}\`\n" for mark in sorted(matched))
+            + "".join(f"- `{mark}`\n" for mark in sorted(matched))
             + "\n**Belangrijk:** dit is **geen bewijs van kopiëren of een licentieschending**. "
             "De MIT-licentie staat kopiëren, wijzigen, herpublicatie en verkoop onder voorwaarden toe. "
             "Forks en naamwijzigingen kunnen dus rechtmatig zijn. Controleer de repository, "
