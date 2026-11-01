@@ -21,3 +21,5 @@ Maak een melding via [GitHub Issues](https://github.com/OnlyRobin/PalaSideBar/is
 ## Licenties en rechten
 
 De eigen PalaSidebar-code staat onder de MIT-licentie met **© 2026 Robin Bouwman**. Neem geen code, afbeeldingen, lettertypen of andere onderdelen van derden over zonder dat verspreiding is toegestaan. Bewaar de voorgeschreven auteursvermeldingen en licentieteksten. Zie [PROVENANCE.md](PROVENANCE.md).
+
+Voor forks en aangepaste uitgaven: houd de bijbehorende **MIT-licentie en oorspronkelijke auteursrechtvermeldingen** intact. Vermeld bij voorkeur ook de [officiële bronrepository](OFFICIEEL-PROJECT.md) zodat gebruikers herkomst en aangepaste versies kunnen onderscheiden. Dit is een aanbeveling, **geen aanvullende licentievoorwaarde**. De huidige MIT-licentie staat commercieel gebruik en herdistributie toe.
