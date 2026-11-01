@@ -2698,7 +2698,7 @@ md-filled-select {
     _paintRcNotice(){
       const info=this._rcCheck.latest;
       let ignored='';try{ignored=localStorage.getItem('palasidebar.rc.dismissed')||'';}catch{}
-      this.rcNotice.replaceChildren();this.rcNotice.hidden=!info||ignored===info;
+      this.rcNotice.replaceChildren();this.rcNotice.hidden=!info||ignored===info||this._dismissedRc===info;
       if(this.rcNotice.hidden)return;
       const buttons=$('div','btnrow');buttons.append(this._button('Bekijk '+info,'rc-open-update'),this._button('Later','rc-dismiss-update'));
       this.rcNotice.append($('strong',null,'Nieuwe PalaSidebar '+info+' beschikbaar'),buttons);
@@ -4455,7 +4455,7 @@ md-filled-select {
        if(cmd==='support-report'){this._supportSubmit();return;}
        if(cmd==='support-updates'){void this._checkRcUpdates(true);return;}
        if(cmd==='rc-open-update'){const tag=this._rcCheck.latest;if(tag&&/^v2\.0\.0-rc[1-9]\d*$/.test(tag))window.open(PALA_REPO+'/releases/tag/'+tag,'_blank','noopener,noreferrer');return;}
-       if(cmd==='rc-dismiss-update'){if(this._rcCheck.latest){try{localStorage.setItem('palasidebar.rc.dismissed',this._rcCheck.latest);}catch{}this._paintRcNotice();}return;}
+       if(cmd==='rc-dismiss-update'){if(this._rcCheck.latest){this._dismissedRc=this._rcCheck.latest;try{localStorage.setItem('palasidebar.rc.dismissed',this._rcCheck.latest);}catch{}this._paintRcNotice();}return;}
        if(cmd==='diagnostic-refresh'){this._fillDiagnostic();return;}
       if(cmd==='diagnostic-copy'){navigator.clipboard?.writeText(this._diagnosticText()).then(()=>this._editorNotice('Rapport gekopieerd.')).catch(()=>this._editorNotice('Kopiëren niet toegestaan door browser.'));return;}
       if(cmd==='recovery-refresh'){this._loadRecoveryPoints(true);return;}
