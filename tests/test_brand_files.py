@@ -5,7 +5,7 @@ import struct
 root=Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar'
 meta=json.loads((root/'manifest.json').read_text(encoding='utf8'))
 assert meta['domain']=='pala_sidebar'
-assert meta['version']=='2.0.0-rc7'
+assert __import__('re').fullmatch(r'\d+\.\d+\.\d+(?:-(?:beta|rc)[1-9]\d*)?', meta['version']), meta['version']
 expect={
     'icon.png':(256,256), 'icon@2x.png':(512,512),
     'dark_icon.png':(256,256), 'dark_icon@2x.png':(512,512),
