@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - develop
+      - 'fix/issue-*'
   pull_request:
     branches:
       - main
