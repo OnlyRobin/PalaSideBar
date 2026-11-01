@@ -59,7 +59,7 @@ with sync_playwright() as pw:
             title:s.saved.header.title,version:window.PalaSidebarDiagnostics().version};
         }""")
         assert result['preview'] and result['before']=='' and 0<result['afterLength']<=110000,result
-        assert result['actual'] and result['position']=='bottom' and result['restored'],result
+        assert result['actual'] and result['position'] in ('bottom','center bottom') and result['restored'],result
         assert result['removedPreview'] and result['remainsBeforeSave'] and result['removed'],result
         assert result['title']=='Mijn huis' and result['version']=='2.0.0-rc5',result
         assert not errors,errors
