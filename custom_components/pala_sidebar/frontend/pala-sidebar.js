@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-rc11';
+  const VERSION = '2.0.0-rc.11';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -2737,7 +2737,7 @@ md-filled-select {
         if(!response.ok)throw Error('GitHub tijdelijk onbereikbaar');
         const raw=await response.text();if(raw.length>120000)throw Error('Antwoord te groot');
         const data=JSON.parse(raw);if(!Array.isArray(data))throw Error('Ongeldig overzicht');
-        const parse=v=>{const m=String(v||'').match(/^v?(\d+)\.(\d+)\.(\d+)(?:-(beta|rc)([1-9]\d*))?$/i);return m?{major:+m[1],minor:+m[2],patch:+m[3],channel:(m[4]||'stable').toLowerCase(),iteration:+(m[5]||0)}:null;};
+        const parse=v=>{const m=String(v||'').match(/^v?(\d+)\.(\d+)\.(\d+)(?:-(beta|rc)\.?([1-9]\d*))?$/i);return m?{major:+m[1],minor:+m[2],patch:+m[3],channel:(m[4]||'stable').toLowerCase(),iteration:+(m[5]||0)}:null;};
         const compareCore=(a,b)=>a.major-b.major||a.minor-b.minor||a.patch-b.patch;
         const installed=parse(VERSION);if(!installed)throw Error('Onbekend versieformaat');
         const found=data.map(r=>({release:r,version:parse(r.tag_name)})).filter(x=>x.version&&!x.release.draft&&(x.version.channel==='stable'?!x.release.prerelease:!!x.release.prerelease));
@@ -4486,7 +4486,7 @@ md-filled-select {
        if(cmd==='support-preview'){this._supportPreview();return;}
        if(cmd==='support-report'){this._supportSubmit();return;}
        if(cmd==='support-updates'){void this._checkRcUpdates(true);return;}
-       if(cmd==='rc-open-update'){const tag=this._rcCheck.latest;if(tag&&/^v?\d+\.\d+\.\d+(?:-(?:beta|rc)[1-9]\d*)?$/.test(tag))window.open(PALA_REPO+'/releases/tag/'+tag,'_blank','noopener,noreferrer');return;}
+       if(cmd==='rc-open-update'){const tag=this._rcCheck.latest;if(tag&&/^v?\d+\.\d+\.\d+(?:-(?:beta|rc)\.?[1-9]\d*)?$/.test(tag))window.open(PALA_REPO+'/releases/tag/'+tag,'_blank','noopener,noreferrer');return;}
        if(cmd==='rc-dismiss-update'){if(this._rcCheck.latest){this._dismissedRc=this._rcCheck.latest;try{localStorage.setItem('palasidebar.updates.dismissed',this._rcCheck.latest);}catch{}this._paintRcNotice();}return;}
        if(cmd==='diagnostic-refresh'){this._fillDiagnostic();return;}
       if(cmd==='diagnostic-copy'){navigator.clipboard?.writeText(this._diagnosticText()).then(()=>this._editorNotice('Rapport gekopieerd.')).catch(()=>this._editorNotice('Kopiëren niet toegestaan door browser.'));return;}
@@ -5321,61 +5321,54 @@ md-filled-select {
       this._haFooterStyles.clear();
     }
     _syncNativeFooter(){
-      // This method is also called after a settings edit or native DOM change:
-      // it must honor those calls immediately. Throttle ONLY the periodic
-      // health check in ensure(), never the actual footer-update operation.
+      // Home Assistant 2026.10 renders these exact IDs in ha-sidebar.shadowRoot.
+      // Notifications is a button WITHOUT an href; inspecting links missed it.
+      // The labels are light-DOM spans slotted into ha-list-item-button, so
+      // styling that button's own shadowRoot cannot scale the labels.
       this._footerLastScan=Date.now();
       this._footerLastNative=this.native;
-      // Limit modification to known native footer anchors; restore our own styles
-      // when settings change. Never hide the native sidebar itself.
-      const native=this.integration==='native'?this._drawer():null;if(!native?.shadowRoot)return;
+      const native=this.integration==='native'?this._drawer():null;
+      if(!native?.shadowRoot)return;
+      const ui=pfxClean(this._pfxDraft||this.saved.ui_style||PFX_DEFAULT);
+      const enabled=ui.enabled&&(ui.fontScale!==100||ui.mobileScale!==100||ui.footerScale!==100);
+      const styleId='pala-native-footer-typography';
+      let style=native.shadowRoot.querySelector('style[data-pala-native-footer-typography]');
+      if(enabled){
+        const desktop=(ui.fontScale*ui.footerScale/10000).toFixed(4);
+        const mobile=(ui.mobileScale*ui.footerScale/10000).toFixed(4);
+        if(!style){
+          style=document.createElement('style');
+          style.dataset.palaNativeFooterTypography='';
+          native.shadowRoot.append(style);
+        }
+        const selector='#sidebar-config > .item-text[slot="headline"],#sidebar-notifications > .item-text[slot="headline"],#sidebar-profile > .item-text[slot="headline"]';
+        const css=selector+'{font-size:calc(14px * '+desktop+')!important;}'+
+          '@media(max-width:700px){'+selector+'{font-size:calc(14px * '+mobile+')!important;}}';
+        if(style.textContent!==css)style.textContent=css;
+      }else{
+        style?.remove();
+      }
+      // Preserve the pre-existing user options for native footer visibility.
       if(!this._haFooterStyles)this._haFooterStyles=new Map();
       const fc=this.saved.footer_config;
-      // Always scan native footer: text-size scaling also applies when all items remain visible.
-      const visibility={'/config':fc.ha_settings,'/notifications':fc.ha_notifications,'/profile':fc.ha_profile};
-      const found=[];const visit=(root,depth=0)=>{
-        if(!root?.querySelectorAll||depth>3)return;
-        for(const element of root.querySelectorAll('a[href]'))found.push(element);
-        for(const element of root.querySelectorAll('ha-list-item-button,ha-list-item-base')){
-          const label=(element.textContent||'').trim().toLowerCase();if(/^(instellingen|meldingen|profiel|settings|notifications|profile)/.test(label))found.push(element);
-        }
-        for(const element of root.querySelectorAll('*'))if(element.shadowRoot)visit(element.shadowRoot,depth+1);
+      const visibility={
+        'sidebar-config':fc.ha_settings,
+        'sidebar-notifications':fc.ha_notifications,
+        'sidebar-profile':fc.ha_profile
       };
-      visit(native.shadowRoot);
-      const ui=pfxClean(this._pfxDraft||this.saved.ui_style||PFX_DEFAULT);
-      const scale=ui.enabled?(matchMedia('(max-width:700px)').matches?ui.mobileScale:ui.fontScale)*ui.footerScale/10000:1;
-      const footerSize=(13*scale).toFixed(2)+'px';
-      for(const anchor of found){
-        const href=anchor.getAttribute('href')||anchor.querySelector?.('a[href]')?.getAttribute('href');let path='';
-        if(!href){const label=(anchor.textContent||'').trim().toLowerCase();path=/^(instellingen|settings)/.test(label)?'/config':/^(meldingen|notifications)/.test(label)?'/notifications':/^(profiel|profile)/.test(label)?'/profile':'';}
-        try{if(href)path=href.startsWith('/')&&!href.startsWith('//')?href.split(/[?#]/)[0]:(new URL(href,location.href)).pathname;path=path.replace(/\/+$/,'')||'/';}catch{continue;}
-        if(!Object.prototype.hasOwnProperty.call(visibility,path))continue;
-        let node=anchor.closest('ha-list-item-button,ha-list-item-base')||anchor;
-        let parent=anchor.getRootNode()?.host;
-        for(let depth=0;depth<4 && parent;depth++,parent=parent.getRootNode()?.host){
-          if(parent.matches?.('ha-list-item-button,ha-list-item-base')){node=parent;break;}
+      for(const [id,show] of Object.entries(visibility)){
+        const node=native.shadowRoot.getElementById(id);
+        if(!node)continue;
+        if(!this._haFooterStyles.has(node))
+          this._haFooterStyles.set(node,[node.style.getPropertyValue('display'),node.style.getPropertyPriority('display')]);
+        if(show===false)node.style.setProperty('display','none','important');
+        else{
+          const [value,priority]=this._haFooterStyles.get(node);
+          value?node.style.setProperty('display',value,priority):node.style.removeProperty('display');
+          this._haFooterStyles.delete(node);
         }
-        // Native HA bottom entries have their own Shadow DOM and ignore our
-        // PalaSidebar text-scale variables. Apply only to these three routes.
-        for(const element of [anchor,node]){
-          element.style.setProperty('--md-sys-typescale-label-large-size',footerSize);
-          element.style.setProperty('--mdc-typography-body1-font-size',footerSize);
-          element.style.setProperty('--pala-native-footer-size',footerSize);
-          element.style.setProperty('--md-list-item-label-text-size',footerSize);
-          element.style.setProperty('--md-list-item-one-line-container-height', 'auto');
-        }
-        if(node.shadowRoot){
-          let style=node.shadowRoot.querySelector('style[data-pala-footer-font]');
-          if(!style){style=document.createElement('style');style.dataset.palaFooterFont='';style.textContent='::slotted(*),span:not(.icon):not([class*="icon"]),.label,.name,.primary,.text,.title{font-size:var(--pala-native-footer-size,13px)!important}';node.shadowRoot.append(style);}
-        }
-        if(!this._haFooterStyles.has(node))this._haFooterStyles.set(node,[node.style.getPropertyValue('display'),node.style.getPropertyPriority('display')]);
-        if(visibility[path]===false)node.style.setProperty('display','none','important');
-        else{const [value,priority]=this._haFooterStyles.get(node);value?node.style.setProperty('display',value,priority):node.style.removeProperty('display');this._haFooterStyles.delete(node);}
       }
-      for(const [node,original] of this._haFooterStyles){
-        if(node.isConnected)continue;
-        this._haFooterStyles.delete(node);
-      }
+      for(const node of this._haFooterStyles.keys())if(!node.isConnected)this._haFooterStyles.delete(node);
     }
     refreshStatus(){
       const started=performance.now();
