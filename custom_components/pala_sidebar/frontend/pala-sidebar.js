@@ -2571,15 +2571,35 @@ md-filled-select {
 
       const fontInfo=$('p','field-note',this._pfxPrefs().customFont?'Eigen lettertype beschikbaar. Kies Eigen lettertype en sla op.':'Upload blijft lokaal tot je op Vormgeving opslaan klikt. Grote fonts zijn niet geschikt voor accountopslag.');fontInfo.id='pala-custom-font-status';page.append(fontInfo);
       this._pfxSection(page,'Thema en achtergrond','‘Home Assistant’ respecteert het actieve thema. ‘Klassieke vormgeving’ herstelt de oude volledige styling. AMOLED is een donkere override.',[
-        ['select','background','Dashboardachtergrond',[['ha','Volg Home Assistant'],['classic','Klassieke vormgeving'],['glass','Glas · zacht verloop'],['flat','Effen · HA-achtergrond'],['amoled','AMOLED zwart']]],
+        ['select','background','Dashboardachtergrond',[['ha','Volg Home Assistant'],['classic','Klassieke vormgeving'],['glass','Glas · zacht verloop'],['flat','Effen · HA-achtergrond'],['solid','Effen · eigen kleur'],['midnight','Midnight · diepblauw'],['aurora','Aurora · groen/blauw'],['sunset','Sunset · warm verloop'],['amoled','AMOLED zwart']]],
         ['select','accentMode','Accentkleur',[['ha','Volg Home Assistant'],['custom','Eigen accentkleur']]],
-        ['color','accent','Eigen accentkleur'],['range','glass','Glassterkte',[15,95,5,'%']]
+        ['color','accent','Eigen accentkleur'],['color','backgroundColor','Eigen achtergrondkleur'],['range','glass','Glassterkte',[15,95,5,'%']]
       ]);
+      const backgrounds=$('section','pfx-section');backgrounds.append($('h3',null,'Achtergrondgalerij'),$('p','pfx-description','Alle achtergronden zijn ook hierboven selecteerbaar. Tik op een voorbeeld om direct te wisselen.'));
+      const bgGrid=$('div','pfx-background-choices');bgGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;max-width:100%';
+      for(const [key,label,bg] of [['ha','Home Assistant','var(--card-background-color,#354354)'],['classic','Klassiek','#252334'],['glass','Glas','linear-gradient(135deg,#223149,#485b6b)'],['flat','Effen HA','#343c46'],['solid','Eigen kleur','linear-gradient(135deg,#2b3550,#121927)'],['midnight','Midnight','linear-gradient(135deg,#070d1d,#172849)'],['aurora','Aurora','linear-gradient(135deg,#06231f,#173750,#0c162e)'],['sunset','Zonsondergang','linear-gradient(135deg,#311b38,#72465b,#18233a)'],['amoled','AMOLED','#030303']]){
+        const b=this._button(label,'pfx-background');b.dataset.background=key;b.style.cssText='min-height:52px;border-radius:13px;background:'+bg+';color:#fff;border:1px solid #ffffff35;text-shadow:0 1px 3px #000;transition:border-color .2s,transform .2s';bgGrid.append(b);
+      }backgrounds.append(bgGrid);page.append(backgrounds);
       this._pfxSection(page,'Vormgeving en beweging','Kaarten, knoppen, schaduwen en subtiele effecten.',[
         ['range','cardRadius','Kaarten en dialogen',[0,44,2,'px']],
         ['range','controlRadius','Knoppen en invoervelden',[0,32,2,'px']],
         ['toggle','sidebarBlur','Glasvervaging van HA-sidebar'],['toggle','dialogBlur','Glasvervaging van HA-dialogen'],
         ['toggle','shadows','Kaartschaduwen'],['toggle','energyGlow','Subtiele energie-gloed'],['toggle','buttonGlow','Premium knop-gloed'],['range','footerScale','Onderste Home Assistant-knoppen',[75,160,5,'%']]
+      ]);
+      this._pfxSection(page,'Badge Design Studio','Eigen kleuren en randen voor standaard PalaSidebar-sensorbadges. Sensorgestuurde en expliciete alarmkleuren houden voorrang.',[
+        ['select','badgeMode','Standaard badgekleur',[['ha','Bestaande thema-/accentkleur'],['custom','Eigen PalaSidebar-kleuren']]],
+        ['color','badgeColor','Standaard badge-achtergrond'],['color','badgeText','Standaard badge-tekst'],
+        ['color','badgeBorderColor','Badge randkleur'],['range','badgeBorderWidth','Badge randdikte',[0,4,1,'px']],
+        ['range','badgeRadius','Badge afronding',[0,24,1,'px']],['range','badgePad','Horizontale binnenruimte',[0,14,1,'px']],
+        ['range','badgeGlow','Badge gloed',[0,24,2,'px']],['range','badgeOpacity','Badge transparantie',[30,100,5,'%']]
+      ]);
+      this._pfxSection(page,'Originele Home Assistant-tellers','Instellingen en Meldingen zijn Home Assistant-knoppen. Stel hun tellers apart in zonder de waarde of werking te veranderen.',[
+        ['select','nativeBadgeMode','Kleur tellers',[['sidebar','PalaSidebar-accent'],['ha','Home Assistant-kleur'],['custom','Eigen tellerkleur']]],
+        ['color','nativeBadgeColor','Eigen tellerachtergrond'],['color','nativeBadgeText','Eigen tellertekstkleur'],
+        ['range','nativeBadgeBorder','Tellerrand',[0,4,1,'px']],['range','nativeBadgeRadius','Tellerafronding',[0,24,1,'px']]
+      ]);
+      this._pfxSection(page,'Sidebar randen','Accentueer menu-items zonder de gewone navigatie of je badges te verstoren.',[
+        ['range','navBorderWidth','Menurand-dikte',[0,4,1,'px']],['color','navBorderColor','Menurandkleur']
       ]);
       const energy=$('section','pfx-section');energy.append($('h3',null,'Energiepalet'),$('p','pfx-description','Stel de acht Home Assistant Energy Dashboard-kleuren in. Alle zeven kleurtrappen lopen automatisch mee.'));
       const grid=$('div','pfx-grid');grid.append(this._pfxField('select','energyMode','Energiekleuren',[['ha','Volg Home Assistant'],['custom','Eigen kleurenpalet']]));
@@ -2628,6 +2648,10 @@ md-filled-select {
       preview.querySelectorAll('[data-pfx-swatch]').forEach(el=>{
         const k=el.dataset.pfxSwatch;el.style.background=v.energyMode==='custom'?v[k]:PFX_ENERGY[k][1];
         el.style.color=readableBadgeText(el.style.background);
+      });
+      this.dialog.querySelectorAll('[data-background]').forEach(btn=>{
+        const selected=btn.dataset.background===v.background;btn.setAttribute('aria-pressed',String(selected));
+        btn.style.outline=selected?'2px solid var(--primary-color,#ffd700)':'none';btn.style.outlineOffset='-2px';
       });
       this.dialog.querySelectorAll('[data-pfx-key]').forEach(el=>{
         const out=el.parentElement.querySelector('output');if(out){
@@ -4532,7 +4556,8 @@ md-filled-select {
       if(cmd==='theme-preset'){this._chosenPreset=target.dataset.preset;this._themePreviewLive();return;}
       if(cmd==='theme-save'){this._themeSave();return;}
       if(cmd==='pfx-preset'){this._pfxPreset(target.dataset.profile);return;}
-      if(cmd==='pfx-remove-font'){const current=this._pfxReadForm();this._pfxDraft=pfxClean({...current,font:'ha',customFont:''});const select=this.dialog.querySelector('#pala-pfx-font');if(select)select.value='ha';const status=this.dialog.querySelector('#pala-custom-font-status');if(status)status.textContent='Eigen lettertype verwijderd uit voorbeeld. Klik Opslaan om dit te bewaren.';this._pfxPreview();return;}
+      if(cmd==='pfx-background'){const select=this.dialog.querySelector('#pala-pfx-background');if(select){select.value=target.dataset.background;this._pfxPreview();}return;}
+       if(cmd==='pfx-remove-font'){const current=this._pfxReadForm();this._pfxDraft=pfxClean({...current,font:'ha',customFont:''});const select=this.dialog.querySelector('#pala-pfx-font');if(select)select.value='ha';const status=this.dialog.querySelector('#pala-custom-font-status');if(status)status.textContent='Eigen lettertype verwijderd uit voorbeeld. Klik Opslaan om dit te bewaren.';this._pfxPreview();return;}
        if(cmd==='pfx-save'){this._pfxSave();return;}
       if(cmd==='pfx-reset'){this._pfxReset();return;}
       if(cmd==='pfx-cancel'){this._pfxDraft=null;this._pfxApply();this._editorNotice('Voorbeeld gestopt; opgeslagen instelling blijft actief.');return;}
