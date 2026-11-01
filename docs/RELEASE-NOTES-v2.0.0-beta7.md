@@ -1,32 +1,30 @@
-# PalaSidebar v2.0.0-beta7 — release notes (DRAFT)
+# PalaSidebar v2.0.0-beta7 — historisch publicatieverslag
 
-> **Not yet published.** Keep the repository private until source provenance and third-party license obligations have been reviewed.
+> **Historisch document.** Deze eerste beta is al op 31 oktober 2026 gepubliceerd. Dit is het oorspronkelijke voorbereidingsverslag, in het Nederlands bijgewerkt. Voor de huidige beta zie [v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8).
 
-## What's included
+## Wat er in beta7 werd opgenomen
 
-- PalaSidebar UI branding and HACS-ready `custom_components/pala_sidebar` layout.
-- Configurable menus, favorites, dashboard shortcuts and account-specific preferences.
-- Live Control Center and theme-aware sidebar sections.
-- Context menus and drag-to-reorder dashboard shortcuts.
-- Theme Studio and Performance Center.
-- Admin-only Home Assistant restart control with confirmation.
-- Automatically registered frontend loader.
+- PalaSidebar-vormgeving en een HACS-geschikte `custom_components/pala_sidebar`-mapstructuur.
+- Aanpasbare menu's, favorieten, dashboardsnelkoppelingen en persoonlijke accountvoorkeuren.
+- Live Control Center en sidebaronderdelen die het gekozen thema volgen.
+- Contextmenu's en de mogelijkheid dashboards te verslepen om ze anders te ordenen.
+- Theme Studio en Performance Center.
+- Herstartbediening voor Home Assistant, alleen voor beheerders en met bevestiging.
+- Automatisch geregistreerde frontend-loader.
 
-## Before publishing
+## Voorbereiding van de eerste publicatie
 
-1. Complete the provenance review in `PROVENANCE.md` and preserve any required third-party notices.
-2. Check public files for keys, private URLs, usernames, credentials and personal defaults.
-3. Verify GitHub Actions **Code checks** passes.
-4. After the repository can be made public, enable **HACS validation** and resolve any failures.
-5. Check PalaSidebar in the Android Companion app and on desktop, including backpress and long-press.
-6. Create GitHub release tag **`v2.0.0-beta7`** and mark it **pre-release**.
-7. Add this GitHub repository as an **Integration** in HACS custom repositories and enable pre-releases if needed.
+Voor de publicatie zijn bronherkomst en licenties onderzocht, openbare bestanden op mogelijke privégegevens gecontroleerd en de GitHub-workflows voor codecontrole, Hassfest en HACS-validatie ingericht. Na het openbaar maken van de repository zijn de HACS-controles geslaagd en is de prerelease `v2.0.0-beta7` aangemaakt.
 
-The HACS validation action cannot validate private repositories. The workflow is configured to skip it while private, not treat the skip as an actual HACS pass.
+De originele rechtencontrole staat in [PROVENANCE.md](../PROVENANCE.md). Automatische controles vervangen geen praktijktest op een Home Assistant-installatie.
 
-## Upgrade notes
+## Bijwerken vanaf een handmatige installatie
 
-- Back up the current `custom_components/pala_sidebar` and export settings first.
-- Preserve any local custom configuration separately when migrating from a manual install to HACS.
-- Do **not** rename the integration domain `pala_sidebar`.
-- Restart Home Assistant after installation; check frontend cache only if old assets persist.
+- Maak eerst een back-up van `custom_components/pala_sidebar` en exporteer de instellingen.
+- Bewaar een eigen `pala-sidebar-config.json` afzonderlijk voordat HACS de bestanden vervangt.
+- Verander de integratiedomeinnaam `pala_sidebar` niet.
+- Herstart Home Assistant volledig na installatie.
+
+## Later ontdekte fouten
+
+De originele beta7 bevatte drie fouten: het tabblad **PalaSidebar UI** bleef leeg, de standaardondertitel ontbrak en de standaardsectie **BEHEER** bevatte slechts twee opties. Dit is opnieuw bevestigd in de [beta7-regressiecontrole](https://github.com/OnlyRobin/PalaSideBar/actions/runs/41213687322). De oplossingen zitten in **beta8**.

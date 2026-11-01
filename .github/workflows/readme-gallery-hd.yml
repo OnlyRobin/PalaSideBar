@@ -1,0 +1,62 @@
+name: README-afbeeldingen in hoge resolutie
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/readme-gallery-hd.yml
+      - docs/images/palasidebar-standaard-scherp.svg
+      - docs/images/palasidebar-aangepast-scherp.svg
+      - docs/images/palasidebar-sensoren-scherp.svg
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: palasidebar-readme-hd-main
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Haal de hoofdtak op
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Installeer SVG-renderer
+        run: |
+          python -m pip install --disable-pip-version-check "cairosvg>=2.7,<3"
+      - name: Maak drie scherpe PNG's
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import struct
+          import cairosvg
+
+          folder = Path("docs/images")
+          for variant in ("standaard", "aangepast", "sensoren"):
+              svg = folder / f"palasidebar-{variant}-scherp.svg"
+              png = folder / f"palasidebar-{variant}-groot.png"
+              assert svg.is_file(), svg
+              cairosvg.svg2png(url=str(svg), write_to=str(png),
+                                output_width=2400, output_height=1333)
+              raw = png.read_bytes()
+              assert raw[:8] == bytes.fromhex("89504e470d0a1a0a")
+              assert struct.unpack(">II", raw[16:24]) == (2400, 1333)
+              assert len(raw) > 60000, (png, len(raw))
+              print(f"{png}: 2400 × 1333 pixels, {len(raw)//1024} KB")
+          PY
+      - name: Bewaar afbeeldingen op GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/images/palasidebar-*-groot.png
+          if git diff --cached --quiet; then
+            echo "Afbeeldingen zijn actueel."
+            exit 0
+          fi
+          git commit -m "Documentatie: drie scherpe PalaSidebar-afbeeldingen op 2400 pixels"
+          git push origin HEAD:main

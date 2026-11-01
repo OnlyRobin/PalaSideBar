@@ -2,11 +2,13 @@
 
 **Een aanpasbare sidebar voor Home Assistant.** Met eigen menu's, slimme badges, thema's, snelkoppelingen en bediening voor desktop, telefoon en tablet.
 
-**© 2026 Robin Bouwman** · Uitgebracht onder de [MIT-licentie](LICENSE) voor de oorspronkelijke PalaSidebar-bijdragen.
+**Officieel project van Robin Bouwman** · [Officiële GitHub-repository](https://github.com/OnlyRobin/PalaSideBar) · [Gepubliceerde versies](https://github.com/OnlyRobin/PalaSideBar/releases)
+
+**© 2026 Robin Bouwman** · De oorspronkelijke PalaSidebar-bijdragen worden verspreid onder de [MIT-licentie](LICENSE). [Herkomst, officiële releases en naamsvermelding](OFFICIEEL-PROJECT.md).
 
 ## PalaSidebar in beeld
 
-Drie compacte voorbeelden van de standaardweergave, een eigen inrichting en dynamische sensorbadges. *Illustratieve impressies: de daadwerkelijke weergave hangt af van je thema, instellingen en Home Assistant-versie.*
+Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te openen. Op deze voorpagina blijven de voorbeelden compact. Voor onbeperkt scherp zoomen is er daarnaast een schaalbare SVG-versie.
 
 <table>
   <tr>
@@ -15,25 +17,30 @@ Drie compacte voorbeelden van de standaardweergave, een eigen inrichting en dyna
     <th>Live sensoren</th>
   </tr>
   <tr>
-    <td><img src="docs/images/palasidebar-standaard.webp" alt="PalaSidebar standaardweergave" width="240"></td>
-    <td><img src="docs/images/palasidebar-aangepast.webp" alt="PalaSidebar met eigen header en persoonlijke instellingen" width="240"></td>
-    <td><img src="docs/images/palasidebar-sensoren.webp" alt="PalaSidebar met zichtbare sensorwaarden en eigen header" width="240"></td>
+    <td align="center"><a href="https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/images/palasidebar-standaard-groot.png"><img src="docs/images/palasidebar-standaard-groot.png" alt="Standaard PalaSidebar met overzichtelijk menu en instellingen" width="285"></a></td>
+    <td align="center"><a href="https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/images/palasidebar-aangepast-groot.png"><img src="docs/images/palasidebar-aangepast-groot.png" alt="Aangepaste PalaSidebar met persoonlijke fotoheader en instellingen" width="285"></a></td>
+    <td align="center"><a href="https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/images/palasidebar-sensoren-groot.png"><img src="docs/images/palasidebar-sensoren-groot.png" alt="PalaSidebar met live sensorbadges en verborgen Home Assistant-header" width="285"></a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/images/palasidebar-standaard-groot.png">Grote afbeelding</a> · <a href="docs/images/palasidebar-standaard-scherp.svg">Scherpe SVG</a></td>
+    <td align="center"><a href="docs/images/palasidebar-aangepast-groot.png">Grote afbeelding</a> · <a href="docs/images/palasidebar-aangepast-scherp.svg">Scherpe SVG</a></td>
+    <td align="center"><a href="docs/images/palasidebar-sensoren-groot.png">Grote afbeelding</a> · <a href="docs/images/palasidebar-sensoren-scherp.svg">Scherpe SVG</a></td>
   </tr>
 </table>
+
+*Illustratieve voorbeelden die nauw aansluiten bij PalaSidebar; het uiterlijk hangt af van je Home Assistant-thema, gekozen instellingen en beschikbare sensoren.*
 
 ## Huidige versies
 
 | Versie | Betekenis |
 | --- | --- |
-| **v2.0.0-rc5 (in voorbereiding)** | Foto-upload, uitsnede en opslag in PalaSidebar-header; eerst alle controles afronden |
-| **[v2.0.0-rc4](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc4)** | Nieuwste **release candidate**: kleurkiezers met HEX-code en directe voorbeelden in Algemeen en Header; nog niet stabiel |
-| [v2.0.0-rc3](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc3) | Eerdere release candidate: sensoren zoeken en attributen kiezen in de header |
+| **[v2.0.0-rc5](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc5)** | Nieuwste **release candidate**: eigen headerfoto, preview, bewerken en opslaan bij je account; HACS-testrelease |
+| [v2.0.0-rc4](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc4) | Vorige RC: kleurkiezers met HEX-code en live voorbeeld in Algemeen en Header |
 | **[v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8)** | Nieuwste **beta** met de herstelde PalaSidebar UI, ondertitel en BEHEER-opties |
 | [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) | Oudere beta, met drie inmiddels bekende fouten |
-| [v2.0.0-rc1](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc1) en [v2.0.0-rc2](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc2) | Eerdere release candidates; blijven beschikbaar om terug te zetten |
 | **v2.0.0 Stable** | Nog **niet uitgebracht**; eerst testen op echte apparaten |
 
-> **Belangrijk bij HACS-updates:** HACS heeft geen afzonderlijk beta- en RC-updatekanaal. Bij versievergelijking staat `2.0.0-rc4` boven `2.0.0-rc3` en `2.0.0-rc2` en doorgaans ook boven `2.0.0-beta8`. De automatisch aangeboden update hoeft dus niet uit dezelfde beta-reeks te komen. Kies **altijd bewust de gewenste versie** via HACS → PalaSidebar → Downloaden/Opnieuw downloaden → testversies. In `hacs.json` is de standaardbranch verborgen voor releasekeuzes.
+> **Belangrijk bij HACS-updates:** HACS heeft geen afzonderlijk beta- en RC-updatekanaal. Bij versievergelijking staat `2.0.0-rc5` boven `2.0.0-rc4` en doorgaans ook boven `2.0.0-beta8`. De automatisch aangeboden update hoeft dus niet uit dezelfde beta-reeks te komen. Kies **altijd bewust de gewenste versie** via HACS → PalaSidebar → Downloaden/Opnieuw downloaden → testversies. In `hacs.json` is de standaardbranch verborgen voor releasekeuzes.
 
 ## Mogelijkheden
 
@@ -53,7 +60,7 @@ Drie compacte voorbeelden van de standaardweergave, een eigen inrichting en dyna
 1. Zorg dat **HACS** is geïnstalleerd in Home Assistant.
 2. Open **HACS → drie puntjes → Aangepaste repositories** (of *Custom repositories*).
 3. Voeg `https://github.com/OnlyRobin/PalaSideBar` toe als type **Integratie** (*Integration*).
-4. Open **PalaSidebar**, schakel de weergave van testversies (*pre-releases / beta versions*) in en kies **v2.0.0-rc4** (laatste gepubliceerde RC) of bewust **v2.0.0-beta8** (beta-reeks). RC5 wordt beschikbaar na geslaagde tests.
+4. Open **PalaSidebar**, schakel de weergave van testversies (*pre-releases / beta versions*) in en kies **v2.0.0-rc5** (nieuwste RC) of bewust een eerdere testversie.
 5. Klik op **Downloaden** en herstart Home Assistant **volledig**.
 6. Open **Instellingen → Apparaten en diensten → Integratie toevoegen** en voeg **PalaSidebar** toe, als deze nog niet is toegevoegd.
 7. Verwijder eventuele oude, handmatig ingestelde PalaSidebar-JavaScript-resources om dubbel laden te voorkomen.
@@ -76,11 +83,11 @@ Open op je Home Assistant-adres het pad:
 /pala_sidebar/assets/pala-sidebar-version.json
 ```
 
-Bij RC5 moet hier `2.0.0-rc5` staan nadat je deze release hebt gekozen; bij RC4 `2.0.0-rc4`, bij RC3 `2.0.0-rc3` en bij beta8 `2.0.0-beta8`. De versie staat ook onderaan PalaSidebar.
+Bij RC5 moet hier `2.0.0-rc5` staan nadat je deze release hebt gekozen; bij RC4 `2.0.0-rc4` en bij beta8 `2.0.0-beta8`. De versie staat ook onderaan PalaSidebar.
 
 ### Teruggaan naar een eerdere versie
 
-Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer de eerdere release (bijvoorbeeld beta7 of RC2). Herstart Home Assistant en herstel zo nodig je back-up. Een andere versie kiezen is geen vervanging voor een back-up van je instellingen.
+Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer een nog beschikbare release (bijvoorbeeld beta8 of RC4). Herstart Home Assistant en herstel zo nodig je back-up. Een andere versie kiezen is geen vervanging voor een back-up van je instellingen.
 
 ## Wat is nieuw in RC5?
 
@@ -91,7 +98,7 @@ Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer de
 - Bestandslimiet: 4 MB voor de bron; de opgeslagen afbeelding is maximaal circa 100 kB in Base64 (verkleind).
 - De gemaakte headerfoto wordt onderdeel van de accountinstellingen en dus ook van geëxporteerde instellingen en herstelpunten. Exporteer bij voorkeur voor de update je instellingen.
 
-Dit is een testfunctie; de werking op telefoons, tablets en Home Assistant-installaties moet ook buiten de automatische Chromium-tests bevestigd worden. Zie [RC5-release-opmerkingen](docs/RELEASE-v2.0.0-rc5.md).
+De automatische code-, HACS-, Hassfest- en Chromium-controles zijn geslaagd. Het blijft een testfunctie: controleer de bediening en synchronisatie ook op je eigen telefoon en tablet. Zie [RC5-release-opmerkingen](docs/RELEASE-v2.0.0-rc5.md).
 
 ## Wat is nieuw in RC4?
 
@@ -103,7 +110,7 @@ Dit is een testfunctie; de werking op telefoons, tablets en Home Assistant-insta
 
 RC4 is gepubliceerd na geslaagde geautomatiseerde code-, Hassfest-, HACS- en Chromium-regressietests. Het blijft een testversie: controleer op je telefoon en tablet vooral de standaardkleur, kleurkeuze, HEX-invoer, opslaan en de keuze voor themakleuren. Zie [RC4-wijzigingen](docs/RELEASE-v2.0.0-rc4.md).
 
-## Wat is nieuw in RC3?
+## Sensoren zoeken en attributen gebruiken
 
 - In **Instellingen → Header** kun je een Home Assistant-sensor zoeken op naam of `entity_id`.
 - Je kunt de gewone sensorwaarde of een beschikbaar attribuut (bijvoorbeeld `race_name` of `countdown`) kiezen.
@@ -112,7 +119,7 @@ RC4 is gepubliceerd na geslaagde geautomatiseerde code-, Hassfest-, HACS- en Chr
 - De entiteitenzoeker bij bestaande sensorvelden heeft een herkenbare zoekknop en betere suggesties.
 - Bestaande sensortokens zoals `{sensor.woonkamer_temperatuur}` en `{sensor.f1#race_name}` blijven werken.
 
-RC3 is een **testrelease**: de geautomatiseerde HACS-, Hassfest- en regressiecontroles zijn geslaagd, maar controle op echte telefoons en tablets blijft nodig. Zie de [RC3-release met toelichting](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc3).
+Deze functies zijn opgenomen in de huidige RC4 en RC5. Controleer sensorselectie en attribuutweergave ook op je eigen telefoon of tablet.
 
 ## Wat is verbeterd in beta8?
 
@@ -121,7 +128,7 @@ RC3 is een **testrelease**: de geautomatiseerde HACS-, Hassfest- en regressiecon
 - De standaardsectie **BEHEER** bevat meer opties, waaronder Apparaten, Entiteiten, Automatiseringen, Scripts, Helpers en Ontwikkelaarstools.
 - De overbodige dubbele voorbeeldweergave tijdens het openen van UI-instellingen is verwijderd.
 
-Zie de [beta8-release](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) voor de volledige toelichting. Beta8 bevat functioneel dezelfde reparaties als RC2.
+Zie de [beta8-release](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) voor de volledige toelichting. Beta8 bevat de herstelde instellingenweergave, ondertitel en beheerschermen.
 
 ## Instellingen en compatibiliteit
 
@@ -133,7 +140,6 @@ PalaSidebar is gebouwd als Home Assistant-customintegratie. Lokale logo's worden
 
 - **`main`:** standaardbranch; we wijzigen die pas na controle.
 - **`develop`:** ontwikkelbranch voor verbeteringen en regressietests.
-- **`rc3-header-sensor-picker`:** testbranch waarmee RC3 is gepubliceerd.
 - **`rc4-accent-color-picker`:** aparte testbranch voor RC4, zonder de eerdere releases aan te passen.
 - **`rc5-header-image`:** aparte testbranch met headerafbeeldingen en README-voorbeelden.
 - **`release/v2.0.0`:** voorbereiding van de toekomstige stabiele versie; nog niet gepubliceerd.
@@ -151,6 +157,10 @@ Lees het [volledige Nederlandstalige veiligheidsverslag](docs/VEILIGHEIDSCONTROL
 
 ## Licentie en auteursrecht
 
-**© 2026 Robin Bouwman.** De eigen PalaSidebar-bijdragen vallen onder de [MIT-licentie](LICENSE). De rechten en naamsvermeldingen van eventueel materiaal van derden blijven behouden. Meer informatie staat in [Herkomst en licenties](PROVENANCE.md) en de [publicatiecontrole](docs/PUBLICATION-AUDIT-2026-10-31.md).
+**© 2026 Robin Bouwman.** De eigen PalaSidebar-bijdragen vallen onder de [MIT-licentie](LICENSE). Dit is de enige actieve projectlicentie voor deze bijdragen; er worden **geen nieuwe beperkingen** op gebruik, forks of doorverkoop ingevoerd. De rechten en naamsvermeldingen van eventueel materiaal van derden blijven behouden. Meer informatie staat in [Herkomst en licenties](PROVENANCE.md) en de [publicatiecontrole](docs/PUBLICATION-AUDIT-2026-10-31.md).
+
+**Wat betekent MIT precies?** Lees de [Nederlandstalige uitleg over gebruik, auteursrecht en verspreiding](docs/LICENTIE-EN-GEBRUIK-NL.md). Hierin staat ook wat MIT toestaat bij forks en doorverkoop, en welke opties er zijn als toekomstige versies strengere voorwaarden zouden moeten krijgen. Deze uitleg voegt géén nieuwe beperkingen toe aan MIT.
+
+Lees ook [hoe je officiële uitgaven herkent](OFFICIEEL-PROJECT.md) en controleer de herkomst als je een fork of download van een andere bron tegenkomt. De MIT-licentie staat ook commerciële distributie toe, mits de licentievoorwaarden worden gevolgd.
 
 De juridische tekst van het bestand `LICENSE` blijft bewust in de oorspronkelijke Engelstalige MIT-formulering. Technische bestandsnamen, programmeeridentificaties en vereiste Home Assistant/HACS-sleutels worden niet vertaald.

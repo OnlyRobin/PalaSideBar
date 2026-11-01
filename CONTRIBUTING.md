@@ -1,7 +1,25 @@
-# Contributing to PalaSidebar
+# Bijdragen aan PalaSidebar
 
-Report bugs with Home Assistant version, PalaSidebar version, device/browser, reproduction steps and console errors (with secrets removed).
+Leuk dat je wilt helpen met PalaSidebar!
 
-Please keep changes focused, preserve shared theme and gesture handling, and add regression tests for new UI behavior. Before submitting a pull request, check JavaScript syntax, Python compilation, and the HACS validation workflow.
+## Fouten melden
 
-Licensing: do not add third-party code or images unless the repository can legally redistribute them with required notices.
+Maak een melding via [GitHub Issues](https://github.com/OnlyRobin/PalaSideBar/issues). Vermeld daarbij de Home Assistant-versie, PalaSidebar-versie, je toestel of browser, de stappen om de fout te herhalen en eventuele foutmeldingen uit de browserconsole.
+
+**Deel nooit wachtwoorden, toegangstokens, privé-IP-adressen of andere vertrouwelijke gegevens.**
+
+## Wijzigingen voorstellen
+
+- Werk bij voorkeur vanaf `develop`; stuur veranderingen via een pull request.
+- Houd aanpassingen overzichtelijk en verander bestaande thema-, swipe- en navigatiewerking niet onnodig.
+- Voeg bij nieuwe functionaliteit ook een passende regressietest toe.
+- Controleer vóór het indienen de JavaScript-syntax, Python-compilatie en GitHub Actions (Code checks, Hassfest en HACS-validatie).
+- Test belangrijke UI-wijzigingen op desktop én op een mobiel scherm.
+- Gebruik duidelijke Nederlandse documentatie en interfaceberichten. **Vertaal geen technische sleutels, bestandspaden of API-velden** die Home Assistant vereist.
+- Publiceer geen nieuwe release of bestaande tagwijziging zonder controle.
+
+## Licenties en rechten
+
+De eigen PalaSidebar-code staat onder de MIT-licentie met **© 2026 Robin Bouwman**. Neem geen code, afbeeldingen, lettertypen of andere onderdelen van derden over zonder dat verspreiding is toegestaan. Bewaar de voorgeschreven auteursvermeldingen en licentieteksten. Zie [PROVENANCE.md](PROVENANCE.md).
+
+Voor forks en aangepaste uitgaven: houd de bijbehorende **MIT-licentie en oorspronkelijke auteursrechtvermeldingen** intact. Vermeld bij voorkeur ook de [officiële bronrepository](OFFICIEEL-PROJECT.md) zodat gebruikers herkomst en aangepaste versies kunnen onderscheiden. Dit is een aanbeveling, **geen aanvullende licentievoorwaarde**. De huidige MIT-licentie staat commercieel gebruik en herdistributie toe.

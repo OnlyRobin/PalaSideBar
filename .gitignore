@@ -9,3 +9,24 @@ __pycache__/
 *.log
 coverage/
 htmlcov/
+
+# Bescherm persoonlijke Home Assistant-data en lokale testomgevingen
+.hass/
+**/.storage/
+**/secrets.yaml
+**/secrets.yml
+**/auth
+**/auth.json
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+*.pem
+*.p12
+*.pfx
+*.key
+.env.*
+!.env.example
+*credentials*.json
+*token*.txt
