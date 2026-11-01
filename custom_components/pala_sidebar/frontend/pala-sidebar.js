@@ -5331,7 +5331,11 @@ md-filled-select {
         const href=anchor.getAttribute('href');let path='';
         try{path=href?.startsWith('/')&&!href.startsWith('//')?href.split(/[?#]/)[0]:(new URL(href,location.href)).pathname;path=path.replace(/\/+$/,'')||'/';}catch{continue;}
         if(!Object.prototype.hasOwnProperty.call(visibility,path))continue;
-        const node=anchor.closest('ha-list-item-button,ha-list-item-base')||anchor;
+        let node=anchor.closest('ha-list-item-button,ha-list-item-base')||anchor;
+        let parent=anchor.getRootNode()?.host;
+        for(let depth=0;depth<4 && parent;depth++,parent=parent.getRootNode()?.host){
+          if(parent.matches?.('ha-list-item-button,ha-list-item-base')){node=parent;break;}
+        }
         // Native HA bottom entries have their own Shadow DOM and ignore our
         // PalaSidebar text-scale variables. Apply only to these three routes.
         for(const element of [anchor,node]){
