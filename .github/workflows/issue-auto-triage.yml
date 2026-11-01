@@ -1,0 +1,30 @@
+name: PalaSidebar — automatische ontvangstbevestiging van bugs
+on:
+  issues:
+    types: [opened]
+permissions:
+  issues: write
+jobs:
+  ontvangstbevestiging:
+    if: ${{ !github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bevestig ontvangst zonder dubbele reacties
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker='<!-- palasidebar-auto-ontvangst-v1 -->'
+          if gh api "repos/$GH_REPO/issues/$ISSUE_NUMBER/comments" --paginate --jq '.[].body' | grep -Fq "$marker"; then
+            echo 'Ontvangst al bevestigd'; exit 0
+          fi
+          if [[ "$ISSUE_TITLE" == "[Bug]"* ]]; then
+            message="Bedankt voor je bugmelding! ✅\n\nDe melding is ontvangen. Een automatische ontvangstbevestiging is **geen bevestiging dat de bug al gereproduceerd of verholpen is**. Bij de volgende RC bekijken we eerst de diagnose en stappen.\n\nHeb je een screenshot? Voeg dit gerust toe aan deze issue (vermijd tokens, adressen en privégegevens). Bestaande RC-releases blijven beschikbaar als terugvaloptie.\n\n$marker"
+          else
+            message="Bedankt voor je melding! Deze issue wordt meegenomen bij de beoordeling. Er wordt niets automatisch gerepareerd of uitgebracht.\n\n$marker"
+          fi
+          gh api "repos/$GH_REPO/issues/$ISSUE_NUMBER/comments" -f body="$message" >/dev/null
