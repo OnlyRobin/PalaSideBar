@@ -34,7 +34,8 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 
 | Versie | Betekenis |
 | --- | --- |
-| **v2.0.0-rc.14 (RC-testrelease)** | Sectie Design Studio, complete blok- en itemranden en vier overzichtelijke instellingencategorieën. [RC14 release-instructies](https://github.com/OnlyRobin/PalaSideBar/blob/rc/docs/RELEASE-v2.0.0-rc.14.md) |
+| **v2.0.0 Stable — eerste officiële stabiele release** | Gebaseerd op volledig geteste RC14, met dezelfde functies. [Stable releasenotities](docs/RELEASE-v2.0.0-STABLE.md) |
+| [v2.0.0-rc.14](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.14) | Laatste goedgekeurde RC; beschikbaar als terugvalversie |
 | [v2.0.0-rc.13](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.13) | Eén achtergrondgalerij en duidelijkere Home Assistant-badges |
 | [v2.0.0-rc.12](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.12) | Badge Design Studio, kleuren, randen, gradient en meerdere achtergronden |
 | [v2.0.0-rc.11](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.11) | Eigen lettertypen, premium presets, herstelde footer-tekstgrootte |
@@ -44,15 +45,14 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 | [v2.0.0-rc7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc7) | Zelftest, bugmelden en broncodebewaking |
 | [Oudere RC-releases](https://github.com/OnlyRobin/PalaSideBar/releases) | Blijven beschikbaar voor terugval |
 | [v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) | Laatste bèta |
-| **v2.0.0 Stable** | Nog niet uitgebracht; vereist tests op echte apparaten en expliciet akkoord |
 
-**Onze werkwijze:** veranderingen eerst op de permanente [`rc`-branch](https://github.com/OnlyRobin/PalaSideBar/tree/rc), daarna een nieuwe HACS-prerelease. We verplaatsen of verwijderen **nooit bestaande RC-tags of -releases**. De `beta`- en `main`-branches blijven behouden. Een stabiele release volgt alleen na goedkeuring.
+**Onze werkwijze:** veranderingen eerst op de permanente [`rc`-branch](https://github.com/OnlyRobin/PalaSideBar/tree/rc), daarna een nieuwe HACS-prerelease. We verplaatsen of verwijderen **nooit bestaande RC-tags of -releases**. De `beta`- en `main`-branches blijven behouden. De eerste Stable-versie is op basis van RC14 door de gebruiker goedgekeurd; nieuwe RC-versies blijven eerst getest worden voordat zij naar Stable gaan.
 
 **Versionering:** vanaf RC11 gebruiken we Semantic Versioning: `2.0.0-rc.11`, `2.0.0-rc.12` enzovoort. Door de bekende HACS-sorteerfout wordt niet altijd de nieuwste RC automatisch aangeboden. Historische tags zoals `v2.0.0-rc10` blijven ongewijzigd. HACS biedt geen volledig afzonderlijke bèta- en RC-updatekanalen; kies de gewenste prerelease expliciet.
 
-**HACS:** schakel prereleases/testversies in. Gebruik *Opnieuw downloaden* en kies `v2.0.0-rc.11` wanneer een oudere HACS-versie geen automatische melding toont. Installeren blijft handmatig via HACS; PalaSidebar meldt alleen beschikbare versies.
+**HACS:** voor de eerste stabiele versie kies je **PalaSidebar v2.0.0** zonder prerelease. RC14 blijft via *Opnieuw downloaden → Andere versie nodig?* beschikbaar. Installeer altijd via HACS en herstart Home Assistant.
 
-**Let op — HACS 2.x updatevolgorde:** GitHub REST retourneert sommige RC-releases niet op semantische versievolgorde. HACS neemt deze volgorde over en kan hierdoor RC9 als nieuwste voorstellen, terwijl RC10 en RC.11 al bestaan. De overstap naar `rc.11` lost dit op oudere HACS-versies niet vanzelf op. Kies daarom onder **PalaSidebar → Opnieuw downloaden → Andere versie nodig?** expliciet `v2.0.0-rc.11` en herstart Home Assistant. Dit is een [bekend HACS-probleem (#5655)](https://github.com/hacs/integration/issues/5655); we wijzigen oudere releases of tags niet om de volgorde te manipuleren.
+**Let op — HACS 2.x updatevolgorde:** GitHub REST retourneert sommige RC-releases niet op semantische versievolgorde. HACS neemt deze volgorde over en kan hierdoor RC9 als nieuwste voorstellen, terwijl RC10 en RC.11 al bestaan. De overstap naar `rc.11` lost dit op oudere HACS-versies niet vanzelf op. Kies bij een gewenste testversie onder **PalaSidebar → Opnieuw downloaden → Andere versie nodig?** expliciet `v2.0.0-rc.14` en herstart Home Assistant. Dit is een [bekend HACS-probleem (#5655)](https://github.com/hacs/integration/issues/5655); we wijzigen oudere releases of tags niet om de volgorde te manipuleren.
 
 ## Mogelijkheden
 

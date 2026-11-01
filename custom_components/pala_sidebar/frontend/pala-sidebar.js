@@ -1,18 +1,20 @@
 /**
- * PalaSidebar 2.0.0-beta7 – custom_components integratie met AutoLoader.
+ * PalaSidebar 2.0.0 – custom_components integratie met AutoLoader.
  * Copyright (c) 2026 Robin Bouwman. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
  * Leest uitsluitend HA-status; voert geen services uit zonder interactie.
  * Integratie via native ha-sidebar slot indien beschikbaar; anders overlay.
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0-beta7';
+  const VERSION = '2.0.0';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
   const SERVER_PREFS_KEY = 'palasidebar.preferences.v1';
   const KEY = 'palas.sidebar.v1';
   const CONFIG_URL = '/pala_sidebar/config.json';
+  const PALA_REPO='https://github.com/OnlyRobin/PalaSideBar';
+  const PALA_API='https://api.github.com/repos/OnlyRobin/PalaSideBar/releases?per_page=15';
   // Production console: one startup record and meaningful warnings only.
   // Call PalaSidebarDiagnostics() manually for details. Never log user IDs,
   // private configuration, sensor values, access tokens or settings contents.
@@ -118,7 +120,18 @@
     discovery: {enabled:true, title:'Andere dashboards', include_system_panels:false, exclude:['config','profile','developer-tools','notifications']},
     groups: [
       {id:'start',title:'START',items:[{id:'home',label:'Overzicht',path:'/lovelace',icon:'mdi:view-dashboard-outline'}]},
-      {id:'beheer',title:'BEHEER',admin_only:true,items:[{id:'integraties',label:'Integraties',path:'/config/integrations',icon:'mdi:puzzle-outline'},{id:'updates',label:'Updates',path:'/config/updates',icon:'mdi:update',badge:'updates'}]}
+      {id:'beheer',title:'BEHEER',admin_only:true,items:[
+        {id:'integraties',label:'Integraties',path:'/config/integrations',icon:'mdi:puzzle-outline'},
+        {id:'updates',label:'Updates',path:'/config/updates',icon:'mdi:update',badge:'updates'},
+        {id:'apparaten',label:'Apparaten',path:'/config/devices/dashboard',icon:'mdi:devices'},
+        {id:'entiteiten',label:'Entiteiten',path:'/config/entities',icon:'mdi:format-list-bulleted'},
+        {id:'automatiseringen',label:'Automatiseringen',path:'/config/automation',icon:'mdi:robot-outline'},
+        {id:'scripts',label:'Scripts',path:'/config/script',icon:'mdi:script-text-outline'},
+        {id:'helpers',label:'Helpers',path:'/config/helpers',icon:'mdi:hand-heart-outline'},
+        {id:'ontwikkelaar',label:'Ontwikkelaarstools',path:'/developer-tools',icon:'mdi:hammer-wrench'},
+        {id:'hacs',label:'HACS',path:'/hacs',icon:'mdi:store-outline',requires_panel:'hacs'},
+        {id:'add-ons',label:'Add-ons',path:'/hassio/dashboard',icon:'mdi:puzzle',requires_panel:'hassio'}
+      ]}
     ], quick_entities:[], profiles:[], mobile:{enabled:true,dock:false,dock_labels:true,dock_items:['home','energie','media'],back_button:true,back_closes_menu:true,swipe_open:true,swipe_close:true,haptics:false,tablet_dock:false}
   };
   // Snelkoppelingen zijn per HA-gebruiker instelbaar. Geen persoonlijke routes
@@ -501,10 +514,18 @@ md-filled-select {
     supercell:'"Supercell-Magic", system-ui, sans-serif',
     roboto:'Roboto, Arial, sans-serif',
     system:'system-ui, -apple-system, sans-serif',
-    arial:'Arial, Helvetica, sans-serif'
+    arial:'Arial, Helvetica, sans-serif',
+    custom:'"PalaUserFont",system-ui,sans-serif'
   };
   const PFX_DEFAULT=Object.freeze({
-    enabled:true,font:'ha',fontScale:100,mobileScale:100,accentMode:'ha',accent:'#ffd700',
+    enabled:true,font:'ha',customFont:'',footerScale:100,buttonGlow:false,fontScale:100,mobileScale:100,
+    badgeMode:'ha',badgeColor:'#ffd700',badgeText:'#071925',badgeBorderColor:'#ffffff',badgeBorderWidth:0,badgeRadius:7,badgeGlow:0,badgeOpacity:100,badgePad:5,
+    nativeBadgeMode:'sidebar',nativeBadgeColor:'#ffd700',nativeBadgeText:'#071925',nativeBadgeRadius:8,nativeBadgeBorder:1,
+    navBorderWidth:0,navBorderColor:'#ffd700',
+    sectionMode:'none',sectionBorderStyle:'solid',sectionBorderWidth:1,sectionBorderColor:'#38bdf8',sectionRadius:14,sectionPadding:8,sectionGap:10,sectionBgColor:'#203040',sectionBgOpacity:12,sectionGlow:0,
+    sectionTitleColorMode:'ha',sectionTitleColor:'#e2e8f0',sectionTitleSize:10,sectionHeaderColor:'#263648',sectionHeaderOpacity:0,
+    itemRadius:10,itemPadding:8,itemGap:3,itemBgColor:'#1b2b3b',itemBgOpacity:0,itemActiveBorderColor:'#38bdf8',
+    backgroundColor:'#1b2230',accentMode:'ha',accent:'#ffd700',
     background:'ha',glass:45,cardRadius:20,controlRadius:14,
     sidebarBlur:true,dialogBlur:true,shadows:true,energyGlow:true,energyMode:'ha',
     ...Object.fromEntries(Object.entries(PFX_ENERGY).map(([key,val])=>[key,val[1]]))
@@ -513,21 +534,27 @@ md-filled-select {
     const r=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};
     const v={...PFX_DEFAULT};
     if(Object.prototype.hasOwnProperty.call(PFX_FONTS,r.font))v.font=r.font;
-    if(['ha','glass','flat','amoled','classic'].includes(r.background))v.background=r.background;
+    if(['ha','glass','flat','amoled','classic','solid','midnight','aurora','sunset'].includes(r.background))v.background=r.background;
+    if(['none','outline','soft','glass','accent'].includes(r.sectionMode))v.sectionMode=r.sectionMode;
+    if(['solid','dashed','dotted'].includes(r.sectionBorderStyle))v.sectionBorderStyle=r.sectionBorderStyle;
+    if(['ha','custom'].includes(r.sectionTitleColorMode))v.sectionTitleColorMode=r.sectionTitleColorMode;
+    if(['ha','custom'].includes(r.badgeMode))v.badgeMode=r.badgeMode;
+    if(['ha','sidebar','custom'].includes(r.nativeBadgeMode))v.nativeBadgeMode=r.nativeBadgeMode;
     if(['ha','custom'].includes(r.accentMode))v.accentMode=r.accentMode;
     if(['ha','custom'].includes(r.energyMode))v.energyMode=r.energyMode;
-    for(const [key,min,max] of [['fontScale',75,160],['mobileScale',75,160],['glass',15,95],['cardRadius',0,44],['controlRadius',0,32]]){
+    if(typeof r.customFont==='string' && /^data:font\/(?:woff2|woff|ttf|otf);base64,[A-Za-z0-9+/=]+$/.test(r.customFont) && r.customFont.length<=240000)v.customFont=r.customFont;
+    for(const [key,min,max] of [['footerScale',75,160],['fontScale',75,160],['mobileScale',75,160],['glass',15,95],['cardRadius',0,44],['controlRadius',0,32],['badgeBorderWidth',0,4],['badgeRadius',0,24],['badgeGlow',0,24],['badgeOpacity',30,100],['badgePad',0,14],['nativeBadgeRadius',0,24],['nativeBadgeBorder',0,4],['navBorderWidth',0,4],['sectionBorderWidth',0,5],['sectionRadius',0,28],['sectionPadding',0,20],['sectionGap',0,28],['sectionBgOpacity',0,85],['sectionGlow',0,24],['sectionTitleSize',9,20],['sectionHeaderOpacity',0,85],['itemRadius',0,24],['itemPadding',3,16],['itemGap',0,18],['itemBgOpacity',0,85]]){
       if(r[key]!==''&&r[key]!=null&&Number.isFinite(Number(r[key])))v[key]=clamp(Math.round(Number(r[key])),min,max);
     }
-    for(const k of ['enabled','sidebarBlur','dialogBlur','shadows','energyGlow'])if(typeof r[k]==='boolean')v[k]=r[k];
-    for(const key of ['accent',...Object.keys(PFX_ENERGY)])if(/^#[a-f0-9]{6}$/i.test(r[key]||''))v[key]=r[key].toLowerCase();
+    for(const k of ['enabled','sidebarBlur','dialogBlur','shadows','energyGlow','buttonGlow'])if(typeof r[k]==='boolean')v[k]=r[k];
+    for(const key of ['accent','badgeColor','badgeText','badgeBorderColor','nativeBadgeColor','nativeBadgeText','navBorderColor','sectionBorderColor','sectionBgColor','sectionTitleColor','sectionHeaderColor','itemBgColor','itemActiveBorderColor','backgroundColor',...Object.keys(PFX_ENERGY)])if(/^#[a-f0-9]{6}$/i.test(r[key]||''))v[key]=r[key].toLowerCase();
     return v;
   };
   const pfxLegacy=(raw)=>{
     const a=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:null;
     if(!a)return null;
     const p={...a};
-    if(!['ha','glass','flat','amoled','classic'].includes(p.background))p.background=p.background==='original'?'classic':'ha';
+    if(!['ha','glass','flat','amoled','classic','solid','midnight','aurora','sunset'].includes(p.background))p.background=p.background==='original'?'classic':'ha';
     p.accentMode='custom';p.energyMode='custom';p.mobileScale=p.fontScale||100;
     return pfxClean(p);
   };
@@ -544,7 +571,8 @@ md-filled-select {
     const rules=[];const vars=[];
     const classic=v.background==='classic';
     const needsTypography=classic||v.font!=='ha'||v.fontScale!==100||v.mobileScale!==100;
-    const font=PFX_FONTS[v.font];
+    const font=v.font==='custom'&&!v.customFont?PFX_FONTS.ha:PFX_FONTS[v.font];
+    if(v.customFont)rules.push('@font-face{font-family:"PalaUserFont";src:url("'+v.customFont+'") format("'+(v.customFont.startsWith('data:font/woff2')?'woff2':v.customFont.startsWith('data:font/woff')?'woff':v.customFont.startsWith('data:font/otf')?'opentype':'truetype')+'");font-display:swap}');
     if(v.font!=='ha'){
       const tokens=['--pala-sidebar-ui-font-family','--primary-font-family','--secondary-font-family',
         '--font-family','--ha-font-family-body','--ha-card-header-font-family','--mdc-typography-font-family',
@@ -610,6 +638,14 @@ md-filled-select {
       vars.push('--lovelace-background:linear-gradient(145deg,color-mix(in srgb,var(--primary-background-color,#18202b) '+(100-v.glass*.12).toFixed(1)+'%,var(--card-background-color,#263442)),var(--primary-background-color,#18202b))!important;');
     }else if(v.background==='flat'){
       vars.push('--lovelace-background:var(--primary-background-color)!important;');
+    }else if(v.background==='solid'){
+      vars.push('--lovelace-background:'+v.backgroundColor+'!important;');
+    }else if(v.background==='midnight'){
+      vars.push('--lovelace-background:linear-gradient(145deg,#070d1d,#172849)!important;');
+    }else if(v.background==='aurora'){
+      vars.push('--lovelace-background:linear-gradient(140deg,#06231f,#173750 55%,#0c162e)!important;');
+    }else if(v.background==='sunset'){
+      vars.push('--lovelace-background:linear-gradient(135deg,#311b38,#72465b 55%,#18233a)!important;');
     }else if(v.background==='amoled'){
       vars.push('--lovelace-background:#050506!important;--card-background-color:#09090c!important;');
       vars.push('--md-sys-color-background:#050506!important;--app-header-background-color:#09090c!important;');
@@ -631,6 +667,7 @@ md-filled-select {
     else if(v.background!=='ha'&&!classic){rules.push('ha-sidebar .mdc-drawer__surface{backdrop-filter:blur(8px) saturate(130%);-webkit-backdrop-filter:blur(8px) saturate(130%)}');}
     if(!v.dialogBlur){vars.push('--pala-sidebar-ui-dialog-filter:none!important;');if(classic)rules.push('ha-dialog .mdc-dialog__surface,.mdc-dialog .mdc-dialog__surface{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}');}
     else if(!classic)rules.push('ha-dialog .mdc-dialog__surface,.mdc-dialog .mdc-dialog__surface{backdrop-filter:blur(10px) saturate(130%);-webkit-backdrop-filter:blur(10px) saturate(130%)}');
+    if(v.buttonGlow)rules.push('pala-sidebar button:hover,.pfx-presets button:hover{box-shadow:0 0 0 1px var(--primary-color,#ffd700),0 8px 28px color-mix(in srgb,var(--primary-color,#ffd700) 25%,transparent)!important;transform:translateY(-1px)}');
     if(!v.shadows){vars.push('--ha-card-box-shadow:none!important;');rules.push('ha-card{box-shadow:none!important}');}
     if(v.energyGlow&&!classic)rules.push('.energy-line{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--energy-solar-color,#f5b642) 28%,transparent))}.gauge{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--energy-grid-consumption-color,#eb3c41) 25%,transparent))}');
     if(!v.energyGlow){rules.push('.energy-line,.gauge{filter:none!important;}');}
@@ -867,6 +904,9 @@ md-filled-select {
   const isEntity = value => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(value||'');
   const serviceName = value => /^[a-z][a-z0-9_]{1,63}$/.test(value||'');
   // Override only known display options; values are plain text and never HTML.
+  // Only a compact locally encoded JPEG is accepted; no remote URL, SVG or script.
+  const safeHeaderImage = value => typeof value==='string' && value.length<=110000 &&
+    /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(value)?value:'';
   function cleanHeader(v){
     const x=v&&typeof v==='object'&&!Array.isArray(v)?v:{};
     return {
@@ -882,6 +922,7 @@ md-filled-select {
       logo_text:text(x.logo_text||'P').slice(0,3),logo_icon:isSafeIcon(x.logo_icon)?x.logo_icon:'',
       logo_bg:safeHex(x.logo_bg),logo_color:safeHex(x.logo_color),
       background_color:safeHex(x.background_color),clock_color:safeHex(x.clock_color),
+      image:safeHeaderImage(x.image),image_position:['center','top','bottom'].includes(x.image_position)?x.image_position:'center',
       show_quick:x.show_quick!==false,show_settings:x.show_settings!==false
     };
   }
@@ -994,7 +1035,11 @@ md-filled-select {
       color_rules:text(value.color_rules).slice(0,900),color_stops:text(value.color_stops).slice(0,900),color_transition:['gradient','direct'].includes(value.color_transition)?value.color_transition:'steps',color_fallback:hex6(value.color_fallback)||'',label_color_from_badge:value.label_color_from_badge===true,icon_color_from_badge:value.icon_color_from_badge===true,
       format:['auto','compact','days-hours','hours-minutes','clock','number'].includes(value.format)?value.format:'auto',
       layout:['right','below','above','left'].includes(value.layout)?value.layout:'right',
-      style:['solid','soft','outline','plain','dot'].includes(value.style)?value.style:'solid',
+      style:['solid','soft','outline','plain','dot','glass','gradient'].includes(value.style)?value.style:'solid',
+      border_width:Number.isFinite(Number(value.border_width))?clamp(Math.floor(Number(value.border_width)),-1,4):-1,
+      border_radius:Number.isFinite(Number(value.border_radius))?clamp(Math.floor(Number(value.border_radius)),-1,24):-1,
+      border_color:hex6(value.border_color)||'',
+      badge_glow:['inherit','on','off'].includes(value.badge_glow)?value.badge_glow:'inherit',
       size:['small','normal','large'].includes(value.size)?value.size:'normal',
       max_chars:Number.isFinite(Number(value.max_chars))?clamp(Math.floor(Number(value.max_chars)),0,60):0,
       decimals:Number.isFinite(Number(value.decimals))?clamp(Math.floor(Number(value.decimals)),0,3):1};
@@ -1040,6 +1085,15 @@ md-filled-select {
       admin_only:!!g.admin_only, collapsed:!!g.collapsed,
       items:arr(g.items).slice(0,100).map(configItem).filter(Boolean)
     })).filter(g=>g.id && g.items.length);
+    // Restore newly added default management links for an untouched legacy BEHEER
+    // group. User-customized groups are never expanded or overwritten.
+    const defaultBeheer=FALLBACK.groups.find(g=>g.id==='beheer');
+    for(const group of groups){
+      if(group.id!=='beheer'||group.items.length!==2)continue;
+      const legacy=[['integraties','/config/integrations'],['updates','/config/updates']];
+      if(!legacy.every(([id,path])=>group.items.some(item=>item.id===id&&item.path===path)))continue;
+      group.items.push(...defaultBeheer.items.slice(2).map(configItem));
+    }
     const appearance={...FALLBACK.appearance,...(raw.appearance && typeof raw.appearance==='object' && !Array.isArray(raw.appearance)?raw.appearance:{})};
     const discovery={...FALLBACK.discovery,...(raw.discovery && typeof raw.discovery==='object' && !Array.isArray(raw.discovery)?raw.discovery:{})};
     const profiles=arr(raw.profiles).slice(0,25).filter(x=>x && typeof x==='object');
@@ -1048,7 +1102,7 @@ md-filled-select {
     for(const k of ['enabled','dock','dock_labels','back_button','back_closes_menu','swipe_open','swipe_close','haptics','tablet_dock'])
       if(typeof mobileInput[k]==='boolean')mobile[k]=mobileInput[k];
     if(Array.isArray(mobileInput.dock_items))mobile.dock_items=mobileInput.dock_items.filter(x=>typeof x==='string').map(cleanId).slice(0,3);
-    return {schema:1,title:text(raw.title||'PalaSidebar').slice(0,60),subtitle:text(raw.subtitle||'').slice(0,90),
+    return {schema:1,title:text(raw.title||'PalaSidebar').slice(0,60),subtitle:text(raw.subtitle ?? FALLBACK.subtitle).slice(0,90),
       mode:['auto','integrated','floating'].includes(raw.mode)?raw.mode:'auto',
       appearance,theme:cleanTheme(raw.theme||FALLBACK.theme),header:cleanHeader(upgradeLegacyHeader(raw.header||FALLBACK.header)),discovery,groups:groups.length?groups:defaults().groups,
       quick_entities:arr(raw.quick_entities).slice(0,8).map(quickEntity).filter(Boolean),
@@ -1084,6 +1138,10 @@ md-filled-select {
 .iconbtn{border:0;color:inherit;background:transparent;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:0 0 32px}.iconbtn:hover,.group-toggle:hover,.nav-link:hover{background:var(--p-soft)}.iconbtn:focus-visible,.group-toggle:focus-visible,.nav-link:focus-visible{outline:2px solid var(--p-accent);outline-offset:-2px}
 .ico{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;flex:0 0 23px}.ico ha-icon{--mdc-icon-size:21px;width:21px;height:21px}.ico .fallback{font-size:16px}
 .clock{font-variant-numeric:tabular-nums;color:var(--secondary-text-color,#9ca9b9);font-size:11px;padding:0 10px 8px}
+.pala-rc-notice{margin:4px 9px 10px;border:1px solid var(--p-accent,#38bdf8);border-radius:11px;padding:9px;font-size:12px;background:var(--secondary-background-color,#253341);line-height:1.5}
+.pala-rc-notice[hidden]{display:none!important}
+.pala-rc-notice .btnrow{margin-top:5px;display:flex;gap:6px;flex-wrap:wrap}
+.pala-rc-notice button{cursor:pointer;border:1px solid var(--divider-color,#586273);background:var(--card-background-color,#182631);color:inherit;border-radius:7px;padding:6px 9px;font:inherit}
 .search{margin:3px 9px 10px;display:flex;align-items:center;gap:6px;border-radius:9px;background:var(--secondary-background-color,#2b3645);padding:7px 9px;border:1px solid var(--divider-color,#445);}
 .search input{background:transparent;border:0;outline:none;color:inherit;min-width:0;width:100%;font-size:12px}.search input::placeholder{color:var(--secondary-text-color,#9ba6b7)}
 .list{display:flex;flex-direction:column;gap:3px;padding:0 7px 8px;min-width:0}
@@ -1341,6 +1399,15 @@ md-filled-select {
 :host([data-header-mode="app"]) .top .iconbtn{min-width:38px;min-height:38px}
 /* Personal header style variables applied only within PalaSidebar. */
 .top{background:var(--p-header-background,transparent)}
+/* Optionele foto: uitsluitend in de eigen PalaSidebar-header, nooit in de HA-header. */
+.top[data-header-picture="true"]{min-height:94px;padding-top:14px;padding-bottom:10px;background-size:cover;background-repeat:no-repeat;background-position:center;align-items:flex-end;isolation:isolate}
+.top[data-header-picture="true"] .brand strong,.top[data-header-picture="true"] .brand small,.top[data-header-picture="true"] .iconbtn{color:#fff!important;text-shadow:0 1px 5px #000c}
+.top[data-header-picture="true"] .logo{box-shadow:0 2px 10px #0009}
+:host([data-header-mode="compact"]) .top[data-header-picture="true"]{min-height:82px}
+:host([data-header-mode="app"]) .top[data-header-picture="true"]{min-height:82px}
+:host([data-header-mode="minimal"]) .top[data-header-picture="true"]{min-height:72px}
+:host([data-compact="true"][data-integration="native"]) .top[data-header-picture="true"]{min-height:36px;padding:4px 7px}
+@media(prefers-reduced-motion:reduce){.top[data-header-picture="true"]{transition:none!important}}
 .top .logo{background:var(--p-header-logo-background,var(--p-accent));color:var(--p-header-logo-color,#06151e)}
 .clock{color:var(--p-header-clock-color,var(--secondary-text-color,#9ca9b9))}
 :host([data-header-mode="hidden"]) .header-extra{display:none}
@@ -1426,6 +1493,9 @@ md-filled-select {
 .editor-record{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;border-bottom:1px solid var(--divider-color,#6677);padding:8px 0;overflow-wrap:anywhere}
 .editor-record .btn{flex-shrink:0}.entity-suggestions{display:flex;flex-direction:column;gap:3px;max-height:170px;overflow:auto}
 .entity-suggestions .btn{font-size:11px;text-align:left;padding:6px 8px;overflow-wrap:anywhere}
+.entity-picker-open{min-width:42px;min-height:42px;border:1px solid var(--divider-color,#566)!important;border-radius:9px!important;background:var(--secondary-background-color,#283647)!important}
+.entity-suggestions[hidden]{display:none!important}
+.entity-suggestions .btn:focus-visible{outline:2px solid var(--p-accent);outline-offset:-2px}
 .popup-message{font-size:14px!important;white-space:pre-wrap;overflow-wrap:anywhere}
 .dialog .btn{min-height:36px}@media (pointer:coarse){.dialog .btn,.dialog .field input,.dialog .field select{min-height:44px}}
 .editor-notice{color:var(--p-accent)!important;font-weight:700}
@@ -1482,6 +1552,30 @@ md-filled-select {
 .badge-color-control{display:flex;align-items:center;gap:9px;min-width:0}
 .badge-color-control input[type="color"]{width:49px;height:44px;padding:3px;flex:0 0 49px;border:1px solid var(--divider-color,#667);border-radius:10px;background:transparent;cursor:pointer}
 .badge-color-control input[type="text"]{min-width:0;flex:1;max-width:145px;min-height:42px;border-radius:9px;background:var(--secondary-background-color,#263442);border:1px solid var(--divider-color,#667);padding:8px;color:inherit;font:600 13px monospace;letter-spacing:.02em}
+/* Algemeen gebruikt dezelfde picker als badges; het voorbeeld verandert direct, de sidebar pas na Opslaan. */
+.settings-dialog .general-accent-field .badge-color-control{width:100%;align-items:stretch}
+.settings-dialog .general-accent-field .badge-color-control input[type="color"]{flex:0 0 64px;width:64px;min-height:48px;height:48px;background:var(--secondary-background-color,#263442)}
+.settings-dialog .general-accent-field .badge-color-control input[type="text"]{max-width:none;flex:1;min-width:0;font-size:14px}
+.settings-dialog .general-accent-field input[aria-invalid="true"]{border-color:#ef4444!important;outline-color:#ef4444}
+.general-accent-preview{border-radius:11px;padding:11px 14px;min-height:42px;display:flex;align-items:center;justify-content:space-between;font-weight:750;border:1px solid var(--divider-color,#6679);transition:background-color .15s ease,color .15s ease}
+.general-accent-preview span{opacity:.8;font:600 12px monospace}
+.general-accent-note{font-size:12px;line-height:1.4;color:var(--secondary-text-color,#aab3c0)}
+.general-accent-note[data-invalid="true"]{color:#ef7777}
+/* Headerkleurvelden: optionele themakleur blijft leeg opgeslagen, ook met een visueel kleurvoorbeeld. */
+.settings-dialog .optional-color-field .badge-color-control{width:100%;min-width:0}
+.settings-dialog .optional-color-field .badge-color-control input[type="color"]{flex:0 0 58px;width:58px;height:45px;background:var(--secondary-background-color,#263442)}
+.settings-dialog .optional-color-field .badge-color-control input[type="text"]{max-width:none;min-width:0;flex:1}
+.settings-dialog .optional-color-field input[aria-invalid="true"]{border-color:#ef4444!important}
+.header-image-editor{border:1px solid var(--divider-color,#6679);padding:12px;border-radius:13px;display:flex;flex-direction:column;gap:9px;background:var(--secondary-background-color,#283647);min-width:0}
+.header-image-editor .header-image-thumbnail{height:92px;width:100%;display:flex;align-items:center;justify-content:center;border:1px dashed var(--divider-color,#667);border-radius:10px;overflow:hidden;background:var(--card-background-color,#171e29);color:var(--secondary-text-color,#aab3c0)}
+.header-image-editor .header-image-thumbnail img{width:100%;height:100%;object-fit:cover}
+.header-image-editor input[type=file]{width:100%;max-width:100%;font-size:12px;color:inherit}
+.header-image-editor .btnrow{justify-content:flex-start}
+.header-image-editor .field-note{font-size:11px!important;line-height:1.45}
+.optional-color-preview{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:39px;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:750;border:1px solid var(--divider-color,#6679)}
+.optional-color-preview span{font:600 11px monospace;opacity:.85}
+.optional-color-field .field-clear{flex:0 0 42px;width:42px;min-width:42px;min-height:44px;font-size:21px}
+@media(prefers-reduced-motion:reduce){.general-accent-preview{transition:none}}
 .badge-color-swatches{display:flex;flex-wrap:wrap;gap:7px}
 .badge-color-swatch{width:30px;height:30px;border:2px solid #fff6;border-radius:9px;cursor:pointer;box-shadow:0 1px 3px #0004}
 .badge-color-swatch:focus-visible{outline:2px solid var(--p-accent);outline-offset:2px}
@@ -1703,9 +1797,34 @@ md-filled-select {
 .pfx-intro{margin:0;padding:15px;border:1px solid var(--divider-color,#ffffff2a);border-radius:17px;background:color-mix(in srgb,var(--card-background-color,#1c2530) 92%,var(--primary-color,#38bdf8) 8%);margin:12px 0 16px}
 .pfx-intro h3{margin:0 0 6px}.pfx-intro p{margin:0;color:var(--secondary-text-color,#64748b)}
 .pfx-preview{margin:0;padding:12px;border:1px solid var(--divider-color,#ffffff33);border-radius:15px;background:var(--card-background-color,#26303b);display:grid;gap:10px}
+/* Issue #6: the PalaSidebar UI sliders previously affected HA tokens and the
+   preview, but not fixed-size text inside our Shadow DOM. Apply the same scale
+   to the sidebar, AFTER Design Studio base sizes; never scale icons or touch
+   hit targets. Header title/subtitle retain their independent size controls. */
+:host{--pfx-active-text-scale:var(--pfx-desktop-text-scale,1)}
+@media(max-width:700px){:host{--pfx-active-text-scale:var(--pfx-mobile-text-scale,1)}}
+:host(:not([data-compact="true"])) .nav-label{font-size:calc(var(--p-ui-text-size,12px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .nav-link .badge:is(:not([data-size]),[data-size="normal"]){font-size:calc(var(--p-ui-badge-font,10px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .nav-link .badge[data-size="small"]{font-size:calc(var(--p-ui-badge-small,9px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .nav-link .badge[data-size="large"]{font-size:calc(var(--p-ui-badge-large,12px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) :is(.group-toggle,.health-title){font-size:calc(var(--p-ui-group-font,10px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) :is(.clock,.footer,.entity,.entity .value,.pala-agenda-head .pala-agenda-title,.pala-agenda-entry .pala-agenda-copy strong){font-size:calc(var(--p-ui-small-font,11px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) :is(.pala-agenda-entry .pala-agenda-copy small,.pala-agenda-entry .pala-agenda-relative){font-size:calc(var(--p-ui-agenda-small,9px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .pala-agenda-entry .pala-agenda-date strong{font-size:calc(var(--p-ui-agenda-date,13px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) :is(.pala-agenda[data-size="compact"] .pala-agenda-copy strong,.pala-agenda[data-size="mini"] .pala-agenda-copy strong,.pala-agenda[data-size="mini"] .pala-agenda-title,.pala-agenda[data-size="mini"] .pala-agenda-date strong){font-size:calc(var(--p-ui-compact-font,10px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .pala-agenda[data-size="compact"] .pala-agenda-date strong{font-size:calc(var(--p-ui-small-font,11px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .search input{font-size:calc(12px * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .header-extra{font-size:calc(11px * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .footer .pala-restart{font-size:calc(var(--p-ui-text-size,12px) * var(--pfx-active-text-scale))}
+:host(:not([data-compact="true"])) .quick-tile{font-size:calc(12px * var(--pfx-active-text-scale))}
 .pfx-preview .pfx-sample{border-radius:var(--pfx-card-radius,20px);padding:13px;border:1px solid var(--divider-color,#ffffff38);background:var(--primary-background-color,#18232d);font-family:var(--pfx-font,inherit);font-size:var(--pfx-size,14px)}
 .pfx-sample .pfx-title{font-size:1.16em;font-weight:750}.pfx-sample small{font-size:.75em;color:var(--secondary-text-color,#64748b)}
 .pfx-presets{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 2px}.pfx-presets .btn{font-size:12px;min-height:36px}.pfx-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.pfx-pill{display:inline-block;background:var(--pfx-accent,#38bdf8);color:var(--pfx-ink,#06141e);padding:5px 9px;border-radius:var(--pfx-control-radius,13px);font-size:.85em;font-weight:750}
+.editor-categories{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 6px}
+.editor-categories .btn{flex:1 1 auto;min-width:105px;border-radius:11px;white-space:nowrap;font-weight:700}
+.editor-categories .btn.primary{box-shadow:inset 0 -2px var(--primary-color,#38bdf8)}
+.editor-tabs [hidden]{display:none!important}
+@media(max-width:700px){.editor-categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.editor-categories .btn{min-width:0;font-size:11px;padding-inline:6px}}
 .pfx-section{margin:0;border-top:1px solid var(--divider-color,#ffffff24);padding:12px 0 2px}.pfx-section>h3{margin:0 0 5px}.pfx-description{margin:0 0 12px;color:var(--secondary-text-color,#96a7b8)}
 .pfx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px;row-gap:8px}.pfx-field{min-width:0;display:flex;flex-direction:column;gap:7px;padding:6px 0}.pfx-field>label{font-size:12px;font-weight:650}.pfx-field select,.pfx-field input:not([type=checkbox]):not([type=color]):not([type=range]){width:100%;min-width:0}
 .pfx-field select{min-height:39px}.pfx-color{display:flex;gap:7px;align-items:center}.pfx-color input[type=color]{width:51px;height:41px;padding:3px;border-radius:10px;flex:0 0 51px;cursor:pointer;border:1px solid var(--divider-color,#777)}.pfx-color output{font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis}
@@ -2140,6 +2259,8 @@ md-filled-select {
       const style=$('style');style.textContent=CSS;
       this.shadowRoot.append(style);const themeStyle=$('style');themeStyle.textContent=THEME_CSS;this.shadowRoot.append(themeStyle);
       this.config=defaults();this.error='';this.saved=EMPTY_PREFS();this.hass=null;this._pfxDraft=null;
+      this._headerImageDraft=undefined;this._headerImageBusy=false;this._headerImageSequence=0;
+      this._rcCheck={latest:null,channel:null,status:'Nog niet gecontroleerd',checked:0,busy:false};
       // Per HA account: the in-browser copy is a fallback, NOT the source of truth.
       // No extra HA integration needed: frontend/get_user_data is built into Core.
       this._prefsStore=null;this._recoveryPoints=[];this._recoveryStatus="nog geladen";this._lastDialogHaTheme="";
@@ -2241,9 +2362,10 @@ md-filled-select {
       this.searchBox.append(sIcon,this.searchInput);
       this.head=$('div','top');this.headerExtra=$('div','header-extra');this.clock=$('div','clock');this.liveCenter=$('section','pala-live-center');this.liveCenter.hidden=true;this.liveCenter.setAttribute('aria-label','Live Control Center');this.agenda=$('section','pala-agenda');this.agenda.hidden=true;this.agenda.setAttribute('aria-label','Aankomende agenda-afspraken');this.health=$('div','health');this.footer=$('div','footer');
       this.banner=$('div','message');this.banner.hidden=true;
+      this.rcNotice=$('div','pala-rc-notice');this.rcNotice.hidden=true;this.rcNotice.setAttribute('role','status');
       const dlg=$('dialog','dialog');dlg.setAttribute('aria-label','PalaSidebar instellingen');this.dialog=dlg;
       this.weatherLayer=$('div','weather-layer');this.weatherLayer.hidden=true;this.weatherLayer.setAttribute('aria-hidden','true');
-      this.shell.append(this.weatherLayer,this.head,this.headerExtra,this.clock,this.searchBox,this.liveCenter,this.banner,this.list,this.agenda,this.health,this.footer);
+      this.shell.append(this.weatherLayer,this.head,this.headerExtra,this.clock,this.searchBox,this.liveCenter,this.banner,this.rcNotice,this.list,this.agenda,this.health,this.footer);
       this.actionDialog=$('dialog','dialog action-dialog');this.actionDialog.setAttribute('aria-label','PalaSidebar dialoog');
       this.quickDialog=$('dialog','dialog quick-dialog');this.quickDialog.setAttribute('aria-label','Van alles · Dashboardkeuze');
       this.shadowRoot.append(this.scrim,this.launch,this.shell);
@@ -2372,7 +2494,100 @@ md-filled-select {
       this.saved.ui_style=pfxLegacy(old);return true;
     }
     _pfxApply(raw=this.saved.ui_style||PFX_DEFAULT){
-      const newCss=pfxStyles(raw);
+      const prefs=pfxClean(raw);
+      // Home Assistant global typography lives outside our Shadow DOM. Keep
+      // the OWN sidebar and its dialog portal in sync with the same sliders,
+      // without multiplying the saved Design Studio typography a second time.
+      // CSS media queries pick desktop/mobile on resize with no listener.
+      for(const root of [this,this._dialogPortal]){
+        if(!root)continue;
+        root.style.setProperty('--pala-badge-fill',prefs.badgeColor);
+        root.style.setProperty('--pala-badge-ink',prefs.badgeText);
+        root.style.setProperty('--pala-badge-border-color',prefs.badgeBorderColor);
+        root.style.setProperty('--pala-badge-border-width',prefs.badgeBorderWidth+'px');
+        root.style.setProperty('--pala-badge-radius',prefs.badgeRadius+'px');
+        root.style.setProperty('--pala-badge-pad',prefs.badgePad+'px');
+        root.style.setProperty('--pala-badge-glow',prefs.badgeGlow?('0 0 '+prefs.badgeGlow+'px '+prefs.badgeColor):'none');
+        root.style.setProperty('--pala-badge-alpha',(prefs.badgeOpacity/100).toFixed(2));
+        root.style.setProperty('--pala-nav-border-width',prefs.navBorderWidth+'px');
+        root.style.setProperty('--pala-nav-border-color',prefs.navBorderColor);
+        const sectionOn=prefs.enabled&&prefs.sectionMode!=='none';
+        const sectionFill=prefs.sectionMode==='outline'?'transparent':prefs.sectionMode==='accent'
+          ?'color-mix(in srgb, '+(prefs.accentMode==='custom'?prefs.accent:'var(--p-accent)')+' '+prefs.sectionBgOpacity+'%,transparent)'
+          :'color-mix(in srgb,'+prefs.sectionBgColor+' '+prefs.sectionBgOpacity+'%,transparent)';
+        root.style.setProperty('--pala-section-border-width',sectionOn?prefs.sectionBorderWidth+'px':'0px');
+        root.style.setProperty('--pala-section-border-style',prefs.sectionBorderStyle);
+        root.style.setProperty('--pala-section-border-color',prefs.sectionBorderColor);
+        root.style.setProperty('--pala-section-radius',prefs.sectionRadius+'px');
+        root.style.setProperty('--pala-section-padding',sectionOn?prefs.sectionPadding+'px':'0px');
+        root.style.setProperty('--pala-section-gap',sectionOn?prefs.sectionGap+'px':'0px');
+        root.style.setProperty('--pala-section-background',sectionOn?sectionFill:'transparent');
+        root.style.setProperty('--pala-section-glow',sectionOn&&prefs.sectionGlow?'0 0 '+prefs.sectionGlow+'px color-mix(in srgb,'+prefs.sectionBorderColor+' 55%,transparent)':'none');
+        root.style.setProperty('--pala-section-title-color',prefs.sectionTitleColorMode==='custom'?prefs.sectionTitleColor:'var(--secondary-text-color,#aab5c5)');
+        root.style.setProperty('--pala-section-title-size',prefs.sectionTitleSize+'px');
+        root.style.setProperty('--pala-section-header-background','color-mix(in srgb,'+prefs.sectionHeaderColor+' '+prefs.sectionHeaderOpacity+'%,transparent)');
+        root.style.setProperty('--pala-item-radius',prefs.itemRadius+'px');
+        root.style.setProperty('--pala-item-padding',prefs.itemPadding+'px');
+        root.style.setProperty('--pala-item-gap',prefs.itemGap+'px');
+        root.style.setProperty('--pala-item-bg','color-mix(in srgb,'+prefs.itemBgColor+' '+prefs.itemBgOpacity+'%,transparent)');
+        root.style.setProperty('--pala-item-active-border',prefs.itemActiveBorderColor);
+        root.style.setProperty('--pfx-desktop-text-scale',(prefs.enabled?prefs.fontScale/100:1).toFixed(2));
+        root.style.setProperty('--pfx-mobile-text-scale',(prefs.enabled?prefs.mobileScale/100:1).toFixed(2));
+      }
+      this.setAttribute('data-pfx-section-studio',String(prefs.enabled&&prefs.sectionMode!=='none'));
+      this.setAttribute('data-pfx-section-mode',prefs.enabled?prefs.sectionMode:'none');
+      this.setAttribute('data-pfx-item-studio',String(prefs.enabled&&(prefs.itemRadius!==10||prefs.itemPadding!==8||prefs.itemGap!==3||prefs.itemBgOpacity>0||prefs.navBorderWidth>0)));
+      this.setAttribute('data-pfx-badge-custom',String(prefs.enabled&&prefs.badgeMode==='custom'));
+      if(this.shadowRoot){
+        let badgeStyle=this.shadowRoot.querySelector('style[data-pala-badge-studio]');
+        if(!badgeStyle){badgeStyle=document.createElement('style');badgeStyle.dataset.palaBadgeStudio='';
+          badgeStyle.textContent=String.raw`
+            .nav-row{border:var(--pala-nav-border-width,0px) solid var(--pala-nav-border-color,transparent)}
+            .badge:not([data-style="dot"]):not([data-style="plain"]){border:var(--pala-badge-border-width,0px) solid var(--pala-badge-border-color,transparent);border-radius:var(--pala-badge-radius,7px);padding-inline:var(--pala-badge-pad,5px);box-shadow:var(--pala-badge-glow,none);opacity:var(--pala-badge-alpha,1)}
+            :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"]:not([data-style="dot"]):not([data-style="plain"]):not([data-style="outline"]):not([data-style="soft"]):not([data-style="glass"]):not([data-style="gradient"]){background:var(--pala-badge-fill)!important;color:var(--pala-badge-ink)!important}
+            :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"][data-style="soft"]{background:color-mix(in srgb,var(--pala-badge-fill) 28%,transparent)!important;color:var(--pala-badge-fill)!important}
+            :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"]:is([data-style="plain"],[data-style="outline"]){color:var(--pala-badge-fill)!important}
+            .badge[data-style="glass"]:not([data-color="sensor"]):not([data-color="custom"]){background:color-mix(in srgb,var(--pala-badge-fill,var(--p-accent)) 18%,transparent)!important;backdrop-filter:blur(5px)}
+            .badge[data-style="gradient"]:not([data-color="sensor"]):not([data-color="custom"]){background:linear-gradient(130deg,var(--pala-badge-fill,var(--p-accent)),color-mix(in srgb,var(--pala-badge-fill,var(--p-accent)) 60%,#ffffff))!important;color:var(--pala-badge-ink,#071925)!important}
+            .badge[data-style="glass"]:is([data-color="sensor"],[data-color="custom"]){background:color-mix(in srgb,var(--p-badge-color,var(--p-accent)) 19%,transparent)!important}
+            .badge[data-style="gradient"]:is([data-color="sensor"],[data-color="custom"]){background:linear-gradient(130deg,var(--p-badge-color,var(--p-accent)),color-mix(in srgb,var(--p-badge-color,var(--p-accent)) 60%,white))!important}
+            @media(prefers-reduced-motion:reduce){.badge{animation:none!important;transition:none!important}}
+          `;this.shadowRoot.append(badgeStyle);}
+      }
+      if(this.shadowRoot){
+        let sectionStyle=this.shadowRoot.querySelector('style[data-pala-section-studio]');
+        if(!sectionStyle){
+          sectionStyle=document.createElement('style');sectionStyle.dataset.palaSectionStudio='';
+          sectionStyle.textContent=String.raw`
+            .section-frame{min-width:0;display:block}
+            :host([data-pfx-section-studio="true"]) .section-frame{
+              border:var(--pala-section-border-width,0px) var(--pala-section-border-style,solid) var(--pala-section-border-color,transparent);
+              border-radius:var(--pala-section-radius,14px);
+              padding:var(--pala-section-padding,0px);
+              margin-bottom:var(--pala-section-gap,0px);
+              background:var(--pala-section-background,transparent);
+              box-shadow:var(--pala-section-glow,none)
+            }
+            :host([data-pfx-section-mode="glass"]) .section-frame{backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px) saturate(120%)}
+            :host([data-pfx-section-studio="true"]) .section-frame > .group-title{
+              margin:0 0 5px;min-width:0;
+              border-radius:calc(var(--pala-section-radius,14px) / 2);
+              background:var(--pala-section-header-background,transparent)
+            }
+            :host([data-pfx-section-studio="true"]) .section-frame .group-toggle{color:var(--pala-section-title-color);font-size:calc(var(--pala-section-title-size,10px) * var(--pfx-active-text-scale,1))}
+            :host([data-pfx-section-studio="true"]) .section-frame .group-toggle:focus-visible{outline:2px solid var(--pala-section-border-color);outline-offset:2px}
+            :host([data-pfx-item-studio="true"]) .section-frame .group-content-inner{gap:var(--pala-item-gap,3px)}
+            :host([data-pfx-item-studio="true"]) .section-frame .nav-row{border-radius:var(--pala-item-radius,10px)}
+            :host([data-pfx-item-studio="true"]) .section-frame .nav-row:not(.active){background:var(--pala-item-bg,transparent)}
+            :host([data-pfx-item-studio="true"]) .section-frame .nav-row.active{border-color:var(--pala-item-active-border,var(--p-accent))}
+            :host([data-pfx-item-studio="true"]) .section-frame .nav-link{border-radius:var(--pala-item-radius,10px);padding-block:var(--pala-item-padding,8px)}
+            @media(prefers-reduced-motion:reduce){.section-frame .nav-row{transition:none!important}}
+          `;
+          this.shadowRoot.append(sectionStyle);
+        }
+      }
+      if(this.integration==='native'){this._syncNativeFooter();this._syncNativeBadgeColors(prefs);}
+      const newCss=pfxStyles(prefs);
       let node=document.getElementById(PFX_STYLE_ID);
       if(!newCss){node?.remove();return;}
       if(!node){node=document.createElement('style');node.id=PFX_STYLE_ID;document.head?.append(node);}
@@ -2407,30 +2622,95 @@ md-filled-select {
       page.append(this._help('PalaSidebar UI versus Home Assistant-thema',
         'HA standaard gebruikt de kleuren van je gekozen Home Assistant-thema. Klassieke stijl overschrijft meer globale kleuren en lettergroottes. De PalaSidebar-weereffecten en dynamische badges stel je apart in. Verminder glasvervaging op oudere tablets voor lagere GPU-belasting.'));
       const profiles=$('div','pfx-presets');
-      for(const [key,label] of [['ha','HA standaard'],['classic','Klassieke stijl'],['premium','Premium glas'],['compact','Compact'],['amoled','AMOLED']]){
-        const btn=this._button(label,'pfx-preset');btn.dataset.profile=key;profiles.append(btn);
+      for(const [key,label] of [['ha','HA standaard'],['classic','Klassieke stijl'],['premium','Premium glas'],['compact','Compact'],['amoled','AMOLED'],['gold','Midnight Gold'],['ice','Nordic Ice'],['sunset','Zonsondergang']]){
+        const btn=this._button(label,'pfx-preset');btn.dataset.profile=key;btn.title='Bekijk het '+label+' ontwerp';profiles.append(btn);
       }
       page.append(profiles);
+      const premiumStyle=$('style');premiumStyle.textContent='.pfx-presets{display:flex;flex-wrap:wrap;gap:9px;padding:8px;border-radius:18px;background:linear-gradient(130deg,rgba(255,255,255,.065),rgba(255,255,255,.012));border:1px solid rgba(150,160,180,.2)}.pfx-presets button{border-radius:12px!important;transition:transform .2s,box-shadow .2s,border-color .2s}.pfx-presets button:hover{transform:translateY(-2px);border-color:var(--primary-color,#ffd700)!important;box-shadow:0 9px 23px rgba(0,0,0,.18)}';page.append(premiumStyle);
       const preview=$('div','pfx-preview');preview.id='pala-pfx-preview';preview.append($('strong',null,'Live voorbeeld'));
       const sample=$('div','pfx-sample');sample.append($('div','pfx-title','PalaSidebar · Mijn Home Assistant'),$('small',null,'Een voorbeeldkaart met energiekleuren, vormgeving en typografie'));
       const pills=$('div','pfx-pills');for(const key of ['energyGrid','energySolar','energyReturn']){const t=$('span','pfx-pill',PFX_ENERGY[key][2]);t.dataset.pfxSwatch=key;pills.append(t);}sample.append(pills);preview.append(sample);page.append(preview);
-      this._pfxSection(page,'Lettertype en responsieve grootte','De grootte werkt voor Home Assistant op mobiel en desktop. Met ‘Klassieke stijl’ herstel je ook de oude compacte lettergroottes.',[
+      this._pfxSection(page,'Lettertype en responsieve grootte','Desktop en mobiel passen nu ook direct de PalaSidebar-menu-items, secties, badges en sensorteksten aan. De aparte titel- en subtitelgroottes in Header blijven zelfstandig instelbaar. Met ‘Klassieke stijl’ herstel je ook de oude compacte lettergroottes.',[
         ['toggle','enabled','PalaSidebar-vormgeving actief'],
-        ['select','font','Lettertype',Object.entries({ha:'Home Assistant-thema',supercell:'Supercell Magic',roboto:'Roboto',system:'Systeemfont',arial:'Arial'})],
+        ['select','font','Lettertype',Object.entries({ha:'Home Assistant-thema',supercell:'Supercell Magic',roboto:'Roboto',system:'Systeemfont',arial:'Arial',custom:'Eigen lettertype (upload)'})],
         ['range','fontScale','Desktop tekstgrootte',[75,160,5,'%']],
         ['range','mobileScale','Mobiel tekstgrootte',[75,160,5,'%']]
       ]);
-      this._pfxSection(page,'Thema en achtergrond','‘Home Assistant’ respecteert het actieve thema. ‘Klassieke vormgeving’ herstelt de oude volledige styling. AMOLED is een donkere override.',[
-        ['select','background','Dashboardachtergrond',[['ha','Volg Home Assistant'],['classic','Klassieke vormgeving'],['glass','Glas · zacht verloop'],['flat','Effen · HA-achtergrond'],['amoled','AMOLED zwart']]],
+      const upload=$('label','field');upload.append($('span',null,'Eigen lettertype uploaden · WOFF2, WOFF, TTF, OTF (max. 160 kB)'));
+      const fontFile=$('input');fontFile.type='file';fontFile.id='pala-custom-font-upload';fontFile.accept='.woff2,.woff,.ttf,.otf';upload.append(fontFile);page.append(upload);
+      page.append(this._button('Verwijder eigen lettertype','pfx-remove-font'));
+
+      const fontInfo=$('p','field-note',this._pfxPrefs().customFont?'Eigen lettertype beschikbaar. Kies Eigen lettertype en sla op.':'Upload blijft lokaal tot je op Vormgeving opslaan klikt. Grote fonts zijn niet geschikt voor accountopslag.');fontInfo.id='pala-custom-font-status';page.append(fontInfo);
+      const backgrounds=$('section','pfx-section');
+      backgrounds.append($('h3',null,'Dashboardachtergrond'),$('p','pfx-description','Kies je achtergrond via één overzichtelijke galerij. De geselecteerde stijl krijgt een accentkleurige rand.'));
+      // Single source of truth for the background: the gallery updates this
+      // hidden form value. Existing saved preferences/presets still work.
+      const backgroundValue=$('input');backgroundValue.type='hidden';backgroundValue.id='pala-pfx-background';
+      backgroundValue.dataset.pfxKey='background';backgroundValue.value=this._pfxPrefs().background;
+      backgrounds.append(backgroundValue);
+      const bgGrid=$('div','pfx-background-choices');bgGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;max-width:100%';
+      for(const [key,label,bg] of [['ha','Home Assistant','var(--card-background-color,#354354)'],['classic','Klassiek','#252334'],['glass','Glas','linear-gradient(135deg,#223149,#485b6b)'],['flat','Effen HA','#343c46'],['solid','Eigen kleur','linear-gradient(135deg,#2b3550,#121927)'],['midnight','Midnight','linear-gradient(135deg,#070d1d,#172849)'],['aurora','Aurora','linear-gradient(135deg,#06231f,#173750,#0c162e)'],['sunset','Zonsondergang','linear-gradient(135deg,#311b38,#72465b,#18233a)'],['amoled','AMOLED','#030303']]){
+        const b=this._button(label,'pfx-background');b.dataset.background=key;b.style.cssText='min-height:52px;border-radius:13px;background:'+bg+';color:#fff;border:1px solid #ffffff35;text-shadow:0 1px 3px #000;transition:border-color .2s,transform .2s';bgGrid.append(b);
+      }backgrounds.append(bgGrid);page.append(backgrounds);
+      this._pfxSection(page,'Accentkleur en achtergronddetails','Pas je accentkleur aan. Eigen achtergrondkleur is van toepassing bij Effen · eigen kleur; glassterkte geldt voor glasachtergronden.',[
         ['select','accentMode','Accentkleur',[['ha','Volg Home Assistant'],['custom','Eigen accentkleur']]],
-        ['color','accent','Eigen accentkleur'],['range','glass','Glassterkte',[15,95,5,'%']]
+        ['color','accent','Eigen accentkleur'],['color','backgroundColor','Eigen achtergrondkleur'],['range','glass','Glassterkte',[15,95,5,'%']]
       ]);
       this._pfxSection(page,'Vormgeving en beweging','Kaarten, knoppen, schaduwen en subtiele effecten.',[
         ['range','cardRadius','Kaarten en dialogen',[0,44,2,'px']],
         ['range','controlRadius','Knoppen en invoervelden',[0,32,2,'px']],
         ['toggle','sidebarBlur','Glasvervaging van HA-sidebar'],['toggle','dialogBlur','Glasvervaging van HA-dialogen'],
-        ['toggle','shadows','Kaartschaduwen'],['toggle','energyGlow','Subtiele energie-gloed']
+        ['toggle','shadows','Kaartschaduwen'],['toggle','energyGlow','Subtiele energie-gloed'],['toggle','buttonGlow','Premium knop-gloed'],['range','footerScale','Onderste Home Assistant-knoppen',[75,160,5,'%']]
       ]);
+      this._pfxSection(page,'Badge Design Studio','Eigen kleuren en randen voor standaard PalaSidebar-sensorbadges. Sensorgestuurde en expliciete alarmkleuren houden voorrang.',[
+        ['select','badgeMode','Standaard badgekleur',[['ha','Bestaande thema-/accentkleur'],['custom','Eigen PalaSidebar-kleuren']]],
+        ['color','badgeColor','Standaard badge-achtergrond'],['color','badgeText','Standaard badge-tekst'],
+        ['color','badgeBorderColor','Badge randkleur'],['range','badgeBorderWidth','Badge randdikte',[0,4,1,'px']],
+        ['range','badgeRadius','Badge afronding',[0,24,1,'px']],['range','badgePad','Horizontale binnenruimte',[0,14,1,'px']],
+        ['range','badgeGlow','Badge gloed',[0,24,2,'px']],['range','badgeOpacity','Badge transparantie',[30,100,5,'%']]
+      ]);
+      const badgeDemo=$('div','pfx-preview');badgeDemo.id='pala-pfx-badge-demo';
+      badgeDemo.append($('strong',null,'Live badgevoorbeeld'));
+      const badgeChip=$('span',null,'⚡ Verbruik 4.2 kWh');
+      badgeChip.id='pala-pfx-badge-demo-chip';
+      badgeChip.style.cssText='display:inline-block;align-self:start;font-weight:750;font-size:13px;transition:background .2s,border-radius .2s';
+      badgeDemo.append(badgeChip);page.append(badgeDemo);
+      this._pfxSection(page,'Home Assistant-badges','De badges naast Instellingen en Meldingen zijn van Home Assistant. Pas hun vormgeving aan zonder de badgewaarden of de knoppen te veranderen.',[
+        ['select','nativeBadgeMode','Kleur Home Assistant-badges',[['sidebar','PalaSidebar-accent'],['ha','Volg Home Assistant'],['custom','Eigen badgekleur']]],
+        ['color','nativeBadgeColor','Eigen badge-achtergrond'],['color','nativeBadgeText','Eigen badge-tekstkleur'],
+        ['range','nativeBadgeBorder','Badge-randdikte',[0,4,1,'px']],['range','nativeBadgeRadius','Badge-afronding',[0,24,1,'px']]
+      ]);
+      this._pfxSection(page,'Sectie Design Studio · complete blokken','Geef START, BEHEER en andere secties een complete kaart of subtiele rand. Standaard blijft alles ongewijzigd.',[
+        ['select','sectionMode','Sectiestijl',[['none','Uit · huidige weergave'],['outline','Alleen een rand'],['soft','Zachte achtergrond'],['glass','Glas · transparant'],['accent','Accentkleur · subtiel']]],
+        ['select','sectionBorderStyle','Randstijl',[['solid','Doorgetrokken'],['dashed','Gestreept'],['dotted','Gestippeld']]],
+        ['color','sectionBorderColor','Sectierandkleur'],['range','sectionBorderWidth','Sectieranddikte',[0,5,1,'px']],
+        ['range','sectionRadius','Afronding sectie',[0,28,1,'px']],['range','sectionPadding','Binnenruimte sectie',[0,20,1,'px']],
+        ['range','sectionGap','Ruimte tussen secties',[0,28,1,'px']],['color','sectionBgColor','Achtergrondkleur sectie'],
+        ['range','sectionBgOpacity','Achtergronddekking',[0,85,5,'%']],['range','sectionGlow','Schaduw / gloed',[0,24,2,'px']]
+      ]);
+      this._pfxSection(page,'Sectiekoppen · START en BEHEER','Pas de titel en de headerstrook aan. Het uitklappen, de pijltjes en animaties blijven werken.',[
+        ['select','sectionTitleColorMode','Titelkleur',[['ha','Volg huidig thema'],['custom','Eigen titeltekst']]],
+        ['color','sectionTitleColor','Eigen titelkleur'],['range','sectionTitleSize','Grootte sectietitel',[9,20,1,'px']],
+        ['color','sectionHeaderColor','Header-achtergrond'],['range','sectionHeaderOpacity','Dekking header',[0,85,5,'%']]
+      ]);
+      this._pfxSection(page,'Items binnen secties','Stel de rijranden, afgeronde hoeken, binnenruimte en actieve items in. Werkt samen met de bestaande Badge Design Studio.',[
+        ['range','navBorderWidth','Itemrand-dikte',[0,4,1,'px']],['color','navBorderColor','Itemrandkleur'],
+        ['range','itemRadius','Afronding items',[0,24,1,'px']],['range','itemPadding','Hoogte / padding items',[3,16,1,'px']],
+        ['range','itemGap','Afstand tussen items',[0,18,1,'px']],['color','itemBgColor','Achtergrondkleur items'],
+        ['range','itemBgOpacity','Dekking itemachtergrond',[0,85,5,'%']],['color','itemActiveBorderColor','Actieve itemrand']
+      ]);
+      const sectionPreview=$('div','pfx-preview');sectionPreview.id='pala-pfx-section-preview';
+      sectionPreview.append($('strong',null,'Live voorbeeld · sectie en items'));
+      const mini=$('div');mini.id='pala-pfx-section-card';
+      mini.style.cssText='padding:8px;border-radius:14px;min-width:0;display:flex;flex-direction:column;gap:5px';
+      const header=$('div',null,'START  ⌄');header.id='pala-pfx-section-heading';
+      header.style.cssText='font-weight:750;letter-spacing:.06em;padding:7px 9px';
+      mini.append(header);
+      for(const title of ['CV Verwarmen   21°C','Netafname   4.2 kWh']){
+        const item=$('div',null,title);item.className='pala-pfx-section-demo-row';
+        item.style.cssText='padding:8px 9px;border-radius:10px;font-size:12px;font-weight:650';mini.append(item);
+      }
+      sectionPreview.append(mini);page.append(sectionPreview);
       const energy=$('section','pfx-section');energy.append($('h3',null,'Energiepalet'),$('p','pfx-description','Stel de acht Home Assistant Energy Dashboard-kleuren in. Alle zeven kleurtrappen lopen automatisch mee.'));
       const grid=$('div','pfx-grid');grid.append(this._pfxField('select','energyMode','Energiekleuren',[['ha','Volg Home Assistant'],['custom','Eigen kleurenpalet']]));
       for(const key of Object.keys(PFX_ENERGY))grid.append(this._pfxField('color',key,PFX_ENERGY[key][2]));energy.append(grid);page.append(energy);
@@ -2445,7 +2725,10 @@ md-filled-select {
         classic:{background:'classic',font:'supercell',accentMode:'custom',energyMode:'custom',fontScale:100,mobileScale:100,glass:45,cardRadius:28,controlRadius:20,sidebarBlur:true,dialogBlur:true,shadows:true,energyGlow:true},
         premium:{background:'glass',font:'supercell',accentMode:'ha',energyMode:'custom',fontScale:105,mobileScale:100,glass:55,cardRadius:28,controlRadius:18,dialogBlur:true},
         compact:{background:'ha',font:'roboto',fontScale:90,mobileScale:95,cardRadius:14,controlRadius:10,dialogBlur:false,sidebarBlur:false},
-        amoled:{background:'amoled',font:'system',fontScale:100,mobileScale:100,glass:90,sidebarBlur:false,dialogBlur:false,shadows:false,energyGlow:false}
+        amoled:{background:'amoled',font:'system',fontScale:100,mobileScale:100,glass:90,sidebarBlur:false,dialogBlur:false,shadows:false,energyGlow:false},
+        gold:{background:'amoled',font:'system',accentMode:'custom',accent:'#ffd700',fontScale:105,mobileScale:100,cardRadius:24,controlRadius:16,glass:55,shadows:true,buttonGlow:true},
+        ice:{background:'glass',font:'system',accentMode:'custom',accent:'#60c9ff',fontScale:100,mobileScale:100,glass:62,cardRadius:22,controlRadius:14,sidebarBlur:true,buttonGlow:true},
+        sunset:{background:'glass',font:'system',accentMode:'custom',accent:'#ff825a',fontScale:105,mobileScale:100,glass:48,cardRadius:28,controlRadius:18,buttonGlow:true}
       }[profile];
       if(!chosen)return;
       const next=pfxClean({...base,...chosen,enabled:true});
@@ -2466,6 +2749,34 @@ md-filled-select {
       if(!this.dialog?.querySelector('#pala-pfx-preview'))return;
       this._pfxDraft=this._pfxReadForm();
       const v=this._pfxDraft,preview=this.dialog.querySelector('#pala-pfx-preview');
+      const sectionDemo=this.dialog.querySelector('#pala-pfx-section-card');
+      if(sectionDemo){
+        const active=v.enabled&&v.sectionMode!=='none';
+        const c=v.sectionMode==='accent'?(v.accentMode==='custom'?v.accent:'#38bdf8'):v.sectionBgColor;
+        const bg=v.sectionMode==='outline'?'transparent':'color-mix(in srgb,'+c+' '+v.sectionBgOpacity+'%,transparent)';
+        sectionDemo.style.background=active?bg:'transparent';
+        sectionDemo.style.border=active?v.sectionBorderWidth+'px '+v.sectionBorderStyle+' '+v.sectionBorderColor:'0px solid transparent';
+        sectionDemo.style.borderRadius=v.sectionRadius+'px';sectionDemo.style.padding=(active?v.sectionPadding:0)+'px';
+        sectionDemo.style.boxShadow=active&&v.sectionGlow?'0 0 '+v.sectionGlow+'px '+v.sectionBorderColor:'none';
+        const header=sectionDemo.querySelector('#pala-pfx-section-heading');
+        if(header){header.style.color=v.sectionTitleColorMode==='custom'?v.sectionTitleColor:'inherit';
+          header.style.fontSize=v.sectionTitleSize+'px';
+          header.style.background='color-mix(in srgb,'+v.sectionHeaderColor+' '+v.sectionHeaderOpacity+'%,transparent)';}
+        for(const item of sectionDemo.querySelectorAll('.pala-pfx-section-demo-row')){
+          item.style.border=v.navBorderWidth+'px solid '+v.navBorderColor;
+          item.style.borderRadius=v.itemRadius+'px';item.style.padding=v.itemPadding+'px 9px';
+          item.style.background='color-mix(in srgb,'+v.itemBgColor+' '+v.itemBgOpacity+'%,transparent)';
+        }
+        sectionDemo.style.gap=v.itemGap+'px';
+      }
+      const demo=this.dialog.querySelector('#pala-pfx-badge-demo-chip');
+      if(demo){
+        const c=v.badgeMode==='custom'?v.badgeColor:(v.accentMode==='custom'?v.accent:'#38bdf8');
+        demo.style.background=c;demo.style.color=v.badgeMode==='custom'?v.badgeText:readableBadgeText(c);
+        demo.style.border=v.badgeBorderWidth+'px solid '+v.badgeBorderColor;
+        demo.style.borderRadius=v.badgeRadius+'px';demo.style.padding='5px '+v.badgePad+'px';
+        demo.style.boxShadow=v.badgeGlow?'0 0 '+v.badgeGlow+'px '+c:'none';demo.style.opacity=String(v.badgeOpacity/100);
+      }
       preview.style.setProperty('--pfx-card-radius',v.cardRadius+'px');
       preview.style.setProperty('--pfx-control-radius',v.controlRadius+'px');
       preview.style.setProperty('--pfx-font',PFX_FONTS[v.font]);
@@ -2476,9 +2787,14 @@ md-filled-select {
         const k=el.dataset.pfxSwatch;el.style.background=v.energyMode==='custom'?v[k]:PFX_ENERGY[k][1];
         el.style.color=readableBadgeText(el.style.background);
       });
+      this.dialog.querySelectorAll('[data-background]').forEach(btn=>{
+        const selected=btn.dataset.background===v.background;btn.setAttribute('aria-pressed',String(selected));
+        btn.style.outline=selected?'2px solid var(--primary-color,#ffd700)':'none';btn.style.outlineOffset='-2px';
+      });
       this.dialog.querySelectorAll('[data-pfx-key]').forEach(el=>{
         const out=el.parentElement.querySelector('output');if(out){
-          out.textContent=el.type==='range'?el.value+(el.max<=100&&el.dataset.pfxKey!=='cardRadius'&&el.dataset.pfxKey!=='controlRadius'?'%':'px'):el.value;
+          const unit=['fontScale','mobileScale','glass'].includes(el.dataset.pfxKey)?'%':'px';
+          out.textContent=el.type==='range'?el.value+unit:el.value;
         }
       });
       this._pfxApply(v);
@@ -2544,9 +2860,106 @@ md-filled-select {
         'Ontbrekend: de sensor bestaat niet onder die entity_id. Niet beschikbaar: Home Assistant meldt unknown of unavailable. Dubbele route: twee knoppen verwijzen naar dezelfde pagina; soms is dat bewust. Opslagstatus geeft aan of jouw persoonlijke instellingen veilig naar Home Assistant zijn geschreven.'));
 
       const holder=$('div');holder.id='pala-diagnostic-results';page.append(holder);
-      const actions=$('div','btnrow');actions.append(this._button('Opnieuw controleren','diagnostic-refresh','primary'),this._button('Rapport kopiëren','diagnostic-copy'));page.append(actions);
+      const actions=$('div','btnrow');actions.append(this._button('Opnieuw controleren','diagnostic-refresh','primary'),this._button('Rapport kopiëren','diagnostic-copy'),this._button('Zelftest uitvoeren','support-test'));page.append(actions);
+      const results=$('div','diagnostic-list');results.id='pala-selftest-results';results.setAttribute('role','status');page.append(results);
+      page.append($('h3',null,'Bug melden via GitHub'));
+      page.append($('p','field-note','Je ziet eerst een voorbeeld. Alleen na jouw privacybevestiging opent GitHub met een ingevuld issue; je moet daar zelf nog op Submit klikken. Er worden geen tokens, sensorwaarden of configuraties automatisch toegevoegd.'));
+      page.append(this._formField('Titel van het probleem','pala-issue-title',''));
+      for(const [label,id,placeholder] of [['Wat gaat er fout?','pala-issue-description','Omschrijf de fout'],['Stappen om de fout na te doen','pala-issue-steps','1. Open... 2. Klik...']]){
+        const field=$('label','field');field.append($('span',null,label));const area=$('textarea');area.id=id;area.rows=3;area.maxLength=1500;area.placeholder=placeholder;field.append(area);page.append(field);
+      }
+      const screenshotField=$('label','field');
+      screenshotField.append($('span',null,'Screenshot (optioneel, PNG of JPG)'));
+      const screenshot=$('input');screenshot.type='file';screenshot.id='pala-issue-screenshot';screenshot.accept='image/png,image/jpeg,image/webp';
+      screenshotField.append(screenshot);page.append(screenshotField);
+      const screenshotHint=$('p','field-note','Je afbeelding wordt alleen lokaal bekeken. Klik na het openen van GitHub op het bijlagegedeelte en voeg hetzelfde bestand toe. De screenshot wordt niet automatisch verzonden.');
+      screenshotHint.id='pala-issue-screenshot-status';page.append(screenshotHint);
+      const screenshotPreview=$('img');screenshotPreview.id='pala-issue-screenshot-preview';screenshotPreview.hidden=true;
+      screenshotPreview.alt='Voorbeeld gekozen screenshot';screenshotPreview.style.cssText='max-width:100%;max-height:240px;object-fit:contain;border-radius:8px';page.append(screenshotPreview);
+      const check=$('label','check'),consent=$('input');consent.type='checkbox';consent.id='pala-issue-consent';check.append(consent,$('span',null,'Ik heb de tekst gecontroleerd op privégegevens.'));page.append(check);
+      const issueButtons=$('div','btnrow');issueButtons.append(this._button('Voorbeeld bekijken','support-preview'),this._button('Issue openen op GitHub','support-report','primary'));page.append(issueButtons);
+      const preview=$('textarea');preview.id='pala-issue-preview';preview.rows=8;preview.readOnly=true;preview.setAttribute('aria-label','Voorbeeld GitHub-issue');preview.placeholder='Klik op Voorbeeld bekijken';page.append(preview);
+      page.append($('h3',null,'Updatecontrole'));
+      const update=$('p','field-note',this._rcCheck.status);update.id='pala-rc-status';update.setAttribute('role','status');page.append(update);
+      page.append($('p','field-note','Geïnstalleerd: '+VERSION+' · Updatekanaal: '+(VERSION.includes('-beta')?'bèta':VERSION.includes('-rc')?'RC':'stabiel')+'. Installeren via HACS.'));page.append(this._button('Controleer op updates','support-updates'));
       page.append($('p','field-note','De controle toont alleen entiteiten die PalaSidebar zelf gebruikt, niet alle Home Assistant-entiteiten. Een verdwenen dashboardlink is niet altijd een dubbele menuverwijzing.'));
       this._fillDiagnostic(holder);
+    }
+    _supportTest(){
+      const checks=[['PalaSidebar geladen',this.isConnected&&!!this.shadowRoot?.querySelector('.shell')],
+        ['Integratie gereed',bootInfo.phase==='gereed'],['Home Assistant verbonden',!!this.hass?.user],
+        ['Accountopslag geladen',!!this._prefsStore?.ready],
+        ['Navigatie',!!this.list&&this._navData(true,true).length>0],
+        ['Instellingen',!!this.dialog?.open]];
+      const result=this.dialog.querySelector('#pala-selftest-results');
+      if(result){result.replaceChildren();for(const [name,ok] of checks)result.append($('div','diagnostic-line',(ok?'✓ ':'⚠ ')+name));}
+      return checks;
+    }
+    _supportReportText(){
+      const get=id=>String(this.dialog.querySelector('#pala-issue-'+id)?.value||'').trim().slice(0,1500);
+      const title=get('title').slice(0,100),description=get('description'),steps=get('steps');
+      const checks=this._supportTest();
+      const body=['## Probleem',description,'','## Stappen om te reproduceren',steps,'','## Diagnose zonder privégegevens',
+        '- PalaSidebar: '+VERSION,'- Home Assistant: '+String(this.hass?.config?.version||'onbekend').slice(0,30),
+        '- Weergave: '+(this.integration==='native'?'ingebouwd':'zwevend'),
+        '- Accountopslag: '+(this._prefsStore?.ready?'geladen':'niet geladen'),
+        '- Zelftest: '+checks.map(([name,ok])=>name+' '+(ok?'OK':'controle nodig')).join('; '),
+        '','Controleer deze melding vóór publicatie op GitHub.'].join('\n');
+      return {title,description,steps,body};
+    }
+    _supportPreview(){
+      const report=this._supportReportText();
+      const field=this.dialog.querySelector('#pala-issue-preview');if(field)field.value=report.body;
+      return report;
+    }
+    _supportSubmit(){
+      const report=this._supportPreview();
+      if(!report.title||!report.description||!report.steps){this._editorNotice('Vul eerst titel, beschrijving en stappen in.');return;}
+      if(!this.dialog.querySelector('#pala-issue-consent')?.checked){this._editorNotice('Controleer de tekst en bevestig eerst de privacycontrole.');return;}
+      const link=PALA_REPO+'/issues/new?title='+encodeURIComponent('[Bug] '+report.title)+'&body='+encodeURIComponent(report.body);
+      window.open(link,'_blank','noopener,noreferrer');
+      if(this.dialog.querySelector('#pala-issue-screenshot')?.files?.length)this._editorNotice('Voeg je gekozen screenshot zelf toe in het GitHub-formulier voordat je indient.');
+    }
+    _paintRcNotice(){
+      const info=this._rcCheck.latest;
+      let ignored='';try{ignored=localStorage.getItem('palasidebar.updates.dismissed')||'';}catch{}
+      this.rcNotice.replaceChildren();this.rcNotice.hidden=!info||ignored===info||this._dismissedRc===info;
+      if(this.rcNotice.hidden)return;
+      const label=this._rcCheck.channel==='stable'?'stabiele versie':this._rcCheck.channel==='beta'?'bèta':'RC';
+      const buttons=$('div','btnrow');buttons.append(this._button('Bekijk '+label,'rc-open-update'),this._button('Later','rc-dismiss-update'));
+      this.rcNotice.append($('strong',null,'Nieuwe PalaSidebar '+label+' beschikbaar: '+info),buttons);
+    }
+    _paintUpdateStatus(){
+      const node=this.dialog?.querySelector('#pala-rc-status');
+      if(node)node.textContent=this._rcCheck.status;
+      const button=this.dialog?.querySelector('[data-do="support-updates"]');
+      if(button){button.disabled=this._rcCheck.busy;button.textContent=this._rcCheck.busy?'Controleren…':'Controleer op updates';}
+    }
+    async _checkRcUpdates(force=false){
+      if(this._rcCheck.busy||(!force&&Date.now()-this._rcCheck.checked<21600000))return;
+      this._rcCheck.busy=true;this._rcCheck.status='Controleren op GitHub…';this._paintUpdateStatus();
+      const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),6000);
+      try{
+        const response=await fetch(PALA_API,{signal:abort.signal,credentials:'omit',headers:{Accept:'application/vnd.github+json'}});
+        if(!response.ok)throw Error('GitHub tijdelijk onbereikbaar');
+        const raw=await response.text();if(raw.length>120000)throw Error('Antwoord te groot');
+        const data=JSON.parse(raw);if(!Array.isArray(data))throw Error('Ongeldig overzicht');
+        const parse=v=>{const m=String(v||'').match(/^v?(\d+)\.(\d+)\.(\d+)(?:-(beta|rc)\.?([1-9]\d*))?$/i);return m?{major:+m[1],minor:+m[2],patch:+m[3],channel:(m[4]||'stable').toLowerCase(),iteration:+(m[5]||0)}:null;};
+        const compareCore=(a,b)=>a.major-b.major||a.minor-b.minor||a.patch-b.patch;
+        const installed=parse(VERSION);if(!installed)throw Error('Onbekend versieformaat');
+        const found=data.map(r=>({release:r,version:parse(r.tag_name)})).filter(x=>x.version&&!x.release.draft&&(x.version.channel==='stable'?!x.release.prerelease:!!x.release.prerelease));
+        const candidates=found.filter(x=>{
+          const c=compareCore(x.version,installed);
+          if(x.version.channel==='stable')return c>0||(c===0&&installed.channel!=='stable');
+          return x.version.channel===installed.channel&&(c>0||(c===0&&x.version.iteration>installed.iteration));
+        });
+        candidates.sort((a,b)=>compareCore(b.version,a.version)||(a.version.channel!==b.version.channel?(a.version.channel==='stable'?-1:1):b.version.iteration-a.version.iteration));
+        const match=candidates[0];
+        this._rcCheck.latest=match?.release.tag_name||null;this._rcCheck.channel=match?.version.channel||null;
+        this._rcCheck.status=match?'Nieuwe '+(match.version.channel==='stable'?'stabiele versie':match.version.channel==='beta'?'bèta':'RC')+' beschikbaar: '+match.release.tag_name:'Geen nieuwere versie beschikbaar binnen jouw updatekanaal.';
+        this._rcCheck.checked=Date.now();this._paintRcNotice();
+      }catch{this._rcCheck.status='Controle niet mogelijk; bekijk updates in HACS.';this._rcCheck.checked=Date.now();}
+      finally{clearTimeout(timer);this._rcCheck.busy=false;this._paintUpdateStatus();}
     }
     _fillDiagnostic(holder=this.dialog.querySelector('#pala-diagnostic-results')){
       if(!holder)return;holder.replaceChildren();const d=this._diagnosticData(),store=this._prefsStore;
@@ -3715,6 +4128,18 @@ md-filled-select {
       n.style.setProperty('--pala-native-text-size',(12*typography).toFixed(1)+'px');
       n.style.setProperty('--pala-native-badge-size',(10*typography).toFixed(1)+'px');
     }
+    _syncNativeBadgeColors(raw=this._pfxDraft||this.saved.ui_style||PFX_DEFAULT){
+      const n=this.integration==='native'?this._drawer():null;
+      if(!n)return;
+      const p=pfxClean(raw);
+      const color=p.enabled&&p.nativeBadgeMode==='custom'?p.nativeBadgeColor:
+        p.enabled&&p.nativeBadgeMode==='ha'?'var(--accent-color,#38bdf8)':
+        (this.style.getPropertyValue('--p-accent').trim()||colour(this.saved.accent||this._resolved().appearance.accent));
+      n.style.setProperty('--pala-badge-accent',color);
+      n.style.setProperty('--pala-native-badge-ink',p.enabled&&p.nativeBadgeMode==='custom'?p.nativeBadgeText:'#0b1822');
+      n.style.setProperty('--pala-native-badge-radius',(p.enabled?p.nativeBadgeRadius:8)+'px');
+      n.style.setProperty('--pala-native-badge-border',(p.enabled?p.nativeBadgeBorder:1)+'px');
+    }
     _syncHaHeader(){
       const n=this.integration==='native' ? (this.native?.isConnected?this.native:deepFindSidebar()) : null;
       if(!n?.shadowRoot){this._restoreHaHeader();return;}
@@ -3728,9 +4153,7 @@ md-filled-select {
       this._syncNativeTypography(n);
       // HA's bottom fixed-navigation is rendered OUTSIDE the PalaSidebar
       // shadow DOM. Feed it the same live accent as badges in the custom menu.
-      n.style.setProperty('--pala-badge-accent',
-        this.style.getPropertyValue('--p-accent').trim() ||
-        colour(this.saved.accent||this._resolved().appearance.accent));
+      this._syncNativeBadgeColors();
       // Only sidebarTitle is used; never remove HA's menu component or overwrite global styles.
       const desired=h.ha_title||this._haHeaderOriginal;
       if(n.sidebarTitle!==desired)n.sidebarTitle=desired;
@@ -3769,10 +4192,10 @@ md-filled-select {
         .panels-list ha-list-item-button .badge,
         .panels-list ha-list-item-base .badge {
           background-color:var(--pala-badge-accent,var(--accent-color))!important;
-          color:#0b1822!important;
-          border-radius:8px!important;
+          color:var(--pala-native-badge-ink,#0b1822)!important;
+          border-radius:var(--pala-native-badge-radius,8px)!important;
           font-weight:800!important;
-          border:1px solid #ffffff25!important;
+          border:var(--pala-native-badge-border,1px) solid #ffffff25!important;
         }
       `;
       // Native HA fixed footer lives outside the PalaSidebar shadow tree.
@@ -4237,6 +4660,12 @@ md-filled-select {
       }
       if(cmd==='agenda-save'){this._agendaSaveEditor();return;}
       if(cmd==='save-header'){this._saveHeader();return;}
+      if(cmd==='head-token-insert'){this._insertHeaderToken();return;}
+      if(cmd==='entity-picker-open'){
+        const field=this.dialog.querySelector('#'+target.dataset.field);
+        if(field){this._updateSuggestions(field,true);field.focus();}
+        return;
+      }
       if(cmd==='layout-section-pick'){const sel=this.dialog.querySelector('#pala-layout-section');if(sel){sel.value=target.dataset.id;this._layoutFillSection();}return;}
       if(cmd==='layout-icon-same-sensor'){
         const source=this.dialog?.querySelector('#pala-layout-title-entity')?.value||'';
@@ -4261,16 +4690,28 @@ md-filled-select {
       if(cmd==='settings-close'||cmd==='settings-close-top'){this._closeOwnedDialog(this.dialog);return;}
       if(cmd==='action-close'){this._closeOwnedDialog(this.actionDialog);return;}
       if(cmd==='editor-tabs-prev'||cmd==='editor-tabs-next'){const nav=this.dialog.querySelector('.editor-tabs');if(nav)nav.scrollBy({left:(cmd==='editor-tabs-prev'?-1:1)*Math.max(150,nav.clientWidth*.7),behavior:'smooth'});return;}
+      if(cmd==='editor-category'){
+        const first=this.dialog.querySelector('[data-do="editor-tab"][data-category="'+target.dataset.category+'"]');
+        first?.click();return;
+      }
       if(cmd==='editor-tab'){if(this.editorTab==='design')this._applyDesign();if(this.editorTab==='ui_style'){this._pfxDraft=null;this._pfxApply();}if(this.themeDraft){this.themeDraft=null;this._syncTheme(true);this._fillThemeEditor(this._themePrefs());}this.dialog.querySelector('#pala-editor-notice')?.remove();this._showEditorTab(target.dataset.tab);const scroller=this.dialog.querySelector('.dialog-content');if(scroller)scroller.scrollTop=0;return;}
       if(cmd==='theme-preset'){this._chosenPreset=target.dataset.preset;this._themePreviewLive();return;}
       if(cmd==='theme-save'){this._themeSave();return;}
       if(cmd==='pfx-preset'){this._pfxPreset(target.dataset.profile);return;}
-      if(cmd==='pfx-save'){this._pfxSave();return;}
+      if(cmd==='pfx-background'){const select=this.dialog.querySelector('#pala-pfx-background');if(select){select.value=target.dataset.background;this._pfxPreview();}return;}
+       if(cmd==='pfx-remove-font'){const current=this._pfxReadForm();this._pfxDraft=pfxClean({...current,font:'ha',customFont:''});const select=this.dialog.querySelector('#pala-pfx-font');if(select)select.value='ha';const status=this.dialog.querySelector('#pala-custom-font-status');if(status)status.textContent='Eigen lettertype verwijderd uit voorbeeld. Klik Opslaan om dit te bewaren.';this._pfxPreview();return;}
+       if(cmd==='pfx-save'){this._pfxSave();return;}
       if(cmd==='pfx-reset'){this._pfxReset();return;}
       if(cmd==='pfx-cancel'){this._pfxDraft=null;this._pfxApply();this._editorNotice('Voorbeeld gestopt; opgeslagen instelling blijft actief.');return;}
       if(cmd==='design-save'){this._designSave();return;}
       if(cmd==='design-reset'){this._designReset();return;}
-      if(cmd==='diagnostic-refresh'){this._fillDiagnostic();return;}
+      if(cmd==='support-test'){this._supportTest();return;}
+       if(cmd==='support-preview'){this._supportPreview();return;}
+       if(cmd==='support-report'){this._supportSubmit();return;}
+       if(cmd==='support-updates'){void this._checkRcUpdates(true);return;}
+       if(cmd==='rc-open-update'){const tag=this._rcCheck.latest;if(tag&&/^v?\d+\.\d+\.\d+(?:-(?:beta|rc)\.?[1-9]\d*)?$/.test(tag))window.open(PALA_REPO+'/releases/tag/'+tag,'_blank','noopener,noreferrer');return;}
+       if(cmd==='rc-dismiss-update'){if(this._rcCheck.latest){this._dismissedRc=this._rcCheck.latest;try{localStorage.setItem('palasidebar.updates.dismissed',this._rcCheck.latest);}catch{}this._paintRcNotice();}return;}
+       if(cmd==='diagnostic-refresh'){this._fillDiagnostic();return;}
       if(cmd==='diagnostic-copy'){navigator.clipboard?.writeText(this._diagnosticText()).then(()=>this._editorNotice('Rapport gekopieerd.')).catch(()=>this._editorNotice('Kopiëren niet toegestaan door browser.'));return;}
       if(cmd==='recovery-refresh'){this._loadRecoveryPoints(true);return;}
       if(cmd==='recovery-restore'){this._restoreRecoveryPoint(Number(target.dataset.index));return;}
@@ -4381,6 +4822,23 @@ md-filled-select {
         this._closeOwnedDialog(this.actionDialog,()=>this._runAction({type:'more-info',entity:target.dataset.entity}));return;
       }
       if(cmd==='save-prefs'){this._saveDialog();return;}
+      if(cmd==='header-image-remove'){
+        this._headerImageSequence++;this._headerImageBusy=false;this._headerImageDraft='';
+        const file=this.dialog?.querySelector('#pala-head-image-file');if(file)file.value='';
+        this._previewHeaderImage();this._editorNotice('Headerfoto wordt verwijderd zodra je Header opslaan kiest.');return;
+      }
+      if(cmd==='optional-color-clear'){
+        const id=target.dataset.field;
+        const input=this.dialog.querySelector('#'+id+'-hex');
+        if(input){input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));}
+        return;
+      }
+      if(cmd==='general-accent-default'){
+        const picker=this.dialog.querySelector('#pala-color');
+        const hex=this.dialog.querySelector('#pala-color-hex');
+        if(picker&&hex){picker.value='#38bdf8';hex.value=picker.value;this._generalAccentPreview();}
+        return;
+      }
       if(cmd==='reset-prefs'){if(!this._prefsStore?.ready){this._editorNotice('Wacht op het laden van je serverinstellingen voordat je herstelt.');return;}if(!confirm('Alle PalaSidebar-instellingen voor dit Home Assistant-account herstellen, ook op andere apparaten?'))return;this.saved=EMPTY_PREFS();this._pfxDraft=null;this._pfxApply();this._saveSettings();this._closeOwnedDialog(this.dialog);this.redraw();return;}
       if(cmd==='add-link'){this._addLink();return;}
       if(cmd==='remove-link'){this.saved.links=this.saved.links.filter(i=>i.id!==target.dataset.id);this._saveSettings();this._rebuildSettingsAtSamePosition(this.editorTab);this.redraw();return;}
@@ -4398,6 +4856,7 @@ md-filled-select {
     _input(e){
       if(e.target===this.searchInput){this.search=e.target.value;this._drawList();}
       else if(e.target?.dataset?.entityPicker)this._updateSuggestions(e.target);
+      if(e.target?.id==='pala-head-token-entity')this._fillHeaderTokenAttributes();
       if(e.target?.id==='pala-badge-entity'){
         this._refreshBadgeAttributeOptions();this._refreshBadgeColorAttributeOptions();
       }
@@ -4410,6 +4869,8 @@ md-filled-select {
       }
       if(['pala-layout-title-attribute','pala-layout-icon-attribute','pala-layout-item-label','pala-layout-item-icon'].includes(e.target?.id))this._previewDynamicItem();
       if(e.target?.matches?.('[data-badge-color-native],[data-badge-color-hex]'))this._badgeColorPickerEvent(e.target);
+      if(['pala-color','pala-color-hex'].includes(e.target?.id))this._generalAccentPreview();
+      if(e.target?.closest?.('.optional-color-field'))this._optionalColorPreview(e.target);
       if(e.target?.closest?.('[data-badge-rule]'))this._badgeSyncColorRules();
       if(e.target?.closest?.('[data-badge-stop]'))this._badgeSyncColorStops();
       if(e.target?.id?.startsWith('pala-badge-')||e.target?.closest?.('[data-badge-rule]')||e.target?.closest?.('[data-badge-stop]'))this._previewBadge();
@@ -4419,6 +4880,27 @@ md-filled-select {
     }
     _change(e) {
       const id=e.target?.id;
+      if(id==='pala-custom-font-upload'){
+        const file=e.target.files?.[0];if(!file)return;
+        const out=this.dialog?.querySelector('#pala-custom-font-status');
+        if(!/\.(woff2?|ttf|otf)$/i.test(file.name)||file.size>160*1024){if(out)out.textContent='Kies WOFF2/WOFF/TTF/OTF van maximaal 160 kB.';e.target.value='';return;}
+        const ext=file.name.split('.').pop().toLowerCase(),mime=ext==='woff2'?'woff2':ext==='woff'?'woff':ext==='otf'?'otf':'ttf';
+        const reader=new FileReader();reader.onload=()=>{const data=String(reader.result||'');if(data.length>240000)return;if(!this._pfxDraft)this._pfxDraft=this._pfxPrefs();this._pfxDraft.customFont=data.replace(/^data:[^;]+;base64,/, 'data:font/'+mime+';base64,');const sel=this.dialog?.querySelector('#pala-pfx-font');if(sel)sel.value='custom';this._pfxPreview();if(out)out.textContent='Lettertype geladen: '+file.name+' · klik Vormgeving opslaan.';};reader.readAsDataURL(file);return;
+      }
+      if(id==='pala-issue-screenshot'){
+        const file=e.target.files?.[0],preview=this.dialog?.querySelector('#pala-issue-screenshot-preview'),status=this.dialog?.querySelector('#pala-issue-screenshot-status');
+        if(this._issueImageUrl){URL.revokeObjectURL(this._issueImageUrl);this._issueImageUrl=null;}
+        if(preview){preview.hidden=true;preview.removeAttribute('src');}
+        if(!file){if(status)status.textContent='Geen screenshot gekozen.';return;}
+        if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>10*1024*1024){
+          e.target.value='';if(status)status.textContent='Kies PNG/JPG/WebP van maximaal 10 MB.';return;
+        }
+        this._issueImageUrl=URL.createObjectURL(file);
+        if(preview){preview.src=this._issueImageUrl;preview.hidden=false;}
+        if(status)status.textContent='Geselecteerd: '+file.name+' · Voeg deze afbeelding op GitHub handmatig toe voordat je het issue indient.';
+        return;
+      }
+      if(id==='pala-head-image-file'){const file=e.target.files?.[0];if(file)void this._loadHeaderImage(file);return;}
       if(id==='pala-layout-section')this._layoutFillSection();
       if(id==='pala-layout-item')this._layoutFillItem();
       if(id==='pala-menu-select')this._fillMenuEditor(e.target.value);
@@ -4431,6 +4913,8 @@ md-filled-select {
         this._refreshBadgeAttributeOptions();this._refreshBadgeColorAttributeOptions();
       }
       if(id==='pala-badge-insert-entity')this._refreshBadgeInsertAttributes();
+      if(id==='pala-head-token-entity')this._fillHeaderTokenAttributes();
+      if(id==='pala-head-token-attribute')this._previewHeaderToken();
       if(id==='pala-sensor-select')this._fillSensorEditor(e.target.value);
       if(['pala-sensor-title-entity','pala-sensor-icon-entity'].includes(id))
         this._fillSensorAttributes(id.includes('title')?'title':'icon');
@@ -4445,10 +4929,13 @@ md-filled-select {
       if(e.target?.matches?.('[data-badge-color-native],[data-badge-color-hex]')){
         this._badgeColorPickerEvent(e.target);
         const hex=e.target.closest('.badge-color-control')?.querySelector('[data-badge-color-hex]');
-        if(hex && !hex6(hex.value))hex.value=hex.closest('.badge-color-control').querySelector('[data-badge-color-native]').value;
+        if(hex && !hex6(hex.value) && hex.id!=='pala-color-hex')
+          hex.value=hex.closest('.badge-color-control').querySelector('[data-badge-color-native]').value;
       }
       if(e.target?.closest?.('[data-badge-rule]'))this._badgeSyncColorRules();
       if(e.target?.closest?.('[data-badge-stop]'))this._badgeSyncColorStops();
+      if(id==='pala-color'||id==='pala-color-hex')this._generalAccentPreview();
+      if(e.target?.closest?.('.optional-color-field'))this._optionalColorPreview(e.target);
       if(id==='pala-badge-color_transition' && e.target.value==='gradient' &&
         !text(this.dialog.querySelector('#pala-badge-color_stops')?.value)){
         // Eén keer automatisch de bestaande numerieke drempels als kleurpunten gebruiken.
@@ -4577,6 +5064,15 @@ md-filled-select {
       this._syncHaHeader();
       this.setAttribute('data-density',this.saved.density||(['normal','compact'].includes(app.density)?app.density:'compact'));
       this.head.replaceChildren();this.head.dataset.align=hdr.align;
+      const image=safeHeaderImage(hdr.image);
+      this.head.dataset.headerPicture=String(!!image);
+      if(this._renderedHeaderImage!==image){
+        this.head.style.backgroundImage=image?('linear-gradient(180deg,rgba(5,12,18,.26),rgba(5,12,18,.72)),url("'+image+'")'):'';
+        this._renderedHeaderImage=image;
+      }
+      if(this._renderedHeaderPosition!==hdr.image_position){
+        this.head.style.backgroundPosition=hdr.image_position||'center';this._renderedHeaderPosition=hdr.image_position;
+      }
       this.style.setProperty('--p-header-title-size',hdr.title_size+'px');
       this.style.setProperty('--p-header-subtitle-size',hdr.subtitle_size+'px');
       for(const [name,value] of [['title',hdr.title_color],['subtitle',hdr.subtitle_color],['extra',hdr.extra_color]]){
@@ -4789,14 +5285,15 @@ md-filled-select {
         const filtered=group.items.filter(i=>!query||(i.label+' '+this._itemDynamicTitle(i)+' '+i.path).toLocaleLowerCase('nl').includes(query));if(!filtered.length)continue;
         const collapsed=this.saved.closed.includes(group.id)&&!query;
         const {header}=this._makeSectionHeader(group.title,'group',collapsed,group.id);
-        this.list.append(header);
+        const frame=$('div','section-frame');frame.dataset.sectionId=group.id;
+        frame.append(header);
         // Keep section rows mounted even when collapsed. The grid track
         // smoothly collapses to zero without disconnecting/recreating badges.
         const body=$('div','group-content');body.dataset.collapsed=String(collapsed);
         body.setAttribute('aria-hidden',String(collapsed));body.inert=collapsed;
         const inner=$('div','group-content-inner');
         for(const item of filtered){inner.append(this._renderLink(item));count++;}
-        body.append(inner);this.list.append(body);
+        body.append(inner);frame.append(body);this.list.append(frame);
       }
       if(count===0&&query)this.list.append($('div','empty','Geen menuonderdelen gevonden.'));
       else if(count===0 && !rows.length)this.list.append($('div','empty','Geen menuonderdelen beschikbaar.'));
@@ -4930,6 +5427,17 @@ md-filled-select {
         const layout=spec&&typeof spec==='object'?spec.layout||'right':'right';
         if(node.dataset.style!==style)node.dataset.style=style;
         if(node.dataset.size!==size)node.dataset.size=size;
+        const own=spec&&typeof spec==='object'?spec:null;
+        const overrides=[
+          ['--pala-badge-border-width',own?.border_width>=0?own.border_width+'px':null],
+          ['--pala-badge-radius',own?.border_radius>=0?own.border_radius+'px':null],
+          ['--pala-badge-border-color',own?.border_color||null],
+          ['--pala-badge-glow',own?.badge_glow==='on'?'0 0 14px var(--p-badge-color,var(--pala-badge-fill,var(--p-accent)))':own?.badge_glow==='off'?'none':null]
+        ];
+        for(const [key,val] of overrides){
+          if(val===null){if(node.style.getPropertyValue(key))node.style.removeProperty(key);}
+          else if(node.style.getPropertyValue(key)!==val)node.style.setProperty(key,val);
+        }
         if(node.parentElement?.dataset.badgeLayout!==layout)node.parentElement.dataset.badgeLayout=layout;
         if(color==='sensor'||color==='custom'){
           const current=badgeColor(spec,this.hass?.states);
@@ -5048,37 +5556,54 @@ md-filled-select {
       this._haFooterStyles.clear();
     }
     _syncNativeFooter(){
-      // This method is also called after a settings edit or native DOM change:
-      // it must honor those calls immediately. Throttle ONLY the periodic
-      // health check in ensure(), never the actual footer-update operation.
+      // Home Assistant 2026.10 renders these exact IDs in ha-sidebar.shadowRoot.
+      // Notifications is a button WITHOUT an href; inspecting links missed it.
+      // The labels are light-DOM spans slotted into ha-list-item-button, so
+      // styling that button's own shadowRoot cannot scale the labels.
       this._footerLastScan=Date.now();
       this._footerLastNative=this.native;
-      // Limit modification to known native footer anchors; restore our own styles
-      // when settings change. Never hide the native sidebar itself.
-      const native=this.integration==='native'?this._drawer():null;if(!native?.shadowRoot)return;
+      const native=this.integration==='native'?this._drawer():null;
+      if(!native?.shadowRoot)return;
+      const ui=pfxClean(this._pfxDraft||this.saved.ui_style||PFX_DEFAULT);
+      const enabled=ui.enabled&&(ui.fontScale!==100||ui.mobileScale!==100||ui.footerScale!==100);
+      const styleId='pala-native-footer-typography';
+      let style=native.shadowRoot.querySelector('style[data-pala-native-footer-typography]');
+      if(enabled){
+        const desktop=(ui.fontScale*ui.footerScale/10000).toFixed(4);
+        const mobile=(ui.mobileScale*ui.footerScale/10000).toFixed(4);
+        if(!style){
+          style=document.createElement('style');
+          style.dataset.palaNativeFooterTypography='';
+          native.shadowRoot.append(style);
+        }
+        const selector='#sidebar-config > .item-text[slot="headline"],#sidebar-notifications > .item-text[slot="headline"],#sidebar-profile > .item-text[slot="headline"]';
+        const css=selector+'{font-size:calc(var(--pala-native-text-size,14px) * '+desktop+')!important;}'+
+          '@media(max-width:700px){'+selector+'{font-size:calc(var(--pala-native-text-size,14px) * '+mobile+')!important;}}';
+        if(style.textContent!==css)style.textContent=css;
+      }else{
+        style?.remove();
+      }
+      // Preserve the pre-existing user options for native footer visibility.
       if(!this._haFooterStyles)this._haFooterStyles=new Map();
       const fc=this.saved.footer_config;
-      if(fc.ha_settings&&fc.ha_notifications&&fc.ha_profile&&!this._haFooterStyles.size)return;
-      const visibility={'/config':fc.ha_settings,'/notifications':fc.ha_notifications,'/profile':fc.ha_profile};
-      const found=[];const visit=(root,depth=0)=>{
-        if(!root?.querySelectorAll||depth>3)return;
-        for(const element of root.querySelectorAll('a[href]'))found.push(element);
-        for(const element of root.querySelectorAll('*'))if(element.shadowRoot)visit(element.shadowRoot,depth+1);
+      const visibility={
+        'sidebar-config':fc.ha_settings,
+        'sidebar-notifications':fc.ha_notifications,
+        'sidebar-profile':fc.ha_profile
       };
-      visit(native.shadowRoot);
-      for(const anchor of found){
-        const href=anchor.getAttribute('href');let path='';
-        try{path=href?.startsWith('/')&&!href.startsWith('//')?href.split(/[?#]/)[0]:(new URL(href,location.href)).pathname;path=path.replace(/\/+$/,'')||'/';}catch{continue;}
-        if(!Object.prototype.hasOwnProperty.call(visibility,path))continue;
-        const node=anchor.closest('ha-list-item-button,ha-list-item-base')||anchor;
-        if(!this._haFooterStyles.has(node))this._haFooterStyles.set(node,[node.style.getPropertyValue('display'),node.style.getPropertyPriority('display')]);
-        if(visibility[path]===false)node.style.setProperty('display','none','important');
-        else{const [value,priority]=this._haFooterStyles.get(node);value?node.style.setProperty('display',value,priority):node.style.removeProperty('display');this._haFooterStyles.delete(node);}
+      for(const [id,show] of Object.entries(visibility)){
+        const node=native.shadowRoot.getElementById(id);
+        if(!node)continue;
+        if(!this._haFooterStyles.has(node))
+          this._haFooterStyles.set(node,[node.style.getPropertyValue('display'),node.style.getPropertyPriority('display')]);
+        if(show===false)node.style.setProperty('display','none','important');
+        else{
+          const [value,priority]=this._haFooterStyles.get(node);
+          value?node.style.setProperty('display',value,priority):node.style.removeProperty('display');
+          this._haFooterStyles.delete(node);
+        }
       }
-      for(const [node,original] of this._haFooterStyles){
-        if(node.isConnected)continue;
-        this._haFooterStyles.delete(node);
-      }
+      for(const node of this._haFooterStyles.keys())if(!node.isConnected)this._haFooterStyles.delete(node);
     }
     refreshStatus(){
       const started=performance.now();
@@ -5172,7 +5697,7 @@ md-filled-select {
         this._liveTiles.push({button,val:value,entity:tile.entity});
       }
       if(!cfg.tiles.length)inner.append($('div','empty','Voeg sensoren toe via Instellingen → Control Center.'));
-      body.append(inner);this.liveCenter.append(header,body);
+      body.append(inner);const frame=$('div','section-frame');frame.append(header,body);this.liveCenter.append(frame);
       this._liveGrid=inner;this._setLiveCenterCollapsed(cfg.collapsed,false);
       this._refreshLiveCenter();
     }
@@ -5449,25 +5974,97 @@ md-filled-select {
       return wrap;
     }
     _entityField(label,id,value=''){
-      const f=this._formField(label,id,value);const input=f.querySelector('input');input.placeholder='Typ naam of entity_id, bijvoorbeeld sensor.buienalarm_neerslag';input.dataset.entityPicker='1';
-      const suggestions=$('div','entity-suggestions');suggestions.dataset.for=id;f.append(suggestions);
+      // Eén lichtgewicht Home Assistant-entiteitenkiezer voor alle sensor-/entiteitvelden.
+      // Dit veld schrijft uitsluitend de entity_id weg; attributen zijn contextafhankelijk.
+      const f=this._formField(label,id,value),input=f.querySelector('input');
+      input.placeholder='Zoek op naam of entity_id';input.dataset.entityPicker='1';
+      input.autocomplete='off';input.spellcheck=false;
+      input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');
+      input.setAttribute('aria-expanded','false');input.setAttribute('aria-controls',id+'-suggestions');
+      const button=this._button('⌕','entity-picker-open','entity-picker-open');
+      button.dataset.field=id;button.title='Zoek Home Assistant-entiteit';button.setAttribute('aria-label',label+': lijst openen');
+      f.querySelector('.field-control')?.append(button);
+      const suggestions=$('div','entity-suggestions');suggestions.id=id+'-suggestions';suggestions.dataset.for=id;
+      suggestions.setAttribute('role','listbox');suggestions.hidden=true;f.append(suggestions);
       return f;
     }
-    _updateSuggestions(input){
+    _updateSuggestions(input,force=false){
       const host=this.dialog.querySelector('[data-for="'+input.id+'"]');if(!host)return;
-      const query=text(input.value).toLowerCase();host.replaceChildren();
-      if(isEntity(query)&&this.hass?.states?.[query])return;
-      const entries=Object.entries(this.hass?.states||{});
-      let count=0;
-      for(const [id,state] of entries){
-        const name=text(state.attributes?.friendly_name);
-        if(!id.toLowerCase().includes(query)&&!name.toLowerCase().includes(query))continue;
-        const b=this._button((name?name+' · ':'')+id,'choose-entity');b.dataset.field=input.id;b.dataset.entity=id;
-        host.append(b);if(++count>=12)break;
+      const query=text(input.value).toLocaleLowerCase('nl'),states=this.hass?.states||{};
+      host.replaceChildren();
+      const finish=show=>{host.hidden=!show;input.setAttribute('aria-expanded',String(show));};
+      if((!query&&!force)||(!force&&isEntity(query)&&states[query])){finish(false);return;}
+      const matches=[];
+      for(const [id,state] of Object.entries(states)){
+        const name=text(state?.attributes?.friendly_name),idLower=id.toLowerCase(),nameLower=name.toLocaleLowerCase('nl');
+        if(query&&!idLower.includes(query)&&!nameLower.includes(query))continue;
+        const rank=idLower===query?0:nameLower===query?1:idLower.startsWith(query)?2:nameLower.startsWith(query)?3:4;
+        matches.push({id,name,rank});
       }
+      matches.sort((a,b)=>a.rank-b.rank||a.name.localeCompare(b.name,'nl')||a.id.localeCompare(b.id));
+      for(const item of matches.slice(0,12)){
+        const b=this._button((item.name?item.name+' · ':'')+item.id,'choose-entity');
+        b.dataset.field=input.id;b.dataset.entity=item.id;b.setAttribute('role','option');
+        host.append(b);
+      }
+      finish(matches.length>0);
+    }
+    _fillHeaderTokenAttributes(){
+      const entity=this.dialog.querySelector('#pala-head-token-entity')?.value||'';
+      const select=this.dialog.querySelector('#pala-head-token-attribute');if(!select)return;
+      const prior=select.dataset.entity===entity?select.value:'';
+      const attrs=this.hass?.states?.[entity]?.attributes||{};
+      const options=[['','Gewone sensorwaarde (state)']];
+      for(const [key,value] of Object.entries(attrs).sort(([a],[b])=>a.localeCompare(b,'nl'))){
+        if(!/^[a-zA-Z0-9_-]{1,80}$/.test(key)||value===null||typeof value==='object')continue;
+        options.push([key,key+' · '+String(value).slice(0,55)]);
+      }
+      select.replaceChildren(...options.map(([key,label])=>{const o=$('option',null,label);o.value=key;return o;}));
+      select.dataset.entity=entity;select.value=options.some(([key])=>key===prior)?prior:'';
+      this._previewHeaderToken();
+    }
+    _previewHeaderToken(){
+      const preview=this.dialog.querySelector('#pala-head-token-preview');if(!preview)return;
+      const id=text(this.dialog.querySelector('#pala-head-token-entity')?.value);
+      const attribute=this.dialog.querySelector('#pala-head-token-attribute')?.value||'';
+      const state=this.hass?.states?.[id];
+      if(!isEntity(id)){preview.textContent='Zoek een entiteit om de actuele waarde te bekijken.';return;}
+      const raw=attribute?state?.attributes?.[attribute]:state?.state;
+      const value=raw===undefined||raw===null?'Niet beschikbaar':String(raw);
+      preview.textContent='Voorbeeld: '+value.slice(0,160)+(state?'':' · entiteit momenteel niet gevonden');
+    }
+    _insertHeaderToken(){
+      const q=id=>this.dialog.querySelector('#'+id);
+      const entity=text(q('pala-head-token-entity')?.value),attr=q('pala-head-token-attribute')?.value||'';
+      if(!isEntity(entity)){this._editorNotice('Kies eerst een geldige Home Assistant-entiteit.');return;}
+      if(attr&&!/^[a-zA-Z0-9_-]{1,80}$/.test(attr)){this._editorNotice('Dit attribuut is niet geldig.');return;}
+      const target=q('pala-head-token-target')?.value||'extra';
+      const fields={extra:['pala-head-extra',240],title:['pala-head-title',60],subtitle:['pala-head-subtitle',90]};
+      const info=fields[target];if(!info)return;
+      const field=q(info[0]);if(!field)return;
+      const token='{'+entity+(attr?'#'+attr:'')+'}';
+      const editing=document.activeElement===field;
+      const start=editing&&Number.isInteger(field.selectionStart)?field.selectionStart:field.value.length;
+      const end=editing&&Number.isInteger(field.selectionEnd)?field.selectionEnd:start;
+      const before=field.value.slice(0,start),after=field.value.slice(end);
+      const spacer=before&&!/\s$/.test(before)?' ':'';
+      const result=before+spacer+token+after;
+      if(result.length>info[1]){this._editorNotice('De gekozen headertekst is te lang ('+info[1]+' tekens maximaal).');return;}
+      field.value=result;field.focus();field.setSelectionRange(before.length+spacer.length+token.length,before.length+spacer.length+token.length);
+      field.dispatchEvent(new Event('input',{bubbles:true}));
+      this._editorNotice('Sensor toegevoegd. Kies Header opslaan om de wijziging te bewaren.');
     }
     _showEditorTab(tab){
       this.editorTab=tab;
+      const currentButton=this.dialog.querySelector('[data-do="editor-tab"][data-tab="'+tab+'"]');
+      const selectedCategory=currentButton?.dataset.category||'basis';
+      for(const node of this.dialog.querySelectorAll('[data-do="editor-category"]')){
+        const active=node.dataset.category===selectedCategory;
+        node.classList.toggle('primary',active);node.setAttribute('aria-current',active?'true':'false');
+      }
+      for(const node of this.dialog.querySelectorAll('[data-do="editor-tab"]')){
+        node.hidden=node.dataset.category!==selectedCategory;
+      }
       if(tab==='performance')this._fillPerformance();
       for(const node of this.dialog.querySelectorAll('[data-editor-page]'))node.hidden=node.dataset.editorPage!==tab;
       for(const node of this.dialog.querySelectorAll('[data-do="editor-tab"]')){
@@ -5557,6 +6154,59 @@ md-filled-select {
       const native=pair.querySelector('[data-badge-color-native]'),hex=pair.querySelector('[data-badge-color-hex]');
       if(input===native)hex.value=native.value;
       else if(hex6(hex.value))native.value=hex6(hex.value);
+    }
+    _optionalColorField(label,id,value=''){
+      const container=$('div','field optional-color-field');
+      const heading=$('label',null,label);heading.htmlFor=id+'-hex';
+      const valid=hex6(value)||'';
+      const fallback=colour(this.saved.accent||this._resolved().appearance.accent);
+      const controls=this._badgeColorPicker(id,valid||fallback);
+      const hex=controls.querySelector('[data-badge-color-hex]');
+      hex.value=valid;hex.placeholder='Automatisch · thema';
+      const clear=this._button('↺','optional-color-clear','field-clear');
+      clear.dataset.field=id;clear.title='Themakleur gebruiken';
+      clear.setAttribute('aria-label',label+': themakleur gebruiken');
+      controls.append(clear);container.append(heading,controls);
+      const preview=$('div','optional-color-preview');preview.dataset.colorPreview=id;
+      preview.append($('strong',null,'Voorbeeldkleur'),$('span',null,''));
+      container.append(preview);
+      return container;
+    }
+    _optionalColorPreview(input){
+      const wrap=input?.closest('.optional-color-field');if(!wrap)return;
+      const native=wrap.querySelector('[data-badge-color-native]'),
+        hex=wrap.querySelector('[data-badge-color-hex]'),
+        preview=wrap.querySelector('.optional-color-preview');
+      if(!native||!hex||!preview)return;
+      const raw=hex.value.trim(),value=hex6(raw);
+      const valid=raw===''||!!value;
+      hex.setAttribute('aria-invalid',String(!valid));
+      // Na wissen of herstellen opnieuw de actuele accentkleur tonen; nooit een
+      // eerder gekozen eigen kleur laten staan terwijl de instelling leeg is.
+      if(!raw)native.value=colour(this.style.getPropertyValue('--p-accent')||this.saved.accent||this._resolved().appearance.accent);
+      const swatch=value||native.value;
+      preview.style.backgroundColor=swatch;
+      preview.style.color=readableBadgeText(swatch);
+      preview.querySelector('strong').textContent=!valid?'Controleer HEX-kleur':value?'Eigen kleur':'Volgt thema';
+      preview.querySelector('span').textContent=value?value.toUpperCase():raw?'Ongeldige HEX':'Automatisch';
+    }
+    _generalAccentPreview(){
+      const hexInput=this.dialog?.querySelector('#pala-color-hex');
+      const swatch=this.dialog?.querySelector('#pala-general-accent-preview');
+      const note=this.dialog?.querySelector('#pala-general-accent-note');
+      if(!hexInput||!swatch||!note)return;
+      const value=hexInput.value.trim();
+      const valid=/^#[0-9a-f]{6}$/i.test(value);
+      if(valid){
+        const color=value.toLowerCase();
+        swatch.style.backgroundColor=color;swatch.style.color=readableBadgeText(color);
+        const code=swatch.querySelector('span');if(code)code.textContent=color.toUpperCase();
+        note.textContent='Dit is je nieuwe accentkleur. De sidebar verandert na Instellingen opslaan.';
+        note.dataset.invalid='false';hexInput.removeAttribute('aria-invalid');
+      }else{
+        note.textContent='Ongeldige kleur. Gebruik #RRGGBB, bijvoorbeeld #38BDF8.';
+        note.dataset.invalid='true';hexInput.setAttribute('aria-invalid','true');
+      }
     }
     _badgeAddStop(value='',color='#38bdf8'){
       const list=this.dialog.querySelector('#pala-badge-gradient-stop-list');
@@ -5853,8 +6503,13 @@ md-filled-select {
         ['auto','Normaal (originele sensorwaarde)'],['compact','Compacte aftelling · 3d 22h'],['days-hours','Dagen en uren · 3d 22h'],
         ['hours-minutes','Uren en minuten · 94h 23m'],['clock','Klok · 3d 22:23:29'],['number','Getal afgerond (met decimalen)']]));
       pane.append(this._formField('Positie badge','pala-badge-layout','right', [['right','Rechts naast de menunaam'],['below','Onder de menunaam · aanbevolen bij F1'],['above','Boven de menunaam'],['left','Tussen icoon en menunaam']]));
-      pane.append(this._formField('Vorm','pala-badge-style','solid', [['solid','Gevulde badge'],['soft','Zachte badge'],['outline','Omlijnd'],['plain','Alleen tekst'],['dot','Alleen statusstip']]));
+      pane.append(this._formField('Vorm','pala-badge-style','solid', [['solid','Gevulde badge'],['soft','Zachte badge'],['outline','Omlijnd'],['plain','Alleen tekst'],['dot','Alleen statusstip'],['glass','Glasbadge'],['gradient','Kleurverloop']]));
       pane.append(this._formField('Grootte','pala-badge-size','normal', [['small','Klein'],['normal','Normaal'],['large','Groot']]));
+      pane.append($('h3',null,'Rand en gloed per badge'),$('p','field-note','Instellingen op deze menuknop hebben voorrang boven de algemene Badge Design Studio.'));
+      pane.append(this._formField('Randdikte','pala-badge-border_width','-1',[['-1','Volg algemene stijl'],['0','Geen rand'],['1','1 px'],['2','2 px'],['3','3 px'],['4','4 px']]));
+      pane.append(this._formField('Hoekafronding','pala-badge-border_radius','-1',[['-1','Volg algemene stijl'],['0','Vierkant'],['6','6 px'],['10','10 px'],['14','14 px'],['20','20 px'],['24','24 px']]));
+      pane.append(this._formField('Randkleur HEX (leeg = algemeen)','pala-badge-border_color',''));
+      pane.append(this._formField('Badge-gloed','pala-badge-badge_glow','inherit',[['inherit','Volg algemene stijl'],['on','Gloed aan'],['off','Gloed uit']]));
       pane.append(this._formField('Maximaal aantal tekens (0 = automatisch)','pala-badge-max_chars','0'));
       pane.append(this._formField('Aantal decimalen bij getal','pala-badge-decimals','1', [['0','0'],['1','1'],['2','2'],['3','3']]));
       pane.append($('h3',null,'Kleur van de badge'),$('p','field-note','Je hoeft geen sensor te zoeken die een kleur heeft. Kies één vaste kleur, of koppel zelf kleuren aan de gewone sensorwaarden.'));
@@ -6062,7 +6717,7 @@ md-filled-select {
       q('icon_color_from_badge').checked=b?.icon_color_from_badge===true;
       q('custom-attribute').value='';
       q('show').value=b?.show||'always';q('prefix').value=b?.prefix||'';q('suffix').value=b?.suffix||'';q('color').value=b?.color||'accent';
-      for(const [field,fallback] of [['format','auto'],['layout','right'],['style','solid'],['size','normal'],['max_chars',0],['decimals',1]])q(field).value=b?.[field]??fallback;
+      for(const [field,fallback] of [['format','auto'],['layout','right'],['style','solid'],['size','normal'],['border_width',-1],['border_radius',-1],['border_color',''],['badge_glow','inherit'],['max_chars',0],['decimals',1]])q(field).value=b?.[field]??fallback;
       this._refreshBadgeAttributeOptions(b?.attribute||'');
     }
     _editorBadgeSave(){
@@ -6074,7 +6729,7 @@ md-filled-select {
         this._editorNotice('Kies een badgesensor, vul een sjabloon in of stel een stand-sensor met een geldige regel in.');return;
       }
       const attribute=this._selectedBadgeAttribute();
-      this.saved.badge_overrides[id]=badgeSpec({entity:q('entity'),template:q('template'),...switchInput,auto_lines:this.dialog.querySelector('#pala-badge-auto_lines')?.checked!==false,attribute,show:q('show'),prefix:q('prefix'),suffix:q('suffix'),color:q('color'),custom_color:q('custom_color'),color_entity:q('color_entity'),color_attribute:this._selectedBadgeColorAttribute(),color_rules:q('color_rules'),color_transition:q('color_transition'),color_stops:q('color_stops'),color_fallback:this.dialog.querySelector('#pala-badge-fallback_enabled')?.checked?q('color_fallback'):'',label_color_from_badge:this.dialog.querySelector('#pala-badge-label_color_from_badge')?.checked,icon_color_from_badge:this.dialog.querySelector('#pala-badge-icon_color_from_badge')?.checked,format:q('format'),layout:q('layout'),style:q('style'),size:q('size'),max_chars:q('max_chars'),decimals:q('decimals')});
+      this.saved.badge_overrides[id]=badgeSpec({entity:q('entity'),template:q('template'),...switchInput,auto_lines:this.dialog.querySelector('#pala-badge-auto_lines')?.checked!==false,attribute,show:q('show'),prefix:q('prefix'),suffix:q('suffix'),color:q('color'),custom_color:q('custom_color'),color_entity:q('color_entity'),color_attribute:this._selectedBadgeColorAttribute(),color_rules:q('color_rules'),color_transition:q('color_transition'),color_stops:q('color_stops'),color_fallback:this.dialog.querySelector('#pala-badge-fallback_enabled')?.checked?q('color_fallback'):'',label_color_from_badge:this.dialog.querySelector('#pala-badge-label_color_from_badge')?.checked,icon_color_from_badge:this.dialog.querySelector('#pala-badge-icon_color_from_badge')?.checked,format:q('format'),layout:q('layout'),style:q('style'),size:q('size'),border_width:q('border_width'),border_radius:q('border_radius'),border_color:q('border_color'),badge_glow:q('badge_glow'),max_chars:q('max_chars'),decimals:q('decimals')});
       this._saveSettings();this._drawList();this._editorNotice('Badge opgeslagen. Je kunt alle velden blijven wijzigen of wissen.');
     }
     _editorBadgeRemove(){
@@ -6417,10 +7072,26 @@ md-filled-select {
       const sync=$('div','pala-sync-status','◌ Instellingen laden / synchroniseren');
       sync.id='pala-storage-pill';sync.setAttribute('role','status');sync.setAttribute('aria-live','polite');
       pane.append(sync);
-      const tabs=$('div','editor-tabs');tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Instellingencategorieën');
-      for(const [id,label] of [['general','Algemeen'],['header','Header'],['layout','Indeling'],['quick','Snelmenu'],['menu','Dashboards'],['badges','Badges'],['actions','Acties'],['sensors','Sensoren'],['agenda','Agenda'],['live_center','Control Center'],['themes','Thema’s'],['design','Design'],['ui_style','PalaSidebar UI'],['diagnostic','Diagnose'],['performance','Performance'],['backup','Backup']]){
-        const b=this._button(label,'editor-tab');b.dataset.tab=id;b.id='pala-tab-'+id;b.setAttribute('role','tab');b.setAttribute('aria-controls','pala-page-'+id);tabs.append(b);
+      // Eén overzichtelijke categorie-indeling voor alle bestaande instellingen.
+      // De technische tab-ID's en bestaande opslag blijven bewust ongewijzigd.
+      const categories=[
+        ['basis','Basis & weergave',[['general','Algemeen'],['header','Header'],['quick','Snelmenu']]],
+        ['menu','Menu & inhoud',[['layout','Indeling'],['menu','Dashboards'],['actions','Acties'],['sensors','Sensoren'],['agenda','Agenda'],['live_center','Control Center']]],
+        ['vormgeving','Vormgeving',[['themes','Thema’s'],['design','Design'],['ui_style','PalaSidebar UI'],['badges','Badges']]],
+        ['beheer','Onderhoud',[['diagnostic','Diagnose'],['performance','Performance'],['backup','Backup']]]
+      ];
+      const categoriesBar=$('nav','editor-categories');categoriesBar.setAttribute('aria-label','Hoofdcategorieën instellingen');
+      const tabs=$('div','editor-tabs');tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Instellingen binnen categorie');
+      for(const [group,label,items] of categories){
+        const categoryButton=this._button(label,'editor-category');categoryButton.dataset.category=group;
+        categoryButton.setAttribute('aria-label','Instellingencategorie '+label);
+        categoriesBar.append(categoryButton);
+        for(const [id,name] of items){
+          const b=this._button(name,'editor-tab');b.dataset.tab=id;b.dataset.category=group;
+          b.id='pala-tab-'+id;b.setAttribute('role','tab');b.setAttribute('aria-controls','pala-page-'+id);tabs.append(b);
+        }
       }
+      pane.append(categoriesBar);
       const tabsWrap=$('div','editor-tabs-wrap');
       const prev=this._button('‹','editor-tabs-prev','tabs-scroll-btn');prev.setAttribute('aria-label','Vorige instellingentabs');prev.title='Vorige tabs';
       const next=this._button('›','editor-tabs-next','tabs-scroll-btn');next.setAttribute('aria-label','Volgende instellingentabs');next.title='Volgende tabs';
@@ -6432,7 +7103,17 @@ md-filled-select {
       general.append(this._formField('Weergave','pala-mode',this.saved.mode||'auto', [['auto','Automatisch'],['integrated','Ingebouwd'],['floating','Zwevend menu']]));
       general.append(this._formField('Dichtheid','pala-density',this.saved.density||'compact',[['compact','Compact'],['normal','Ruim']]));
       general.append(this._formField('Apparaatprofiel','pala-device',this.saved.device||'auto',[['auto','Automatisch'],['desktop','Computer'],['tablet','Tablet / PalaKiosk'],['phone','Telefoon']]));
-      general.append(this._formField('Kleuraccent (hex)','pala-color',this.saved.accent||colour(this.config.appearance.accent)));
+      const accentField=$('div','field general-accent-field');
+      const accentLabel=$('label',null,'Kleuraccent');accentLabel.htmlFor='pala-color-hex';
+      accentField.append(accentLabel,this._badgeColorPicker('pala-color',this.saved.accent||colour(this.config.appearance.accent)));
+      const accentPreview=$('div','general-accent-preview');
+      accentPreview.id='pala-general-accent-preview';
+      accentPreview.append($('strong',null,'Voorbeeldkleur'),$('span',null,''));
+      accentField.append(accentPreview);
+      const accentNote=$('small','general-accent-note','Kies een kleur of vul een HEX-code in.');accentNote.id='pala-general-accent-note';
+      accentNote.setAttribute('role','status');accentNote.setAttribute('aria-live','polite');accentField.append(accentNote);
+      accentField.append(this._button('Standaardkleur herstellen','general-accent-default'));
+      general.append(accentField);
       for(const [id,label,checked] of [
         ['pala-mobile-dock','Mobiele navigatiebalk onderaan',this._dockEnabled()],
         ['pala-mobile-swipe','Vanaf de linkerrand vegen om het menu te openen',this.saved.mobile_swipe??this._mobile().swipe_open]]){
@@ -6450,6 +7131,7 @@ md-filled-select {
       general.append($('p',null,'De originele Home Assistant-drawer blijft zelf verantwoordelijk voor de breedte en mobiele terugknop. De instellingen regelen alleen de PalaSidebar-inhoud en eigen dialogen. Systeeminstelling ‘verminder beweging’ heeft altijd voorrang.'));
       general.append($('p',null,'Android-terug: PalaSidebar-menu en eigen dialogen gebruiken elk één tijdelijke geschiedenisstap. Home Assistant- en Browser Mod-dialogen worden door Home Assistant zelf beheerd. Op Android bepaalt de Companion App/WebView uiteindelijk of de fysieke terugknop aan de pagina wordt doorgegeven.'));
       const headPage=page('header');const hh=this._header();
+      this._headerImageDraft=undefined;this._headerImageBusy=false;this._headerImageSequence++;
       headPage.append($('h3',null,'Home Assistant header'),
         $('p',null,'De aanpassing geldt alleen voor de linker Home Assistant-sidebar. De titelbalk boven een dashboard blijft intact.'));
       headPage.append(this._formField('Originele Home Assistant-header','pala-ha-header',hh.ha,
@@ -6463,21 +7145,43 @@ md-filled-select {
       headPage.append(this._formField('Eigen titel (leeg = standaard)','pala-head-title',hh.title));
       headPage.append(this._formField('Eigen subtitel (leeg = standaard)','pala-head-subtitle',hh.subtitle));
       headPage.append(this._formField('Extra sensorregel onder header','pala-head-extra',hh.extra));
-      headPage.append($('p','field-note','In titel, subtitel en extra regel kun je tokens gebruiken: {sensor.woonkamer_temperatuur} of {sensor.f1#race_name}. De tekst wordt zonder HTML of scripts getoond.'));
+      const photoEditor=$('div','header-image-editor');photoEditor.id='pala-header-image-editor';
+      photoEditor.append($('strong',null,'Headerafbeelding (optioneel)'));
+      const photoPreview=$('div','header-image-thumbnail');photoEditor.append(photoPreview);
+      const photoLabel=$('label','field');photoLabel.append($('span',null,'Foto kiezen vanaf je apparaat'));
+      const photoInput=$('input');photoInput.type='file';photoInput.id='pala-head-image-file';
+      photoInput.accept='image/jpeg,image/png,image/webp';photoInput.setAttribute('aria-label','Headerafbeelding uploaden');
+      photoLabel.append(photoInput);photoEditor.append(photoLabel);
+      photoEditor.append(this._formField('Uitsnede positioneren','pala-head-image-position',hh.image_position,[['center','Midden'],['top','Bovenkant'],['bottom','Onderkant']]));
+      const imageButtons=$('div','btnrow');imageButtons.append(this._button('Foto verwijderen','header-image-remove'));photoEditor.append(imageButtons);
+      const photoInfo=$('p','field-note','');photoInfo.dataset.imageInfo='1';photoInfo.setAttribute('role','status');photoEditor.append(photoInfo);
+      photoEditor.append($('p','field-note','JPG, PNG of WebP tot 4 MB. Wordt lokaal verkleind en privé met je Home Assistant-accountinstellingen gesynchroniseerd. Geen aparte www-map nodig.'));
+      headPage.append(photoEditor);
+      const tokenPane=$('div','layout-dynamic-panel');
+      tokenPane.append($('h4',null,'Sensor of attribuut aan de header toevoegen'));
+      tokenPane.append($('p','field-note','Zoek een Home Assistant-entiteit op naam, kies eventueel een attribuut en voeg de waarde toe aan de titel, subtitel of extra sensorregel. De actuele waarde wordt automatisch ververst.'));
+      tokenPane.append(this._entityField('Zoek sensor / entiteit','pala-head-token-entity'));
+      tokenPane.append(this._formField('Welke waarde wil je tonen?','pala-head-token-attribute','',[['','Gewone sensorwaarde (state)']]));
+      tokenPane.append(this._formField('Toevoegen aan','pala-head-token-target','extra',[['extra','Extra sensorregel'],['title','Eigen titel'],['subtitle','Eigen subtitel']]));
+      const tokenPreview=$('p','field-note','Zoek een entiteit om de actuele waarde te bekijken.');tokenPreview.id='pala-head-token-preview';
+      tokenPreview.setAttribute('aria-live','polite');tokenPane.append(tokenPreview);
+      tokenPane.append(this._button('Sensorwaarde invoegen','head-token-insert','primary'));
+      headPage.append(tokenPane);
+      headPage.append($('p','field-note','Je kunt meerdere sensoren en eigen tekst combineren. Bestaande tokens zoals {sensor.woonkamer_temperatuur} en {sensor.f1#race_name} blijven volledig werken.'));
       headPage.append(this._formField('Uitlijning','pala-head-align',hh.align,[['left','Links'],['center','Midden'],['right','Rechts']]));
-      headPage.append(this._formField('Tekstkleur titel (#RRGGBB, leeg = thema)','pala-head-title-color',hh.title_color));
-      headPage.append(this._formField('Tekstkleur subtitel (#RRGGBB)','pala-head-subtitle-color',hh.subtitle_color));
-      headPage.append(this._formField('Tekstkleur sensorregel (#RRGGBB)','pala-head-extra-color',hh.extra_color));
+      headPage.append(this._optionalColorField('Tekstkleur titel','pala-head-title-color',hh.title_color));
+      headPage.append(this._optionalColorField('Tekstkleur subtitel','pala-head-subtitle-color',hh.subtitle_color));
+      headPage.append(this._optionalColorField('Tekstkleur sensorregel','pala-head-extra-color',hh.extra_color));
       headPage.append(this._formField('Titelgrootte in pixels (9–24)','pala-head-title-size',String(hh.title_size)));
       headPage.append(this._formField('Subtitelgrootte in pixels (8–20)','pala-head-subtitle-size',String(hh.subtitle_size)));
       headPage.append(this._formField('Avatar links in de header','pala-head-logo-mode',hh.logo_mode,[['account','Home Assistant-account (profielfoto / initialen)'],['custom','Eigen logo / icoon (bestaande instelling)']]));
       headPage.append($('p','field-note','Tik op de account-avatar om je Home Assistant-profiel te openen. Bij Eigen logo blijven je bestaande logoletters en -kleuren bruikbaar.'));
       headPage.append(this._formField('Eigen logoletters (maximaal 3)','pala-head-logo-text',hh.logo_text));
       headPage.append(this._formField('Logo-icoon (mdi:..., leeg = letters)','pala-head-logo-icon',hh.logo_icon));
-      headPage.append(this._formField('Achtergrond header (#RRGGBB)','pala-head-background-color',hh.background_color));
-      headPage.append(this._formField('Logokleur achtergrond (#RRGGBB)','pala-head-logo-bg',hh.logo_bg));
-      headPage.append(this._formField('Kleur logo (#RRGGBB)','pala-head-logo-color',hh.logo_color));
-      headPage.append(this._formField('Kleur klok (#RRGGBB)','pala-head-clock-color',hh.clock_color));
+      headPage.append(this._optionalColorField('Achtergrond header','pala-head-background-color',hh.background_color));
+      headPage.append(this._optionalColorField('Achtergrond logo','pala-head-logo-bg',hh.logo_bg));
+      headPage.append(this._optionalColorField('Kleur logo','pala-head-logo-color',hh.logo_color));
+      headPage.append(this._optionalColorField('Kleur klok','pala-head-clock-color',hh.clock_color));
       for(const [id,label,checked] of [['pala-head-logo','Avatar / logo tonen',hh.logo],['pala-head-clock','Datum/tijd tonen',hh.clock],['pala-head-quick','Van alles-knop tonen',hh.show_quick],['pala-head-settings','Instellingenknop tonen',hh.show_settings]]){
         const line=$('label','check'),box=$('input');box.type='checkbox';box.id=id;box.checked=checked;
         line.append(box,$('span',null,label));headPage.append(line);
@@ -6485,7 +7189,7 @@ md-filled-select {
       headPage.append($('p','warning','Bij een grote Home Assistant-update kan de headerstructuur veranderen. De originele HA-navigatie blijft beschikbaar.'));
       headPage.append(this._button('Header opslaan','save-header','primary'));
       const gr=$('div','btnrow');gr.append(this._button('Instellingen opslaan','save-prefs','primary'));general.append(gr);
-      this._layoutEditor(page('layout'));this._quickEditor(page('quick'));this._contextMenuEditor(pane.querySelector('#pala-page-quick'));this._menuEditor(page('menu'));this._badgeEditor(page('badges'));this._actionEditor(page('actions'));this._sensorEditor(page('sensors'));this._agendaEditor(page('agenda'));this._liveCenterEditor(page('live_center'));this._themeEditor(page('themes'));this._themeStudioPro(pane.querySelector('#pala-page-themes'));this._designEditor(page('design'));this._pfxEditor(page('palafix'));this._diagnosticEditor(page('diagnostic'));this._performanceEditor(page('performance'));
+      this._layoutEditor(page('layout'));this._quickEditor(page('quick'));this._contextMenuEditor(pane.querySelector('#pala-page-quick'));this._menuEditor(page('menu'));this._badgeEditor(page('badges'));this._actionEditor(page('actions'));this._sensorEditor(page('sensors'));this._agendaEditor(page('agenda'));this._liveCenterEditor(page('live_center'));this._themeEditor(page('themes'));this._themeStudioPro(pane.querySelector('#pala-page-themes'));this._designEditor(page('design'));this._pfxEditor(page('ui_style'));this._diagnosticEditor(page('diagnostic'));this._performanceEditor(page('performance'));
       const backup=page('backup');backup.append($('h3',null,'Opslag en backup'),
         $('p',null,'Je persoonlijke dashboards, badges, acties, sensoren en header worden automatisch opgeslagen bij Home Assistant onder je gebruikersaccount. Cache wissen verwijdert deze serverinstellingen niet. De browser bewaart ook een lokale kopie voor als Home Assistant tijdelijk onbereikbaar is.'));
       backup.append(this._help('Veilig herstellen zonder menu-items te verliezen',
@@ -6503,7 +7207,10 @@ md-filled-select {
       backup.append($('p',null,'De oorspronkelijke Home Assistant-rechten blijven altijd van toepassing. Dit is geen beheerinterface voor HA-dashboards zelf.'));
       backup.append($('p',null,'HA '+(this.hass?.config?.version||'?')+' · PalaSidebar '+VERSION+' · '+(this.integration==='native'?'Ingebouwd':'Zwevend')));
       const footer=$('div','btnrow');footer.append(this._button('Sluiten','settings-close'));pane.append(footer);
-      this.dialog.append(pane);this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);if(tab==='palafix')this._pfxPreview();
+      this.dialog.append(pane);this._generalAccentPreview();this._previewHeaderImage();
+      for(const input of this.dialog.querySelectorAll('.optional-color-field [data-badge-color-hex]'))
+        this._optionalColorPreview(input);
+      this._showStorageStatus();this._refreshBadgeAttributeOptions('');this._fillThemeEditor(this._themePrefs());this._layoutFillSection();this._layoutFillItem();this._fillSensorEditor('');this._showEditorTab(tab);
       if(!this.dialog.open)this._openOwnedDialog(this.dialog,'settings');
     }
     _layoutEditor(page){
@@ -6750,30 +7457,108 @@ md-filled-select {
       this._saveSettings();this.redraw();this._rebuildSettingsAtSamePosition('layout');this._editorNotice('Indeling hersteld.');
     }
     _button(label,cmd,cls=''){const b=$('button','btn '+cls,label);b.type='button';b.dataset.do=cmd;return b;}
+    _previewHeaderImage(){
+      const editor=this.dialog?.querySelector('#pala-header-image-editor');if(!editor)return;
+      const preview=editor.querySelector('.header-image-thumbnail');
+      const info=editor.querySelector('[data-image-info]');
+      const value=this._headerImageDraft===undefined?this._header().image:this._headerImageDraft;
+      const image=safeHeaderImage(value);
+      preview.replaceChildren();
+      if(image){const pic=$('img');pic.src=image;pic.alt='Voorbeeld van de gekozen headerfoto';preview.append(pic);}
+      else preview.append($('span',null,'Geen headerfoto · standaard header'));
+      if(info)info.textContent=this._headerImageBusy?'Afbeelding verwerken…':image?'De foto verschijnt na Header opslaan.':'De standaardkleur van je thema blijft actief.';
+    }
+    async _loadHeaderImage(file){
+      if(!file||!this.dialog)return;
+      const sequence=++this._headerImageSequence;
+      if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>4*1024*1024||file.size===0){
+        // An invalid second selection must not leave a previous decode's busy
+        // flag stuck forever: the old async result is invalidated by sequence.
+        this._headerImageBusy=false;
+        const picker=this.dialog?.querySelector('#pala-head-image-file');if(picker)picker.value='';
+        this._previewHeaderImage();
+        this._editorNotice('Kies een JPG, PNG of WebP van maximaal 4 MB.');return;
+      }
+      this._headerImageBusy=true;this._previewHeaderImage();
+      let url='';
+      try{
+        url=URL.createObjectURL(file);
+        const image=new Image();image.decoding='async';image.src=url;
+        await image.decode();
+        if(sequence!==this._headerImageSequence)return;
+        if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>12000||image.naturalHeight>12000 ||
+           image.naturalWidth*image.naturalHeight>24000000)throw Error('Afmetingen te groot');
+        const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');if(!ctx)throw Error('Geen afbeeldingsverwerking');
+        // JPEG-strip van ca. 3:1; EXIF/metadata worden niet opgeslagen.
+        const sourceRatio=3.1,iw=image.naturalWidth,ih=image.naturalHeight;
+        const sw=Math.min(iw,ih*sourceRatio),sh=sw/sourceRatio;
+        const sx=(iw-sw)/2,sy=(ih-sh)/2;
+        let result='';
+        for(const width of [720,580,460,340]){
+          canvas.width=width;canvas.height=Math.round(width/sourceRatio);
+          ctx.drawImage(image,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+          for(const quality of [0.76,0.60,0.45]){
+            result=canvas.toDataURL('image/jpeg',quality);
+            if(result.length<=100000)break;
+          }
+          if(result.length<=100000)break;
+        }
+        if(!safeHeaderImage(result))throw Error('Afbeelding te groot');
+        if(sequence!==this._headerImageSequence)return;
+        this._headerImageDraft=result;
+        this._editorNotice('Headerfoto klaar. Druk op Header opslaan om te bewaren.');
+      }catch(error){
+        if(sequence===this._headerImageSequence)this._editorNotice('Foto kon niet worden geladen. Kies een andere JPG, PNG of WebP.');
+      }finally{
+        if(url)URL.revokeObjectURL(url);
+        if(sequence===this._headerImageSequence){this._headerImageBusy=false;this._previewHeaderImage();}
+      }
+    }
     _saveHeader(){
+      if(this._headerImageBusy){this._editorNotice('De headerfoto wordt nog verwerkt.');return;}
       const q=id=>this.dialog.querySelector('#'+id);
+      const colors=['pala-head-title-color','pala-head-subtitle-color','pala-head-extra-color',
+        'pala-head-background-color','pala-head-logo-bg','pala-head-logo-color','pala-head-clock-color'];
+      for(const id of colors){
+        const field=q(id+'-hex'),raw=field?.value.trim()||'';
+        if(raw&&!hex6(raw)){
+          field.setAttribute('aria-invalid','true');field.focus();
+          this._editorNotice('Kleur ongeldig: vul #RRGGBB in of kies Themakleur gebruiken.');
+          return;
+        }
+      }
+      const color=id=>(hex6(q(id+'-hex')?.value)||'').toLowerCase();
       this.saved.header=cleanHeader({ha:q('pala-ha-header').value,ha_title:q('pala-ha-title').value,
         pala:q('pala-head-mode').value,title:q('pala-head-title').value,
         subtitle:q('pala-head-subtitle').value,logo:q('pala-head-logo').checked,logo_mode:q('pala-head-logo-mode').value,clock:q('pala-head-clock').checked,
         extra:q('pala-head-extra').value,align:q('pala-head-align').value,
-        title_color:q('pala-head-title-color').value,subtitle_color:q('pala-head-subtitle-color').value,
-        extra_color:q('pala-head-extra-color').value,title_size:q('pala-head-title-size').value,
+        title_color:color('pala-head-title-color'),subtitle_color:color('pala-head-subtitle-color'),
+        extra_color:color('pala-head-extra-color'),title_size:q('pala-head-title-size').value,
         subtitle_size:q('pala-head-subtitle-size').value,logo_text:q('pala-head-logo-text').value,
         show_quick:q('pala-head-quick').checked,show_settings:q('pala-head-settings').checked,
-        logo_icon:q('pala-head-logo-icon').value,background_color:q('pala-head-background-color').value,
-        logo_bg:q('pala-head-logo-bg').value,logo_color:q('pala-head-logo-color').value,
-        clock_color:q('pala-head-clock-color').value});
+        logo_icon:q('pala-head-logo-icon').value,background_color:color('pala-head-background-color'),
+        logo_bg:color('pala-head-logo-bg'),logo_color:color('pala-head-logo-color'),
+        clock_color:color('pala-head-clock-color'),
+        image:this._headerImageDraft===undefined?this._header().image:this._headerImageDraft,
+        image_position:q('pala-head-image-position').value});
+      this._headerImageDraft=undefined;
       this._saveSettings();this.redraw();this._editorNotice('Header opgeslagen.');
     }
     _saveDialog(){
       const q=id=>this.dialog.querySelector('#'+id);
+      // Valideer vóór het wijzigen van voorkeuren: foutief handmatig HEX mag geen
+      // eerder gekozen kleur opslaan of een deel van de instellingen aanpassen.
+      const input=q('pala-color-hex')?.value.trim()||'';
+      if(!/^#[0-9a-f]{6}$/i.test(input)){
+        this._generalAccentPreview();
+        q('pala-color-hex')?.focus();this._editorNotice('Gebruik een geldige HEX-kleur (#RRGGBB).');return;
+      }
       this.saved.mode=q('pala-mode').value;this.saved.density=q('pala-density').value;this.saved.device=q('pala-device').value;this.saved.mobile_dock=q('pala-mobile-dock').checked;this.saved.mobile_swipe=q('pala-mobile-swipe').checked;
       this.saved.dialog_motion=q('pala-dialog-motion').value;
       this.saved.dialog_style=q('pala-dialog-style').value;
       this.saved.dialog_backdrop=q('pala-dialog-backdrop').value;
       this.saved.rail_motion=q('pala-rail-motion').value;
-      const input=q('pala-color').value.trim();if(!/^#[0-9a-f]{6}$/i.test(input)){alert('Voer een geldige kleur in zoals #38bdf8');return;}
-      this.saved.accent=input;this._saveSettings();this._closeOwnedDialog(this.dialog);this.redraw();this.ensurePlacement();
+      this.saved.accent=input.toLowerCase();this._saveSettings();this._closeOwnedDialog(this.dialog);this.redraw();this.ensurePlacement();
     }
     _addLink(){
       const name=text(this.dialog.querySelector('#pala-newname')?.value),path=text(this.dialog.querySelector('#pala-newpath')?.value),icon=text(this.dialog.querySelector('#pala-newicon')?.value);
@@ -6905,6 +7690,7 @@ md-filled-select {
       logStartup(sidebar);
       if(error)logWarning('config','Configbestand niet geladen; veilige standaardconfiguratie actief. '+error);
       checkLegacySource();
+      setTimeout(()=>{if(sidebar?.isConnected)void sidebar._checkRcUpdates();},3000);
       // Delayed resource scan: extra_module_url can load after the sidebar.
       setTimeout(checkLegacySource,1700);
     }catch(error){

@@ -1,6 +1,7 @@
 """PalaSidebar Home Assistant custom integration.
 
 Serves versioned frontend resources from custom_components (no /www needed).
+Origin marker for public-source similarity monitoring: PALASIDEBAR_ORIGIN_ROBIN_2026.
 The existing frontend/set_user_data preferences remain owned by Home Assistant.
 """
 
@@ -71,7 +72,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.info(
             "PalaSidebar %s: legacy configuration copied to %s; user settings "
             "and recovery points remain untouched",
-            "2.0.0-beta7",
+            "2.0.0-rc11",
             config_file,
         )
     _LOGGER.info(
