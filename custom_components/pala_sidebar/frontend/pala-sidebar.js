@@ -7019,6 +7019,11 @@ md-filled-select {
       if(!file||!this.dialog)return;
       const sequence=++this._headerImageSequence;
       if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>4*1024*1024||file.size===0){
+        // An invalid second selection must not leave a previous decode's busy
+        // flag stuck forever: the old async result is invalidated by sequence.
+        this._headerImageBusy=false;
+        const picker=this.dialog?.querySelector('#pala-head-image-file');if(picker)picker.value='';
+        this._previewHeaderImage();
         this._editorNotice('Kies een JPG, PNG of WebP van maximaal 4 MB.');return;
       }
       this._headerImageBusy=true;this._previewHeaderImage();
@@ -7028,7 +7033,8 @@ md-filled-select {
         const image=new Image();image.decoding='async';image.src=url;
         await image.decode();
         if(sequence!==this._headerImageSequence)return;
-        if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>12000||image.naturalHeight>12000)throw Error('Afmetingen ongeldig');
+        if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>12000||image.naturalHeight>12000 ||
+           image.naturalWidth*image.naturalHeight>24000000)throw Error('Afmetingen te groot');
         const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');if(!ctx)throw Error('Geen afbeeldingsverwerking');
         // JPEG-strip van ca. 3:1; EXIF/metadata worden niet opgeslagen.
         const sourceRatio=3.1,iw=image.naturalWidth,ih=image.naturalHeight;
