@@ -27,4 +27,4 @@ jobs:
           else
             message="Bedankt voor je melding! Deze issue wordt meegenomen bij de beoordeling. Er wordt niets automatisch gerepareerd of uitgebracht.\n\n$marker"
           fi
-          gh api "repos/$GH_REPO/issues/$ISSUE_NUMBER/comments" -f body="$message" >/dev/null
+          gh api "repos/$GH_REPO/issues/$ISSUE_NUMBER/comments" -f body="$(printf '%b' "$message")" >/dev/null
