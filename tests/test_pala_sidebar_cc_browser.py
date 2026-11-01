@@ -15,7 +15,7 @@ with sync_playwright() as pw:
         page.set_content('<html><body></body></html>')
         page.evaluate('''args => {
             window.__fixture=args.config;window.__source=args.source;
-            window.__networkVersion='2.0.0-rc8';window.__networkCalls=[];window.__imports=[];window.__reloads=0;
+            window.__networkVersion='2.0.0-rc9';window.__networkCalls=[];window.__imports=[];window.__reloads=0;
             window.__testReload=()=>window.__reloads++;
             window.__testImport=async url=>{window.__imports.push(url);const s=document.createElement('script');s.textContent=window.__source;document.head.append(s);};
             window.fetch=async url=>{
@@ -30,11 +30,11 @@ with sync_playwright() as pw:
             const h={user:{id:'fixture-user',name:'Test',is_admin:true},config:{version:'2026.10'},states:{},entities:{},panels:{},connection:{sendMessagePromise:async req=>req.type==='frontend/get_user_data'?{value:null}:{}}};ha.hass=h;side.hass=h;
         }''', {'config':fixture,'source':main})
         page.evaluate(mock_loader)
-        page.wait_for_function("window.PalaSidebarUpdater?.status().loaded==='2.0.0-rc8'",timeout=30000)
+        page.wait_for_function("window.PalaSidebarUpdater?.status().loaded==='2.0.0-rc9'",timeout=30000)
         page.wait_for_function("window.PalaSidebarDiagnostics?.().phase==='gereed'",timeout=30000)
         r=page.evaluate('''()=>({version:window.PalaSidebarDiagnostics().version,imports:window.__imports, calls:window.__networkCalls})''')
-        assert r['version']=='2.0.0-rc8',r
-        assert r['imports']==['/pala_sidebar/assets/pala-sidebar.js?v=2.0.0-rc8'],r
+        assert r['version']=='2.0.0-rc9',r
+        assert r['imports']==['/pala_sidebar/assets/pala-sidebar.js?v=2.0.0-rc9'],r
         assert any('/pala_sidebar/config.json' in x for x in r['calls']),r
         typography=page.evaluate('''()=>{
           const n=document.querySelector('home-assistant').shadowRoot.querySelector('ha-sidebar');
