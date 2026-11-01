@@ -40,7 +40,7 @@ with sync_playwright() as pw:
           s._rcCheck.latest='v2.0.1-rc.2';
           s._rcCheck.channel='rc';
           s._paintRcNotice();
-          if(s.rcNotice.hidden||!s.rcNotice.textContent.includes('rc.15'))throw Error('Updatebericht ontbreekt');
+          if(s.rcNotice.hidden||!s.rcNotice.textContent.includes('rc.2'))throw Error('Updatebericht ontbreekt');
         }""")
         def styles():
             return page.evaluate("""()=>{
@@ -68,7 +68,7 @@ with sync_playwright() as pw:
         assert collapsed["visibility"]=="hidden" and collapsed["maxHeight"]=="0px",collapsed
         assert collapsed["noticePadding"]=="0px" and collapsed["noticeBorder"]=="0px",collapsed
         assert collapsed["border"]=="0px" and collapsed["padding"]=="0px" and collapsed["margin"]=="0px",collapsed
-        assert "rc.15" in collapsed["text"] and not collapsed["noticeHidden"],collapsed
+        assert "rc.2" in collapsed["text"] and not collapsed["noticeHidden"],collapsed
         page.evaluate("""()=>{
           const s=window.issue16,nav=s.native;
           nav.expanded=true;nav.setAttribute('expanded','');
@@ -77,7 +77,7 @@ with sync_playwright() as pw:
         page.wait_for_timeout(550)
         reopened=styles()
         assert reopened["border"]=="3px" and reopened["padding"]=="12px",reopened
-        assert reopened["visibility"]=="visible" and "rc.15" in reopened["text"],reopened
+        assert reopened["visibility"]=="visible" and "rc.2" in reopened["text"],reopened
         assert not errors,(width,errors)
         print("PASS issue #16: updatebericht en sectieranden verdwijnen en keren terug",width)
         page.close()
