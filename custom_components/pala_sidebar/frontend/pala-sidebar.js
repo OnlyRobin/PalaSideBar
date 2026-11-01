@@ -2511,8 +2511,8 @@ md-filled-select {
       page.append(this._help('PalaSidebar UI versus Home Assistant-thema',
         'HA standaard gebruikt de kleuren van je gekozen Home Assistant-thema. Klassieke stijl overschrijft meer globale kleuren en lettergroottes. De PalaSidebar-weereffecten en dynamische badges stel je apart in. Verminder glasvervaging op oudere tablets voor lagere GPU-belasting.'));
       const profiles=$('div','pfx-presets');
-      for(const [key,label] of [['ha','HA standaard'],['classic','Klassieke stijl'],['premium','Premium glas'],['compact','Compact'],['amoled','AMOLED']]){
-        const btn=this._button(label,'pfx-preset');btn.dataset.profile=key;profiles.append(btn);
+      for(const [key,label] of [['ha','HA standaard'],['classic','Klassieke stijl'],['premium','Premium glas'],['compact','Compact'],['amoled','AMOLED'],['gold','Midnight Gold'],['ice','Nordic Ice'],['sunset','Zonsondergang']]){
+        const btn=this._button(label,'pfx-preset');btn.dataset.profile=key;btn.title='Bekijk het '+label+' ontwerp';profiles.append(btn);
       }
       page.append(profiles);
       const premiumStyle=$('style');premiumStyle.textContent='.pfx-presets{display:flex;flex-wrap:wrap;gap:9px;padding:8px;border-radius:18px;background:linear-gradient(130deg,rgba(255,255,255,.065),rgba(255,255,255,.012));border:1px solid rgba(150,160,180,.2)}.pfx-presets button{border-radius:12px!important;transition:transform .2s,box-shadow .2s,border-color .2s}.pfx-presets button:hover{transform:translateY(-2px);border-color:var(--primary-color,#ffd700)!important;box-shadow:0 9px 23px rgba(0,0,0,.18)}';page.append(premiumStyle);
@@ -2527,6 +2527,8 @@ md-filled-select {
       ]);
       const upload=$('label','field');upload.append($('span',null,'Eigen lettertype uploaden · WOFF2, WOFF, TTF, OTF (max. 160 kB)'));
       const fontFile=$('input');fontFile.type='file';fontFile.id='pala-custom-font-upload';fontFile.accept='.woff2,.woff,.ttf,.otf';upload.append(fontFile);page.append(upload);
+      page.append(this._button('Verwijder eigen lettertype','pfx-remove-font'));
+
       const fontInfo=$('p','field-note',this._pfxPrefs().customFont?'Eigen lettertype beschikbaar. Kies Eigen lettertype en sla op.':'Upload blijft lokaal tot je op Vormgeving opslaan klikt. Grote fonts zijn niet geschikt voor accountopslag.');fontInfo.id='pala-custom-font-status';page.append(fontInfo);
       this._pfxSection(page,'Thema en achtergrond','‘Home Assistant’ respecteert het actieve thema. ‘Klassieke vormgeving’ herstelt de oude volledige styling. AMOLED is een donkere override.',[
         ['select','background','Dashboardachtergrond',[['ha','Volg Home Assistant'],['classic','Klassieke vormgeving'],['glass','Glas · zacht verloop'],['flat','Effen · HA-achtergrond'],['amoled','AMOLED zwart']]],
@@ -2553,7 +2555,10 @@ md-filled-select {
         classic:{background:'classic',font:'supercell',accentMode:'custom',energyMode:'custom',fontScale:100,mobileScale:100,glass:45,cardRadius:28,controlRadius:20,sidebarBlur:true,dialogBlur:true,shadows:true,energyGlow:true},
         premium:{background:'glass',font:'supercell',accentMode:'ha',energyMode:'custom',fontScale:105,mobileScale:100,glass:55,cardRadius:28,controlRadius:18,dialogBlur:true},
         compact:{background:'ha',font:'roboto',fontScale:90,mobileScale:95,cardRadius:14,controlRadius:10,dialogBlur:false,sidebarBlur:false},
-        amoled:{background:'amoled',font:'system',fontScale:100,mobileScale:100,glass:90,sidebarBlur:false,dialogBlur:false,shadows:false,energyGlow:false}
+        amoled:{background:'amoled',font:'system',fontScale:100,mobileScale:100,glass:90,sidebarBlur:false,dialogBlur:false,shadows:false,energyGlow:false},
+        gold:{background:'amoled',font:'system',accentMode:'custom',accent:'#ffd700',fontScale:105,mobileScale:100,cardRadius:24,controlRadius:16,glass:55,shadows:true,buttonGlow:true},
+        ice:{background:'glass',font:'system',accentMode:'custom',accent:'#60c9ff',fontScale:100,mobileScale:100,glass:62,cardRadius:22,controlRadius:14,sidebarBlur:true,buttonGlow:true},
+        sunset:{background:'glass',font:'system',accentMode:'custom',accent:'#ff825a',fontScale:105,mobileScale:100,glass:48,cardRadius:28,controlRadius:18,buttonGlow:true}
       }[profile];
       if(!chosen)return;
       const next=pfxClean({...base,...chosen,enabled:true});
@@ -4477,7 +4482,8 @@ md-filled-select {
       if(cmd==='theme-preset'){this._chosenPreset=target.dataset.preset;this._themePreviewLive();return;}
       if(cmd==='theme-save'){this._themeSave();return;}
       if(cmd==='pfx-preset'){this._pfxPreset(target.dataset.profile);return;}
-      if(cmd==='pfx-save'){this._pfxSave();return;}
+      if(cmd==='pfx-remove-font'){const current=this._pfxReadForm();this._pfxDraft=pfxClean({...current,font:'ha',customFont:''});const select=this.dialog.querySelector('#pala-pfx-font');if(select)select.value='ha';const status=this.dialog.querySelector('#pala-custom-font-status');if(status)status.textContent='Eigen lettertype verwijderd uit voorbeeld. Klik Opslaan om dit te bewaren.';this._pfxPreview();return;}
+       if(cmd==='pfx-save'){this._pfxSave();return;}
       if(cmd==='pfx-reset'){this._pfxReset();return;}
       if(cmd==='pfx-cancel'){this._pfxDraft=null;this._pfxApply();this._editorNotice('Voorbeeld gestopt; opgeslagen instelling blijft actief.');return;}
       if(cmd==='design-save'){this._designSave();return;}
