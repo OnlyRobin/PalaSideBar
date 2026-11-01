@@ -3,10 +3,12 @@ on:
   push:
     branches:
       - develop
+      - 'fix/issue-*'
   pull_request:
     branches:
       - main
       - develop
+      - rc
   workflow_dispatch:
 permissions:
   contents: read
