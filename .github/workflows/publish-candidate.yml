@@ -2,7 +2,9 @@ name: Publiceer PalaSidebar RC-testrelease via HACS
 on:
   push:
     branches:
-      - release/candidate
+      - rc
+    paths:
+      - custom_components/pala_sidebar/manifest.json
   workflow_dispatch:
 
 permissions:
