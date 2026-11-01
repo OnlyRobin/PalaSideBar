@@ -41,7 +41,7 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 | [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) | Oudere beta |
 | **v2.0.0 Stable** | Nog niet uitgebracht; vereist jouw praktijktests en goedkeuring |
 
-**Vaste werkwijze:** We ontwikkelen op [`release/candidate`](https://github.com/OnlyRobin/PalaSideBar/tree/release/candidate). Elke inhoudelijke aanpassing krijgt **een nieuwe, oplopende RC-versie** en GitHub-prerelease (RC7, RC8 enzovoort), zodat HACS een echte update toont. We **wijzigen of verwijderen bestaande RC-tags en -releases nooit**; die blijven terugvalpunten. Alleen een door jou geteste RC wordt uiteindelijk als Stable uitgebracht, zonder de RC te verwijderen.
+**Vaste werkwijze:** We ontwikkelen op [`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc). Elke inhoudelijke aanpassing krijgt **een nieuwe, oplopende RC-versie** en GitHub-prerelease (RC7, RC8 enzovoort), zodat HACS een echte update toont. We **wijzigen of verwijderen bestaande RC-tags en -releases nooit**; die blijven terugvalpunten. Alleen een door jou geteste RC wordt uiteindelijk als Stable uitgebracht, zonder de RC te verwijderen.
 
 **HACS:** testversies / prereleases inschakelen en de nieuwste RC kiezen. HACS gebruikt geen afzonderlijke beta- en RC-kanalen, dus controleer altijd het versienummer. De standaardbranch is via `hacs.json` uitgeschakeld als willekeurige downloadbron.
 
@@ -151,12 +151,11 @@ PalaSidebar is gebouwd als Home Assistant-customintegratie. Lokale logo's worden
 
 ## Ontwikkeling en testen
 
-- **`main`:** standaardbranch; we wijzigen die pas na controle.
-- **`develop`:** ontwikkelbranch voor verbeteringen en regressietests.
-- **`rc4-accent-color-picker`:** aparte testbranch voor RC4, zonder de eerdere releases aan te passen.
-- **`rc5-header-image`:** aparte testbranch met headerafbeeldingen en README-voorbeelden.
-- **`release/v2.0.0`:** voorbereiding van de toekomstige stabiele versie; nog niet gepubliceerd.
-- **`release/v2.0.0-beta8`:** bronbranch waarmee beta8 is uitgebracht.
+- **[`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main):** beschermde hoofdbranch en projectdocumentatie.
+- **[`beta`](https://github.com/OnlyRobin/PalaSideBar/tree/beta):** vaste betabranch, momenteel gebaseerd op Beta8.
+- **[`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc):** permanente testbranch, momenteel RC6; hieruit publiceren we elke nieuwe RC via HACS.
+
+Oude GitHub-releases en tags blijven beschikbaar, ook als de oude tijdelijke branches zijn verwijderd. Stable wordt pas op basis van een door de gebruiker goedgekeurde RC voorbereid.
 
 De technische bestanden staan in `custom_components/pala_sidebar`. Automatische controles draaien via GitHub Actions: codecontrole, Hassfest, HACS-validatie en browser-/touchregressietests.
 
