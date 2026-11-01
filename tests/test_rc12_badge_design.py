@@ -1,4 +1,4 @@
-"""RC12: badge palette/HA counters, background gallery and per-badge override integration."""
+"""RC13: badge palette/HA badges, single background gallery and per-badge override integration."""
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -31,13 +31,20 @@ with sync_playwright() as pw:
           const n=document.querySelector('home-assistant').shadowRoot.querySelector('ha-sidebar');
           const s=n.querySelector('pala-sidebar'),get=id=>s.dialog.querySelector('#pala-pfx-'+id);
           s.showSettings('ui_style');
-          const options=[...get('background').options].map(e=>e.value);
+          // RC13: gallery is the ONLY visible background selector.
+          const options=[...s.dialog.querySelectorAll('button[data-background]')].map(e=>e.dataset.background);
           for(const value of ['ha','classic','glass','flat','solid','midnight','aurora','sunset','amoled'])
             if(!options.includes(value))throw Error('Ontbrekende achtergrond: '+value);
+          if(s.dialog.querySelector('select#pala-pfx-background'))throw Error('Dubbele achtergrond-dropdown bestaat nog');
+          if(get('background')?.type!=='hidden')throw Error('Galerijbron moet een verborgen formulierveld zijn');
+          s._pfxPreset('amoled');
+          if(get('background').value!=='amoled')throw Error('Preset synchroniseert de galerij niet');
           const click=s.dialog.querySelector('[data-background="aurora"]');
           if(!click)throw Error('Galerij mist Aurora');
           click.click();
           if(get('background').value!=='aurora')throw Error('Galerij werkt niet');
+          if(click.getAttribute('aria-pressed')!=='true')throw Error('Actieve galerijkeuze is niet aangeduid');
+          if(!s.dialog.textContent.includes('Home Assistant-badges'))throw Error('Oude tellernaam nog aanwezig');
           get('badgeMode').value='custom';get('badgeColor').value='#af22bb';get('badgeBorderWidth').value='2';
           get('badgeRadius').value='17';get('badgeGlow').value='12';get('badgeOpacity').value='65';
           get('navBorderWidth').value='1';get('navBorderColor').value='#00eeff';
@@ -72,6 +79,6 @@ with sync_playwright() as pw:
         assert result["perBadge"]["radius"]=="14px" and result["perBadge"]["color"]=="#ff0000",result
         assert result["perBadge"]["glow"]!="",result
         assert not errors,(width,errors)
-        print("PASS RC12 badge design",width,result)
+        print("PASS RC13 badge design",width,result)
         page.close()
     browser.close()
