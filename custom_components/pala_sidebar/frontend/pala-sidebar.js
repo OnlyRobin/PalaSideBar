@@ -1399,14 +1399,12 @@ md-filled-select {
 :host([data-header-mode="app"]) .top .iconbtn{min-width:38px;min-height:38px}
 /* Personal header style variables applied only within PalaSidebar. */
 .top{background:var(--p-header-background,transparent)}
-/* Optionele foto: uitsluitend in de eigen PalaSidebar-header, nooit in de HA-header. */
-.top[data-header-picture="true"]{min-height:94px;padding-top:14px;padding-bottom:10px;background-size:cover;background-repeat:no-repeat;background-position:center;align-items:flex-end;isolation:isolate}
+/* De headerfoto is een achtergrond, geen extra rij in de layout.
+   Behoud exact dezelfde hoogte, padding en verticale uitlijning als zonder foto
+   in normaal, compact, minimal, app en de native ingeklapte iconenrail. */
+.top[data-header-picture="true"]{background-size:cover;background-repeat:no-repeat;background-position:center;isolation:isolate}
 .top[data-header-picture="true"] .brand strong,.top[data-header-picture="true"] .brand small,.top[data-header-picture="true"] .iconbtn{color:#fff!important;text-shadow:0 1px 5px #000c}
 .top[data-header-picture="true"] .logo{box-shadow:0 2px 10px #0009}
-:host([data-header-mode="compact"]) .top[data-header-picture="true"]{min-height:82px}
-:host([data-header-mode="app"]) .top[data-header-picture="true"]{min-height:82px}
-:host([data-header-mode="minimal"]) .top[data-header-picture="true"]{min-height:72px}
-:host([data-compact="true"][data-integration="native"]) .top[data-header-picture="true"]{min-height:36px;padding:4px 7px}
 @media(prefers-reduced-motion:reduce){.top[data-header-picture="true"]{transition:none!important}}
 .top .logo{background:var(--p-header-logo-background,var(--p-accent));color:var(--p-header-logo-color,#06151e)}
 .clock{color:var(--p-header-clock-color,var(--secondary-text-color,#9ca9b9))}
