@@ -67,7 +67,7 @@ with sync_playwright() as pw:
         assert data['rendered']=='Mexico GP',data
         assert data['preview']=='Voorbeeld: Mexico GP',data
         assert data['badgeSearch'] and data['badgeOpen'] and data['safe'],data
-        assert data['version']=='2.0.0-rc4',data
+        assert data['version']=='2.0.0-rc5',data
         assert not errors,errors
         print('PASS RC3 sensor zoeken, attributen, opslag en veilig invoegen',width,'px')
         page.close()
