@@ -1820,6 +1820,11 @@ md-filled-select {
 .pfx-preview .pfx-sample{border-radius:var(--pfx-card-radius,20px);padding:13px;border:1px solid var(--divider-color,#ffffff38);background:var(--primary-background-color,#18232d);font-family:var(--pfx-font,inherit);font-size:var(--pfx-size,14px)}
 .pfx-sample .pfx-title{font-size:1.16em;font-weight:750}.pfx-sample small{font-size:.75em;color:var(--secondary-text-color,#64748b)}
 .pfx-presets{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 2px}.pfx-presets .btn{font-size:12px;min-height:36px}.pfx-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.pfx-pill{display:inline-block;background:var(--pfx-accent,#38bdf8);color:var(--pfx-ink,#06141e);padding:5px 9px;border-radius:var(--pfx-control-radius,13px);font-size:.85em;font-weight:750}
+.editor-categories{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 6px}
+.editor-categories .btn{flex:1 1 auto;min-width:105px;border-radius:11px;white-space:nowrap;font-weight:700}
+.editor-categories .btn.primary{box-shadow:inset 0 -2px var(--primary-color,#38bdf8)}
+.editor-tabs [hidden]{display:none!important}
+@media(max-width:700px){.editor-categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.editor-categories .btn{min-width:0;font-size:11px;padding-inline:6px}}
 .pfx-section{margin:0;border-top:1px solid var(--divider-color,#ffffff24);padding:12px 0 2px}.pfx-section>h3{margin:0 0 5px}.pfx-description{margin:0 0 12px;color:var(--secondary-text-color,#96a7b8)}
 .pfx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px;row-gap:8px}.pfx-field{min-width:0;display:flex;flex-direction:column;gap:7px;padding:6px 0}.pfx-field>label{font-size:12px;font-weight:650}.pfx-field select,.pfx-field input:not([type=checkbox]):not([type=color]):not([type=range]){width:100%;min-width:0}
 .pfx-field select{min-height:39px}.pfx-color{display:flex;gap:7px;align-items:center}.pfx-color input[type=color]{width:51px;height:41px;padding:3px;border-radius:10px;flex:0 0 51px;cursor:pointer;border:1px solid var(--divider-color,#777)}.pfx-color output{font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis}
@@ -4683,6 +4688,10 @@ md-filled-select {
       if(cmd==='settings-close'||cmd==='settings-close-top'){this._closeOwnedDialog(this.dialog);return;}
       if(cmd==='action-close'){this._closeOwnedDialog(this.actionDialog);return;}
       if(cmd==='editor-tabs-prev'||cmd==='editor-tabs-next'){const nav=this.dialog.querySelector('.editor-tabs');if(nav)nav.scrollBy({left:(cmd==='editor-tabs-prev'?-1:1)*Math.max(150,nav.clientWidth*.7),behavior:'smooth'});return;}
+      if(cmd==='editor-category'){
+        const first=this.dialog.querySelector('[data-do="editor-tab"][data-category="'+target.dataset.category+'"]');
+        first?.click();return;
+      }
       if(cmd==='editor-tab'){if(this.editorTab==='design')this._applyDesign();if(this.editorTab==='ui_style'){this._pfxDraft=null;this._pfxApply();}if(this.themeDraft){this.themeDraft=null;this._syncTheme(true);this._fillThemeEditor(this._themePrefs());}this.dialog.querySelector('#pala-editor-notice')?.remove();this._showEditorTab(target.dataset.tab);const scroller=this.dialog.querySelector('.dialog-content');if(scroller)scroller.scrollTop=0;return;}
       if(cmd==='theme-preset'){this._chosenPreset=target.dataset.preset;this._themePreviewLive();return;}
       if(cmd==='theme-save'){this._themeSave();return;}
@@ -6045,6 +6054,15 @@ md-filled-select {
     }
     _showEditorTab(tab){
       this.editorTab=tab;
+      const currentButton=this.dialog.querySelector('[data-do="editor-tab"][data-tab="'+tab+'"]');
+      const selectedCategory=currentButton?.dataset.category||'basis';
+      for(const node of this.dialog.querySelectorAll('[data-do="editor-category"]')){
+        const active=node.dataset.category===selectedCategory;
+        node.classList.toggle('primary',active);node.setAttribute('aria-current',active?'true':'false');
+      }
+      for(const node of this.dialog.querySelectorAll('[data-do="editor-tab"]')){
+        node.hidden=node.dataset.category!==selectedCategory;
+      }
       if(tab==='performance')this._fillPerformance();
       for(const node of this.dialog.querySelectorAll('[data-editor-page]'))node.hidden=node.dataset.editorPage!==tab;
       for(const node of this.dialog.querySelectorAll('[data-do="editor-tab"]')){
@@ -7052,10 +7070,26 @@ md-filled-select {
       const sync=$('div','pala-sync-status','◌ Instellingen laden / synchroniseren');
       sync.id='pala-storage-pill';sync.setAttribute('role','status');sync.setAttribute('aria-live','polite');
       pane.append(sync);
-      const tabs=$('div','editor-tabs');tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Instellingencategorieën');
-      for(const [id,label] of [['general','Algemeen'],['header','Header'],['layout','Indeling'],['quick','Snelmenu'],['menu','Dashboards'],['badges','Badges'],['actions','Acties'],['sensors','Sensoren'],['agenda','Agenda'],['live_center','Control Center'],['themes','Thema’s'],['design','Design'],['ui_style','PalaSidebar UI'],['diagnostic','Diagnose'],['performance','Performance'],['backup','Backup']]){
-        const b=this._button(label,'editor-tab');b.dataset.tab=id;b.id='pala-tab-'+id;b.setAttribute('role','tab');b.setAttribute('aria-controls','pala-page-'+id);tabs.append(b);
+      // Eén overzichtelijke categorie-indeling voor alle bestaande instellingen.
+      // De technische tab-ID's en bestaande opslag blijven bewust ongewijzigd.
+      const categories=[
+        ['basis','Basis & weergave',[['general','Algemeen'],['header','Header'],['quick','Snelmenu']]],
+        ['menu','Menu & inhoud',[['layout','Indeling'],['menu','Dashboards'],['actions','Acties'],['sensors','Sensoren'],['agenda','Agenda'],['live_center','Control Center']]],
+        ['vormgeving','Vormgeving',[['themes','Thema’s'],['design','Design'],['ui_style','PalaSidebar UI'],['badges','Badges']]],
+        ['beheer','Onderhoud',[['diagnostic','Diagnose'],['performance','Performance'],['backup','Backup']]]
+      ];
+      const categoriesBar=$('nav','editor-categories');categoriesBar.setAttribute('aria-label','Hoofdcategorieën instellingen');
+      const tabs=$('div','editor-tabs');tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Instellingen binnen categorie');
+      for(const [group,label,items] of categories){
+        const categoryButton=this._button(label,'editor-category');categoryButton.dataset.category=group;
+        categoryButton.setAttribute('aria-label','Instellingencategorie '+label);
+        categoriesBar.append(categoryButton);
+        for(const [id,name] of items){
+          const b=this._button(name,'editor-tab');b.dataset.tab=id;b.dataset.category=group;
+          b.id='pala-tab-'+id;b.setAttribute('role','tab');b.setAttribute('aria-controls','pala-page-'+id);tabs.append(b);
+        }
       }
+      pane.append(categoriesBar);
       const tabsWrap=$('div','editor-tabs-wrap');
       const prev=this._button('‹','editor-tabs-prev','tabs-scroll-btn');prev.setAttribute('aria-label','Vorige instellingentabs');prev.title='Vorige tabs';
       const next=this._button('›','editor-tabs-next','tabs-scroll-btn');next.setAttribute('aria-label','Volgende instellingentabs');next.title='Volgende tabs';
