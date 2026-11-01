@@ -1,0 +1,33 @@
+name: Wekelijkse PalaSidebar broncodebewaking
+on:
+  schedule:
+    - cron: "10 7 * * 1"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/watch-public-code.yml
+      - scripts/watch_palasidebar_reuse.py
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  zoek-openbare-kopieen:
+    name: Controleer openbare GitHub-code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Controleer syntax en test zoekfilter
+        run: |
+          python -m py_compile scripts/watch_palasidebar_reuse.py
+          python tests/test_public_source_monitor.py
+      - name: Zoek herkenbare herpublicaties en meld bij dubbele match
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python scripts/watch_palasidebar_reuse.py
