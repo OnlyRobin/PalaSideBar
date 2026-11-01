@@ -34,7 +34,7 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 
 | Versie | Betekenis |
 | --- | --- |
-| **v2.0.0-rc.11 (RC-testrelease)** | Premium UI, eigen lettertypen, extra profielen en reparatie van de drie native Home Assistant-footerlabels. [RC11 release-instructies](docs/RELEASE-v2.0.0-rc.11.md) |
+| **v2.0.0-rc.12 (RC-testrelease)** | Badge Design Studio, eigen tellerkleuren, glass/gradient, randen en achtergrondgalerij. [RC12 release-instructies](docs/RELEASE-v2.0.0-rc.12.md) |\n| [v2.0.0-rc.11](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.11) | Eigen lettertypen, premium presets, herstelde footer-tekstgrootte |
 | [v2.0.0-rc10](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc10) | Screenshot-voorbeeld in bugmelding en eerste footer-tekstgroottefix |
 | [v2.0.0-rc9](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc9) | Zichtbare feedback bij handmatige updatecontrole |
 | [v2.0.0-rc8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc8) | Kanaalbewuste updatemeldingen |
@@ -45,7 +45,7 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 
 **Onze werkwijze:** veranderingen eerst op de permanente [`rc`-branch](https://github.com/OnlyRobin/PalaSideBar/tree/rc), daarna een nieuwe HACS-prerelease. We verplaatsen of verwijderen **nooit bestaande RC-tags of -releases**. De `beta`- en `main`-branches blijven behouden. Een stabiele release volgt alleen na goedkeuring.
 
-**Versionering:** vanaf RC11 gebruiken we de numeriek sorteervriendelijke Semantic Versioning-notatie `2.0.0-rc.11`, `2.0.0-rc.12` enzovoort. Historische tags zoals `v2.0.0-rc10` blijven ongewijzigd. HACS biedt geen volledig afzonderlijke bèta- en RC-updatekanalen; kies de gewenste prerelease expliciet.
+**Versionering:** vanaf RC11 gebruiken we Semantic Versioning: `2.0.0-rc.11`, `2.0.0-rc.12` enzovoort. Door de bekende HACS-sorteerfout wordt niet altijd de nieuwste RC automatisch aangeboden. Historische tags zoals `v2.0.0-rc10` blijven ongewijzigd. HACS biedt geen volledig afzonderlijke bèta- en RC-updatekanalen; kies de gewenste prerelease expliciet.
 
 **HACS:** schakel prereleases/testversies in. Gebruik *Opnieuw downloaden* en kies `v2.0.0-rc.11` wanneer een oudere HACS-versie geen automatische melding toont. Installeren blijft handmatig via HACS; PalaSidebar meldt alleen beschikbare versies.
 
@@ -168,6 +168,18 @@ Open **PalaSidebar → Instellingen → PalaSidebar UI**. De live-voorvertoning 
 
 **Bugs en screenshots:** in **Instellingen → Diagnose → Bug melden** kun je een screenshot selecteren en lokaal bekijken. Voeg het bestand daarna zelf toe aan het GitHub-issue. Een gekozen afbeelding wordt niet automatisch verstuurd. Controleer zelf altijd eerst op gevoelige informatie.
 
+## Badge Design Studio en achtergronden (RC12)
+
+Onder **PalaSidebar → Instellingen → PalaSidebar UI** staat nu een aparte **Badge Design Studio**. Kies of standaard sensorbadges hun bestaande thema-accent gebruiken of eigen kleuren. Stel vervolgens badgeachtergrond, tekstkleur, randkleur, randdikte, hoekafronding, binnenruimte, transparantie en gloed in. De live preview laat het resultaat direct zien. Bestaande sensorgestuurde kleuren (zoals temperatuur, warmtepomp en F1) blijven afzonderlijk werken en worden niet door de algemene kleur vervangen.
+
+**Originele Home Assistant-tellers:** de tellers van **Instellingen** en **Meldingen** hebben hun eigen kanaal: PalaSidebar-accent, HA-kleur of eigen kleur. Rand en radius zijn ook instelbaar, zonder de HA-tellerwaarde of klikactie te veranderen.
+
+**Per sensorbadge:** open de bestaande badge-editor om voor één badge een eigen randdikte, radius, HEX-randkleur of gloed te kiezen. Naast Solid, Soft, Outline, Plain en Dot zijn **Glass** en **Gradient** beschikbaar. Een instelling op één badge heeft voorrang op de algemene badgevormgeving.
+
+**Achtergrondgalerij:** de bestaande achtergrondkeuzelijst is aangevuld met Eigen kleur, Midnight, Aurora en Zonsondergang. Alle negen achtergronden hebben een direct aanklikbaar voorbeeld. Er zijn ook afzonderlijke randinstellingen voor de PalaSidebar-menurijen.
+
+Alle nieuwe instellingen gebruiken begrensde waarden en veilige standaardwaarden. Wijzigingen worden pas definitief met **Vormgeving opslaan**. Test kleurwisseling op telefoon/tablet en controleer ook je bestaande sensorbadges voordat je een RC als geschikt voor Stable beoordeelt.
+
 ## Instellingen en compatibiliteit
 
 Open het instellingenmenu van PalaSidebar om dashboards, badges, thema's, snelkoppelingen en **PalaSidebar UI** aan te passen. Eerdere vormgevingsinstellingen worden bij het inladen indien mogelijk overgenomen.
@@ -178,7 +190,7 @@ PalaSidebar is gebouwd als Home Assistant-customintegratie. Lokale logo's worden
 
 - **[`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main):** beschermde hoofdbranch en projectdocumentatie.
 - **[`beta`](https://github.com/OnlyRobin/PalaSideBar/tree/beta):** vaste betabranch, momenteel gebaseerd op Beta8.
-- **[`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc):** permanente testbranch, momenteel RC11; hieruit publiceren we nieuwe testreleases via HACS.
+- **[`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc):** permanente testbranch, momenteel RC12; hieruit publiceren we nieuwe testreleases via HACS.
 
 Oude GitHub-releases en tags blijven beschikbaar, ook als de oude tijdelijke branches zijn verwijderd. Stable wordt pas op basis van een door de gebruiker goedgekeurde RC voorbereid.
 
