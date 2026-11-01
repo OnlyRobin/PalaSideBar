@@ -1028,7 +1028,11 @@ md-filled-select {
       color_rules:text(value.color_rules).slice(0,900),color_stops:text(value.color_stops).slice(0,900),color_transition:['gradient','direct'].includes(value.color_transition)?value.color_transition:'steps',color_fallback:hex6(value.color_fallback)||'',label_color_from_badge:value.label_color_from_badge===true,icon_color_from_badge:value.icon_color_from_badge===true,
       format:['auto','compact','days-hours','hours-minutes','clock','number'].includes(value.format)?value.format:'auto',
       layout:['right','below','above','left'].includes(value.layout)?value.layout:'right',
-      style:['solid','soft','outline','plain','dot'].includes(value.style)?value.style:'solid',
+      style:['solid','soft','outline','plain','dot','glass','gradient'].includes(value.style)?value.style:'solid',
+      border_width:Number.isFinite(Number(value.border_width))?clamp(Math.floor(Number(value.border_width)),-1,4):-1,
+      border_radius:Number.isFinite(Number(value.border_radius))?clamp(Math.floor(Number(value.border_radius)),-1,24):-1,
+      border_color:hex6(value.border_color)||'',
+      badge_glow:['inherit','on','off'].includes(value.badge_glow)?value.badge_glow:'inherit',
       size:['small','normal','large'].includes(value.size)?value.size:'normal',
       max_chars:Number.isFinite(Number(value.max_chars))?clamp(Math.floor(Number(value.max_chars)),0,60):0,
       decimals:Number.isFinite(Number(value.decimals))?clamp(Math.floor(Number(value.decimals)),0,3):1};
@@ -5284,6 +5288,17 @@ md-filled-select {
         const layout=spec&&typeof spec==='object'?spec.layout||'right':'right';
         if(node.dataset.style!==style)node.dataset.style=style;
         if(node.dataset.size!==size)node.dataset.size=size;
+        const own=spec&&typeof spec==='object'?spec:null;
+        const overrides=[
+          ['--pala-badge-border-width',own?.border_width>=0?own.border_width+'px':null],
+          ['--pala-badge-radius',own?.border_radius>=0?own.border_radius+'px':null],
+          ['--pala-badge-border-color',own?.border_color||null],
+          ['--pala-badge-glow',own?.badge_glow==='on'?'0 0 14px var(--p-badge-color,var(--pala-badge-fill,var(--p-accent)))':own?.badge_glow==='off'?'none':null]
+        ];
+        for(const [key,val] of overrides){
+          if(val===null){if(node.style.getPropertyValue(key))node.style.removeProperty(key);}
+          else if(node.style.getPropertyValue(key)!==val)node.style.setProperty(key,val);
+        }
         if(node.parentElement?.dataset.badgeLayout!==layout)node.parentElement.dataset.badgeLayout=layout;
         if(color==='sensor'||color==='custom'){
           const current=badgeColor(spec,this.hass?.states);
@@ -6340,8 +6355,13 @@ md-filled-select {
         ['auto','Normaal (originele sensorwaarde)'],['compact','Compacte aftelling · 3d 22h'],['days-hours','Dagen en uren · 3d 22h'],
         ['hours-minutes','Uren en minuten · 94h 23m'],['clock','Klok · 3d 22:23:29'],['number','Getal afgerond (met decimalen)']]));
       pane.append(this._formField('Positie badge','pala-badge-layout','right', [['right','Rechts naast de menunaam'],['below','Onder de menunaam · aanbevolen bij F1'],['above','Boven de menunaam'],['left','Tussen icoon en menunaam']]));
-      pane.append(this._formField('Vorm','pala-badge-style','solid', [['solid','Gevulde badge'],['soft','Zachte badge'],['outline','Omlijnd'],['plain','Alleen tekst'],['dot','Alleen statusstip']]));
+      pane.append(this._formField('Vorm','pala-badge-style','solid', [['solid','Gevulde badge'],['soft','Zachte badge'],['outline','Omlijnd'],['plain','Alleen tekst'],['dot','Alleen statusstip'],['glass','Glasbadge'],['gradient','Kleurverloop']]));
       pane.append(this._formField('Grootte','pala-badge-size','normal', [['small','Klein'],['normal','Normaal'],['large','Groot']]));
+      pane.append($('h3',null,'Rand en gloed per badge'),$('p','field-note','Instellingen op deze menuknop hebben voorrang boven de algemene Badge Design Studio.'));
+      pane.append(this._formField('Randdikte','pala-badge-border_width','-1',[['-1','Volg algemene stijl'],['0','Geen rand'],['1','1 px'],['2','2 px'],['3','3 px'],['4','4 px']]));
+      pane.append(this._formField('Hoekafronding','pala-badge-border_radius','-1',[['-1','Volg algemene stijl'],['0','Vierkant'],['6','6 px'],['10','10 px'],['14','14 px'],['20','20 px'],['24','24 px']]));
+      pane.append(this._formField('Randkleur HEX (leeg = algemeen)','pala-badge-border_color',''));
+      pane.append(this._formField('Badge-gloed','pala-badge-badge_glow','inherit',[['inherit','Volg algemene stijl'],['on','Gloed aan'],['off','Gloed uit']]));
       pane.append(this._formField('Maximaal aantal tekens (0 = automatisch)','pala-badge-max_chars','0'));
       pane.append(this._formField('Aantal decimalen bij getal','pala-badge-decimals','1', [['0','0'],['1','1'],['2','2'],['3','3']]));
       pane.append($('h3',null,'Kleur van de badge'),$('p','field-note','Je hoeft geen sensor te zoeken die een kleur heeft. Kies één vaste kleur, of koppel zelf kleuren aan de gewone sensorwaarden.'));
@@ -6549,7 +6569,7 @@ md-filled-select {
       q('icon_color_from_badge').checked=b?.icon_color_from_badge===true;
       q('custom-attribute').value='';
       q('show').value=b?.show||'always';q('prefix').value=b?.prefix||'';q('suffix').value=b?.suffix||'';q('color').value=b?.color||'accent';
-      for(const [field,fallback] of [['format','auto'],['layout','right'],['style','solid'],['size','normal'],['max_chars',0],['decimals',1]])q(field).value=b?.[field]??fallback;
+      for(const [field,fallback] of [['format','auto'],['layout','right'],['style','solid'],['size','normal'],['border_width',-1],['border_radius',-1],['border_color',''],['badge_glow','inherit'],['max_chars',0],['decimals',1]])q(field).value=b?.[field]??fallback;
       this._refreshBadgeAttributeOptions(b?.attribute||'');
     }
     _editorBadgeSave(){
@@ -6561,7 +6581,7 @@ md-filled-select {
         this._editorNotice('Kies een badgesensor, vul een sjabloon in of stel een stand-sensor met een geldige regel in.');return;
       }
       const attribute=this._selectedBadgeAttribute();
-      this.saved.badge_overrides[id]=badgeSpec({entity:q('entity'),template:q('template'),...switchInput,auto_lines:this.dialog.querySelector('#pala-badge-auto_lines')?.checked!==false,attribute,show:q('show'),prefix:q('prefix'),suffix:q('suffix'),color:q('color'),custom_color:q('custom_color'),color_entity:q('color_entity'),color_attribute:this._selectedBadgeColorAttribute(),color_rules:q('color_rules'),color_transition:q('color_transition'),color_stops:q('color_stops'),color_fallback:this.dialog.querySelector('#pala-badge-fallback_enabled')?.checked?q('color_fallback'):'',label_color_from_badge:this.dialog.querySelector('#pala-badge-label_color_from_badge')?.checked,icon_color_from_badge:this.dialog.querySelector('#pala-badge-icon_color_from_badge')?.checked,format:q('format'),layout:q('layout'),style:q('style'),size:q('size'),max_chars:q('max_chars'),decimals:q('decimals')});
+      this.saved.badge_overrides[id]=badgeSpec({entity:q('entity'),template:q('template'),...switchInput,auto_lines:this.dialog.querySelector('#pala-badge-auto_lines')?.checked!==false,attribute,show:q('show'),prefix:q('prefix'),suffix:q('suffix'),color:q('color'),custom_color:q('custom_color'),color_entity:q('color_entity'),color_attribute:this._selectedBadgeColorAttribute(),color_rules:q('color_rules'),color_transition:q('color_transition'),color_stops:q('color_stops'),color_fallback:this.dialog.querySelector('#pala-badge-fallback_enabled')?.checked?q('color_fallback'):'',label_color_from_badge:this.dialog.querySelector('#pala-badge-label_color_from_badge')?.checked,icon_color_from_badge:this.dialog.querySelector('#pala-badge-icon_color_from_badge')?.checked,format:q('format'),layout:q('layout'),style:q('style'),size:q('size'),border_width:q('border_width'),border_radius:q('border_radius'),border_color:q('border_color'),badge_glow:q('badge_glow'),max_chars:q('max_chars'),decimals:q('decimals')});
       this._saveSettings();this._drawList();this._editorNotice('Badge opgeslagen. Je kunt alle velden blijven wijzigen of wissen.');
     }
     _editorBadgeRemove(){
