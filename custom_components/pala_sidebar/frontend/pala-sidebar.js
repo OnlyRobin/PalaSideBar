@@ -2509,7 +2509,7 @@ md-filled-select {
           badgeStyle.textContent=String.raw`
             .nav-row{border:var(--pala-nav-border-width,0px) solid var(--pala-nav-border-color,transparent)}
             .badge:not([data-style="dot"]):not([data-style="plain"]){border:var(--pala-badge-border-width,0px) solid var(--pala-badge-border-color,transparent);border-radius:var(--pala-badge-radius,7px);padding-inline:var(--pala-badge-pad,5px);box-shadow:var(--pala-badge-glow,none);opacity:var(--pala-badge-alpha,1)}
-            :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"]:not([data-style="dot"]):not([data-style="plain"]):not([data-style="outline"]){background:var(--pala-badge-fill)!important;color:var(--pala-badge-ink)!important}
+            :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"]:not([data-style="dot"]):not([data-style="plain"]):not([data-style="outline"]):not([data-style="soft"]):not([data-style="glass"]):not([data-style="gradient"]){background:var(--pala-badge-fill)!important;color:var(--pala-badge-ink)!important}
             :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"][data-style="soft"]{background:color-mix(in srgb,var(--pala-badge-fill) 28%,transparent)!important;color:var(--pala-badge-fill)!important}
             :host([data-pfx-badge-custom="true"]) .badge[data-color="accent"]:is([data-style="plain"],[data-style="outline"]){color:var(--pala-badge-fill)!important}
             .badge[data-style="glass"]:not([data-color="sensor"]):not([data-color="custom"]){background:color-mix(in srgb,var(--pala-badge-fill,var(--p-accent)) 18%,transparent)!important;backdrop-filter:blur(5px)}
@@ -2597,6 +2597,12 @@ md-filled-select {
         ['range','badgeRadius','Badge afronding',[0,24,1,'px']],['range','badgePad','Horizontale binnenruimte',[0,14,1,'px']],
         ['range','badgeGlow','Badge gloed',[0,24,2,'px']],['range','badgeOpacity','Badge transparantie',[30,100,5,'%']]
       ]);
+      const badgeDemo=$('div','pfx-preview');badgeDemo.id='pala-pfx-badge-demo';
+      badgeDemo.append($('strong',null,'Live badgevoorbeeld'));
+      const badgeChip=$('span',null,'⚡ Verbruik 4.2 kWh');
+      badgeChip.id='pala-pfx-badge-demo-chip';
+      badgeChip.style.cssText='display:inline-block;align-self:start;font-weight:750;font-size:13px;transition:background .2s,border-radius .2s';
+      badgeDemo.append(badgeChip);page.append(badgeDemo);
       this._pfxSection(page,'Originele Home Assistant-tellers','Instellingen en Meldingen zijn Home Assistant-knoppen. Stel hun tellers apart in zonder de waarde of werking te veranderen.',[
         ['select','nativeBadgeMode','Kleur tellers',[['sidebar','PalaSidebar-accent'],['ha','Home Assistant-kleur'],['custom','Eigen tellerkleur']]],
         ['color','nativeBadgeColor','Eigen tellerachtergrond'],['color','nativeBadgeText','Eigen tellertekstkleur'],
@@ -2643,6 +2649,14 @@ md-filled-select {
       if(!this.dialog?.querySelector('#pala-pfx-preview'))return;
       this._pfxDraft=this._pfxReadForm();
       const v=this._pfxDraft,preview=this.dialog.querySelector('#pala-pfx-preview');
+      const demo=this.dialog.querySelector('#pala-pfx-badge-demo-chip');
+      if(demo){
+        const c=v.badgeMode==='custom'?v.badgeColor:(v.accentMode==='custom'?v.accent:'#38bdf8');
+        demo.style.background=c;demo.style.color=v.badgeMode==='custom'?v.badgeText:readableBadgeText(c);
+        demo.style.border=v.badgeBorderWidth+'px solid '+v.badgeBorderColor;
+        demo.style.borderRadius=v.badgeRadius+'px';demo.style.padding='5px '+v.badgePad+'px';
+        demo.style.boxShadow=v.badgeGlow?'0 0 '+v.badgeGlow+'px '+c:'none';demo.style.opacity=String(v.badgeOpacity/100);
+      }
       preview.style.setProperty('--pfx-card-radius',v.cardRadius+'px');
       preview.style.setProperty('--pfx-control-radius',v.controlRadius+'px');
       preview.style.setProperty('--pfx-font',PFX_FONTS[v.font]);
