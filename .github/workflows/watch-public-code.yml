@@ -1,4 +1,5 @@
 name: Wekelijkse PalaSidebar broncodebewaking
+# Pas alerts niet automatisch als auteursrechtinbreuk aan: MIT-rechten blijven bestaan.
 on:
   schedule:
     - cron: "10 7 * * 1"
