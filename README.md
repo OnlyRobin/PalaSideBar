@@ -34,13 +34,11 @@ Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te opene
 | --- | --- |
 | **[v2.0.0-rc5](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc5)** | Nieuwste **release candidate**: eigen headerfoto, preview, bewerken en opslaan bij je account; HACS-testrelease |
 | [v2.0.0-rc4](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc4) | Vorige RC: kleurkiezers met HEX-code en live voorbeeld in Algemeen en Header |
-| [v2.0.0-rc3](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc3) | Eerdere release candidate: sensoren zoeken en attributen kiezen in de header |
 | **[v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8)** | Nieuwste **beta** met de herstelde PalaSidebar UI, ondertitel en BEHEER-opties |
 | [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) | Oudere beta, met drie inmiddels bekende fouten |
-| [v2.0.0-rc1](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc1) en [v2.0.0-rc2](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc2) | Eerdere release candidates; blijven beschikbaar om terug te zetten |
 | **v2.0.0 Stable** | Nog **niet uitgebracht**; eerst testen op echte apparaten |
 
-> **Belangrijk bij HACS-updates:** HACS heeft geen afzonderlijk beta- en RC-updatekanaal. Bij versievergelijking staat `2.0.0-rc5` boven `2.0.0-rc4`, `2.0.0-rc3` en `2.0.0-rc2` en doorgaans ook boven `2.0.0-beta8`. De automatisch aangeboden update hoeft dus niet uit dezelfde beta-reeks te komen. Kies **altijd bewust de gewenste versie** via HACS → PalaSidebar → Downloaden/Opnieuw downloaden → testversies. In `hacs.json` is de standaardbranch verborgen voor releasekeuzes.
+> **Belangrijk bij HACS-updates:** HACS heeft geen afzonderlijk beta- en RC-updatekanaal. Bij versievergelijking staat `2.0.0-rc5` boven `2.0.0-rc4` en doorgaans ook boven `2.0.0-beta8`. De automatisch aangeboden update hoeft dus niet uit dezelfde beta-reeks te komen. Kies **altijd bewust de gewenste versie** via HACS → PalaSidebar → Downloaden/Opnieuw downloaden → testversies. In `hacs.json` is de standaardbranch verborgen voor releasekeuzes.
 
 ## Mogelijkheden
 
@@ -83,11 +81,11 @@ Open op je Home Assistant-adres het pad:
 /pala_sidebar/assets/pala-sidebar-version.json
 ```
 
-Bij RC5 moet hier `2.0.0-rc5` staan nadat je deze release hebt gekozen; bij RC4 `2.0.0-rc4`, bij RC3 `2.0.0-rc3` en bij beta8 `2.0.0-beta8`. De versie staat ook onderaan PalaSidebar.
+Bij RC5 moet hier `2.0.0-rc5` staan nadat je deze release hebt gekozen; bij RC4 `2.0.0-rc4` en bij beta8 `2.0.0-beta8`. De versie staat ook onderaan PalaSidebar.
 
 ### Teruggaan naar een eerdere versie
 
-Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer de eerdere release (bijvoorbeeld beta7 of RC2). Herstart Home Assistant en herstel zo nodig je back-up. Een andere versie kiezen is geen vervanging voor een back-up van je instellingen.
+Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer een nog beschikbare release (bijvoorbeeld beta8 of RC4). Herstart Home Assistant en herstel zo nodig je back-up. Een andere versie kiezen is geen vervanging voor een back-up van je instellingen.
 
 ## Wat is nieuw in RC5?
 
@@ -110,7 +108,7 @@ De automatische code-, HACS-, Hassfest- en Chromium-controles zijn geslaagd. Het
 
 RC4 is gepubliceerd na geslaagde geautomatiseerde code-, Hassfest-, HACS- en Chromium-regressietests. Het blijft een testversie: controleer op je telefoon en tablet vooral de standaardkleur, kleurkeuze, HEX-invoer, opslaan en de keuze voor themakleuren. Zie [RC4-wijzigingen](docs/RELEASE-v2.0.0-rc4.md).
 
-## Wat is nieuw in RC3?
+## Sensoren zoeken en attributen gebruiken
 
 - In **Instellingen → Header** kun je een Home Assistant-sensor zoeken op naam of `entity_id`.
 - Je kunt de gewone sensorwaarde of een beschikbaar attribuut (bijvoorbeeld `race_name` of `countdown`) kiezen.
@@ -119,7 +117,7 @@ RC4 is gepubliceerd na geslaagde geautomatiseerde code-, Hassfest-, HACS- en Chr
 - De entiteitenzoeker bij bestaande sensorvelden heeft een herkenbare zoekknop en betere suggesties.
 - Bestaande sensortokens zoals `{sensor.woonkamer_temperatuur}` en `{sensor.f1#race_name}` blijven werken.
 
-RC3 is een **testrelease**: de geautomatiseerde HACS-, Hassfest- en regressiecontroles zijn geslaagd, maar controle op echte telefoons en tablets blijft nodig. Zie de [RC3-release met toelichting](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc3).
+Deze functies zijn opgenomen in de huidige RC4 en RC5. Controleer sensorselectie en attribuutweergave ook op je eigen telefoon of tablet.
 
 ## Wat is verbeterd in beta8?
 
@@ -128,7 +126,7 @@ RC3 is een **testrelease**: de geautomatiseerde HACS-, Hassfest- en regressiecon
 - De standaardsectie **BEHEER** bevat meer opties, waaronder Apparaten, Entiteiten, Automatiseringen, Scripts, Helpers en Ontwikkelaarstools.
 - De overbodige dubbele voorbeeldweergave tijdens het openen van UI-instellingen is verwijderd.
 
-Zie de [beta8-release](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) voor de volledige toelichting. Beta8 bevat functioneel dezelfde reparaties als RC2.
+Zie de [beta8-release](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) voor de volledige toelichting. Beta8 bevat de herstelde instellingenweergave, ondertitel en beheerschermen.
 
 ## Instellingen en compatibiliteit
 
@@ -140,7 +138,6 @@ PalaSidebar is gebouwd als Home Assistant-customintegratie. Lokale logo's worden
 
 - **`main`:** standaardbranch; we wijzigen die pas na controle.
 - **`develop`:** ontwikkelbranch voor verbeteringen en regressietests.
-- **`rc3-header-sensor-picker`:** testbranch waarmee RC3 is gepubliceerd.
 - **`rc4-accent-color-picker`:** aparte testbranch voor RC4, zonder de eerdere releases aan te passen.
 - **`rc5-header-image`:** aparte testbranch met headerafbeeldingen en README-voorbeelden.
 - **`release/v2.0.0`:** voorbereiding van de toekomstige stabiele versie; nog niet gepubliceerd.
