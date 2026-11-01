@@ -1,0 +1,97 @@
+name: Eenmalige opruiming GitHub werkbranches (alleen main, beta, rc blijven)
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/cleanup-to-three-branches.yml
+permissions:
+  contents: write
+jobs:
+  opschoning:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verifieer vaste branches, prereleases, open PR's en alle 12 doelbranches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Veilige takken:"
+          for name in main beta rc; do
+            sha="$(gh api "repos/$GH_REPO/branches/$name" --jq .commit.sha)"
+            test -n "$sha"
+            echo "  $name: $sha"
+          done
+          test "$(gh api "repos/$GH_REPO/contents/custom_components/pala_sidebar/manifest.json?ref=beta" --jq .content | base64 -d | python -c 'import json,sys;print(json.load(sys.stdin)["version"])')" = "2.0.0-beta8"
+          test "$(gh api "repos/$GH_REPO/contents/custom_components/pala_sidebar/manifest.json?ref=rc" --jq .content | base64 -d | python -c 'import json,sys;print(json.load(sys.stdin)["version"])')" = "2.0.0-rc6"
+          for tag in v2.0.0-beta7 v2.0.0-beta8 v2.0.0-rc4 v2.0.0-rc5 v2.0.0-rc6; do
+            gh release view "$tag" --json tagName --jq .tagName | grep -qx "$tag"
+          done
+          open_heads="$(gh api "repos/$GH_REPO/pulls?state=open&per_page=100" --jq '.[].head.ref')"
+          if [ "$open_heads" != "rc" ]; then
+            echo "::error::Onverwachte open PR heads, abort"
+            printf '%s\n' "$open_heads"
+            exit 1
+          fi
+          while read -r name expected; do
+            [ -n "$name" ] || continue
+            actual="$(gh api "repos/$GH_REPO/git/ref/heads/$name" --jq '.object.sha')"
+            test "$actual" = "$expected" || { echo "::error::Branch $name is veranderd; niets verwijderen";exit 1; }
+            echo "Gecontroleerd: $name"
+          done <<'BRANCHES'
+audit/beta7-original-regression 6fdfddfc7e7b03cdc15d873abf77bcd7bd93018d
+audit/volledige-gitgeschiedenis 802f5604b408706d14771fe991a7796c3ce32ca0
+develop 3cb32517b4a8f47b233a453857c0ddb44af2a312
+docs/nederlands-beta8 58295c0ee4ef2b8cd975c2d5e93cf62961cb0ba1
+fix/hacs-release-only-updates 87c57297c92621d643a24c167b91f780c2925a30
+legal/community-license-proposal 62c4b80466f2bd0c191900ddba61a6e4aa41ca41
+rc4-accent-color-picker b9d4b72c3552e4b269bb96d3461083241cdb2fbd
+rc5-header-image 3558941d875792ffbc55b6dc1aa975fd69fd073b
+release/candidate 2998ac18f8aeb97a052fc54219b23e01ba505d6d
+release/v2.0.0-beta8 8bb59669af5bd9fca6e5b0b1df008a59d60fd2db
+release/v2.0.0 89674dc3d4b839d47409411106dec416c331c608
+stabilization/rc5-to-v2 7717d5db39967cd919288049385cbc389b00ff68
+          BRANCHES
+      - name: Verwijder alleen gecontroleerde oude branches (nooit tags of releases)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r name expected; do
+            [ -n "$name" ] || continue
+            actual="$(gh api "repos/$GH_REPO/git/ref/heads/$name" --jq '.object.sha')"
+            test "$actual" = "$expected" || { echo "::error::Branch $name is veranderd";exit 1; }
+            gh api --method DELETE "repos/$GH_REPO/git/refs/heads/$name"
+            echo "Verwijderd: $name"
+          done <<'BRANCHES'
+audit/beta7-original-regression 6fdfddfc7e7b03cdc15d873abf77bcd7bd93018d
+audit/volledige-gitgeschiedenis 802f5604b408706d14771fe991a7796c3ce32ca0
+develop 3cb32517b4a8f47b233a453857c0ddb44af2a312
+docs/nederlands-beta8 58295c0ee4ef2b8cd975c2d5e93cf62961cb0ba1
+fix/hacs-release-only-updates 87c57297c92621d643a24c167b91f780c2925a30
+legal/community-license-proposal 62c4b80466f2bd0c191900ddba61a6e4aa41ca41
+rc4-accent-color-picker b9d4b72c3552e4b269bb96d3461083241cdb2fbd
+rc5-header-image 3558941d875792ffbc55b6dc1aa975fd69fd073b
+release/candidate 2998ac18f8aeb97a052fc54219b23e01ba505d6d
+release/v2.0.0-beta8 8bb59669af5bd9fca6e5b0b1df008a59d60fd2db
+release/v2.0.0 89674dc3d4b839d47409411106dec416c331c608
+stabilization/rc5-to-v2 7717d5db39967cd919288049385cbc389b00ff68
+          BRANCHES
+          echo "Beschermde takken main, beta en rc blijven intact."
+      - name: Controleer dat EXACT 3 branches overblijven en releases intact zijn
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(gh api "repos/$GH_REPO/branches?per_page=100" --jq '.[].name' | sort)"
+          expected="$(printf 'beta\nmain\nrc')"
+          test "$actual" = "$expected" || { echo "::error::Onverwachte branches over";printf '%s\n' "$actual";exit 1; }
+          for tag in v2.0.0-beta7 v2.0.0-beta8 v2.0.0-rc4 v2.0.0-rc5 v2.0.0-rc6; do
+            gh release view "$tag" --json tagName --jq .tagName | grep -qx "$tag"
+          done
+          echo "GESLAAGD: 3 branches en alle 5 bestaande releases."
