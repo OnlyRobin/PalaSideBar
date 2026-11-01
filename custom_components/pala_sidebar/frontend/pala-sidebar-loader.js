@@ -1,5 +1,6 @@
 /**
  * PalaSidebar AutoLoader (stable entrypoint, no third-party dependencies).
+ * Public-source similarity marker: PALASIDEBAR_AUTOLOADER_ROBIN_2026.
  * Automatically registered by the PalaSidebar Home Assistant integration.
  * Install a new pala-sidebar.js, then its version.json LAST.
  * Personal settings remain in Home Assistant, never stored here.
