@@ -14,11 +14,11 @@
 
 ## Altijd via het RC-testkanaal
 
-De permanente ontwikkelbranch heet [`release/candidate`](https://github.com/OnlyRobin/PalaSideBar/tree/release/candidate).
+De permanente ontwikkelbranch heet [`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc).
 
 Bij elke volgende inhoudelijke wijziging **verhogen we het RC-nummer** (RC7, RC8 enzovoort), draaien alle tests en publiceren vervolgens een **nieuwe GitHub-prerelease met een nieuwe tag**. Zo ziet HACS de nieuwe versie als update. We vervangen of verwijderen oude RC-releases of tags **niet**; ook de vorige RC's blijven installabel. Een GitHub-tag is een vastgelegde versie en geen bewegend updatekanaal.
 
-Pas nadat jij de huidige RC in de praktijk goedkeurt, maken we van precies die geteste code een stabiele `v2.0.0`-uitgave. De `release/candidate`-branch blijft bestaan voor toekomstige RC's.
+Pas nadat jij de huidige RC in de praktijk goedkeurt, maken we van precies die geteste code een stabiele `v2.0.0`-uitgave. De `rc`-branch blijft bestaan voor toekomstige RC's.
 
 ## Zo installeer je RC6
 
