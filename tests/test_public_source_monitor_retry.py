@@ -84,12 +84,49 @@ value, failure, sleeps, count = run_request([
 assert failure is None and count == 2
 assert [call.args[0] for call in sleeps] == [61], sleeps
 
-# Blijkt het resetmoment > 3 minuten, blijf van de API af; geen onveilige storm.
+# Ook bij de werkelijk opgetreden wachttijd van 736 seconden doorgaan.
 value, failure, sleeps, count = run_request([
-    error(429, {"Retry-After": "600"}),
+    error(429, {"Retry-After": "736"}), response({"items": []}),
+])
+assert failure is None and count == 2
+assert [call.args[0] for call in sleeps] == [736], sleeps
+
+# Lange maar redelijke resetmomenten kunnen binnen het jobbudget aflopen.
+value, failure, sleeps, count = run_request([
+    error(429, {"Retry-After": "600"}), response({"items": []}),
+])
+assert failure is None and count == 2
+assert [call.args[0] for call in sleeps] == [600], sleeps
+
+# Buiten het individuele wachtbudget meteen stoppen met een eerlijke fout.
+value, failure, sleeps, count = run_request([
+    error(429, {"Retry-After": "2500"}),
 ])
 assert isinstance(failure, RuntimeError) and "onvolledig" in str(failure)
 assert count == 1 and not sleeps
+
+# Ook cumulatief mag de monitor niet onbeperkt blijven slapen.
+value, failure, sleeps, count = run_request([
+    error(429, {"Retry-After": "1100"}),
+    error(429, {"Retry-After": "1100"}),
+])
+assert isinstance(failure, RuntimeError) and "onvolledig" in str(failure)
+assert count == 2 and [call.args[0] for call in sleeps] == [1100]
+
+# Een eerder verbruikte limiet door een andere fingerprint telt mee.
+with patch.object(watch.urllib.request, "urlopen", side_effect=[
+    error(429, {"Retry-After": "600"}),
+]) as urlopen:
+    with patch.object(watch.time, "sleep") as sleep:
+        budget = [1700]
+        try:
+            watch.request("GET", URL, "fake-token", wait_budget=budget)
+        except RuntimeError as failure:
+            assert "onvolledig" in str(failure)
+        else:
+            raise AssertionError("Het gedeelde wachtbudget werd overschreden")
+        assert urlopen.call_count == 1 and budget == [1700]
+        sleep.assert_not_called()
 
 # Serverfout mag wel kort opnieuw worden geprobeerd.
 value, failure, sleeps, count = run_request([

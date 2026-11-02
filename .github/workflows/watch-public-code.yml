@@ -11,6 +11,12 @@ on:
       - scripts/watch_palasidebar_reuse.py
       - tests/test_public_source_monitor.py
       - tests/test_public_source_monitor_retry.py
+  pull_request:
+    paths:
+      - .github/workflows/watch-public-code.yml
+      - scripts/watch_palasidebar_reuse.py
+      - tests/test_public_source_monitor.py
+      - tests/test_public_source_monitor_retry.py
 
 # Laat twee controles nooit tegelijk de GitHub Code Search-limiet gebruiken.
 concurrency:
@@ -25,7 +31,7 @@ jobs:
   zoek-openbare-kopieen:
     name: Controleer openbare GitHub-code
     runs-on: ubuntu-latest
-    timeout-minutes: 26
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,7 +42,10 @@ jobs:
           python -m py_compile scripts/watch_palasidebar_reuse.py
           python tests/test_public_source_monitor.py
           python tests/test_public_source_monitor_retry.py
+      # Codewijzigingen testen zonder het zoek-API-quotum te verbruiken.
+      # De echte scan draait uitsluitend via schedule of workflow_dispatch.
       - name: Zoek herkenbare herpublicaties en meld bij dubbele match
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
