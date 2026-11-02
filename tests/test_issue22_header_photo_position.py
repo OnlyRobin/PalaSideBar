@@ -79,7 +79,7 @@ with sync_playwright() as pw:
             const picker=q('pala-head-image-position');
             picker.value=position;picker.dispatchEvent(new Event('change',{bubbles:true}));
             const preview=s.dialog.querySelector('.header-image-thumbnail img');
-            const objectPosition=getComputedStyle(preview).objectPosition;
+            const objectPosition=preview.style.objectPosition;
             if(!objectPosition.includes(position))
               throw Error('Preview volgt positie niet: '+position+' -> '+objectPosition);
             s._saveHeader();
