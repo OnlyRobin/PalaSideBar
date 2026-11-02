@@ -143,7 +143,10 @@ def find_public_repositories(token: str):
         query = urllib.parse.urlencode({"q": f'"{mark}" in:file', "per_page": 100})
         answer = request("GET", f"{API}/search/code?{query}", token)
         if answer.get("incomplete_results"):
-            print(f"WAARSCHUWING: GitHub meldt onvolledige zoekresultaten voor {mark}.")
+            raise RuntimeError(
+                "GitHub Code Search meldt incomplete_results=true; "
+                f"zoekresultaten voor {mark} zijn onvolledig."
+            )
         for item in answer.get("items", []):
             repo = item.get("repository", {}).get("full_name", "")
             if not repo or repo.lower() == ORIGINAL:
