@@ -91,6 +91,21 @@ value, failure, sleeps, count = run_request([
 assert failure is None and count == 2
 assert [call.args[0] for call in sleeps] == [3], sleeps
 
+# POST mag ook bij een tijdelijke fout nooit opnieuw worden verzonden.
+with patch.object(watch.urllib.request, "urlopen", side_effect=[
+    error(503), response({"number": 100}),
+]) as urlopen:
+    with patch.object(watch.time, "sleep") as sleep:
+        try:
+            watch.request("POST", "https://api.github.com/repos/OnlyRobin/PalaSideBar/issues",
+                          "fake-token", {"title": "Controlerapport"})
+        except urllib.error.HTTPError as failure:
+            assert failure.code == 503
+        else:
+            raise AssertionError("POST is onterecht opnieuw geprobeerd")
+        assert urlopen.call_count == 1
+        sleep.assert_not_called()
+
 # API-resultaat met incomplete_results=true mag geen lege geslaagde scan worden.
 with patch.object(watch, "request", return_value={"incomplete_results": True, "items": []}):
     try:
