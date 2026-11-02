@@ -7,8 +7,8 @@ watch=module_from_spec(spec)
 spec.loader.exec_module(watch)
 
 calls=[]
-def fake_request(method,url,token,payload=None):
-    calls.append((method,url,payload))
+def fake_request(method,url,token,payload=None,*,wait_budget=None):
+    calls.append((method,url,payload,wait_budget))
     if "search/code" in url:
         from urllib.parse import parse_qs,urlparse
         q=parse_qs(urlparse(url).query)["q"][0]
@@ -26,6 +26,9 @@ def fake_request(method,url,token,payload=None):
 watch.request=fake_request
 results=watch.find_public_repositories("fake-token")
 assert results=={"Someone/changed-app":set(watch.FINGERPRINTS)},results
+search_calls = [call for call in calls if "search/code" in call[1]]
+assert len(search_calls) == 2 and search_calls[0][3] is search_calls[1][3]
+assert search_calls[0][3] == [0]
 watch.notify("fake-token","OnlyRobin/PalaSideBar",results)
 posted=[c for c in calls if c[0]=="POST"]
 assert len(posted)==1,posted
