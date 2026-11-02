@@ -91,6 +91,15 @@ value, failure, sleeps, count = run_request([
 assert failure is None and count == 2
 assert [call.args[0] for call in sleeps] == [3], sleeps
 
+# API-resultaat met incomplete_results=true mag geen lege geslaagde scan worden.
+with patch.object(watch, "request", return_value={"incomplete_results": True, "items": []}):
+    try:
+        watch.find_public_repositories("fake-token")
+    except RuntimeError as failure:
+        assert "incomplete_results" in str(failure)
+    else:
+        raise AssertionError("Onvolledige Code Search-uitslag werd als volledig behandeld")
+
 # Bij mislukte GitHub-zoekopdracht geen nep-succes en geen notificatie.
 with tempfile.TemporaryDirectory() as folder:
     summary_path = Path(folder) / "summary.md"
