@@ -4919,6 +4919,7 @@ md-filled-select {
         return;
       }
       if(id==='pala-head-image-file'){const file=e.target.files?.[0];if(file)void this._loadHeaderImage(file);return;}
+      if(id==='pala-head-image-position'){this._previewHeaderImage();return;}
       if(id==='pala-layout-section')this._layoutFillSection();
       if(id==='pala-layout-item')this._layoutFillItem();
       if(id==='pala-menu-select')this._fillMenuEditor(e.target.value);
@@ -7170,10 +7171,10 @@ md-filled-select {
       const photoInput=$('input');photoInput.type='file';photoInput.id='pala-head-image-file';
       photoInput.accept='image/jpeg,image/png,image/webp';photoInput.setAttribute('aria-label','Headerafbeelding uploaden');
       photoLabel.append(photoInput);photoEditor.append(photoLabel);
-      photoEditor.append(this._formField('Uitsnede positioneren','pala-head-image-position',hh.image_position,[['center','Midden'],['top','Bovenkant'],['bottom','Onderkant']]));
+      photoEditor.append(this._formField('Foto positioneren','pala-head-image-position',hh.image_position,[['center','Midden'],['top','Bovenkant'],['bottom','Onderkant']]));
       const imageButtons=$('div','btnrow');imageButtons.append(this._button('Foto verwijderen','header-image-remove'));photoEditor.append(imageButtons);
       const photoInfo=$('p','field-note','');photoInfo.dataset.imageInfo='1';photoInfo.setAttribute('role','status');photoEditor.append(photoInfo);
-      photoEditor.append($('p','field-note','JPG, PNG of WebP tot 4 MB. Wordt lokaal verkleind en privé met je Home Assistant-accountinstellingen gesynchroniseerd. Geen aparte www-map nodig.'));
+      photoEditor.append($('p','field-note','JPG, PNG of WebP tot 4 MB. De volledige foto wordt lokaal verkleind en privé opgeslagen. Foto uit een oudere versie? Upload die opnieuw om boven/midden/onder te kunnen kiezen. Geen aparte www-map nodig.'));
       headPage.append(photoEditor);
       const tokenPane=$('div','layout-dynamic-panel');
       tokenPane.append($('h4',null,'Sensor of attribuut aan de header toevoegen'));
@@ -7482,7 +7483,12 @@ md-filled-select {
       const value=this._headerImageDraft===undefined?this._header().image:this._headerImageDraft;
       const image=safeHeaderImage(value);
       preview.replaceChildren();
-      if(image){const pic=$('img');pic.src=image;pic.alt='Voorbeeld van de gekozen headerfoto';preview.append(pic);}
+      if(image){
+        const pic=$('img');pic.src=image;pic.alt='Voorbeeld van de gekozen headerfoto';
+        const position=this.dialog.querySelector('#pala-head-image-position')?.value||this._header().image_position;
+        pic.style.objectPosition='center '+(position==='top'?'top':position==='bottom'?'bottom':'center');
+        preview.append(pic);
+      }
       else preview.append($('span',null,'Geen headerfoto · standaard header'));
       if(info)info.textContent=this._headerImageBusy?'Afbeelding verwerken…':image?'De foto verschijnt na Header opslaan.':'De standaardkleur van je thema blijft actief.';
     }
@@ -7507,14 +7513,17 @@ md-filled-select {
         if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>12000||image.naturalHeight>12000 ||
            image.naturalWidth*image.naturalHeight>24000000)throw Error('Afmetingen te groot');
         const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');if(!ctx)throw Error('Geen afbeeldingsverwerking');
-        // JPEG-strip van ca. 3:1; EXIF/metadata worden niet opgeslagen.
-        const sourceRatio=3.1,iw=image.naturalWidth,ih=image.naturalHeight;
-        const sw=Math.min(iw,ih*sourceRatio),sh=sw/sourceRatio;
-        const sx=(iw-sw)/2,sy=(ih-sh)/2;
+        // Bewaar de volledige foto in de compacte JPEG, zonder metadata.
+        // De header past de zichtbare uitsnede daarna toe met background-size:cover
+        // en background-position. De oude vaste 3.1:1-uitsnede gooide boven-
+        // en onderkant al weg vóór de positieknop gebruikt kon worden.
+        const iw=image.naturalWidth,ih=image.naturalHeight;
         let result='';
-        for(const width of [720,580,460,340]){
-          canvas.width=width;canvas.height=Math.round(width/sourceRatio);
-          ctx.drawImage(image,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+        for(const maxSize of [720,580,460,340,260]){
+          const scale=Math.min(1,maxSize/Math.max(iw,ih));
+          canvas.width=Math.max(1,Math.round(iw*scale));
+          canvas.height=Math.max(1,Math.round(ih*scale));
+          ctx.drawImage(image,0,0,iw,ih,0,0,canvas.width,canvas.height);
           for(const quality of [0.76,0.60,0.45]){
             result=canvas.toDataURL('image/jpeg',quality);
             if(result.length<=100000)break;
