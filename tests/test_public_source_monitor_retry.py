@@ -62,6 +62,13 @@ value, failure, sleeps, count = run_request([
 assert isinstance(failure, RuntimeError) and "onvolledig" in str(failure)
 assert count == 3 and len(sleeps) == 2
 
+# Ook GitHubs werkelijk gemelde 253 seconden moeten worden gerespecteerd.
+value, failure, sleeps, count = run_request([
+    error(429, {"Retry-After": "253"}), response({"items": []}),
+])
+assert failure is None and count == 2
+assert [call.args[0] for call in sleeps] == [253], sleeps
+
 # 403 zonder rate-limit-signaal: niet nogmaals proberen (bv. foutieve rechten).
 value, failure, sleeps, count = run_request([
     error(403, body="Resource not accessible by integration"),
