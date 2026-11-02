@@ -68,7 +68,7 @@ with sync_playwright() as pw:
           if(window.__requests.length!==before)throw Error('Te vaak updatecontrole');
           return {tests:test.length,issue:window.__opens[0],latest:s._rcCheck.latest,version:window.PalaSidebarDiagnostics().version};
         }""")
-        assert result["tests"]>=5 and result["version"]=="2.0.1-rc.1",result
+        assert result["tests"]>=5 and result["version"]=="2.0.1-rc.2",result
         assert not errors,{"width":width,"errors":errors}
         print("PASS RC7 zelftest, issue privacy, toestemming, release check en cache",width)
         page.close()
