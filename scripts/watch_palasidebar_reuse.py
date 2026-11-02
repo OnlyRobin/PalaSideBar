@@ -72,8 +72,8 @@ def _summary(status: str, description: str) -> None:
     if not path:
         return
     with open(path, "a", encoding="utf-8") as output:
-        output.write(f"## PalaSidebar broncodebewaking — {status}\\n\\n{description}\\n\\n")
-        output.write("Dit is een indicatieve controle van openbare GitHub-code, geen bewijs van auteursrechtinbreuk of afwezigheid van kopieën.\\n")
+        output.write(f"## PalaSidebar broncodebewaking — {status}\n\n{description}\n\n")
+        output.write("Dit is een indicatieve controle van openbare GitHub-code, geen bewijs van auteursrechtinbreuk of afwezigheid van kopieën.\n")
 
 
 
