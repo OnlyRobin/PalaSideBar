@@ -1,233 +1,116 @@
 # PalaSidebar
 
-**Een aanpasbare sidebar voor Home Assistant.** Met eigen menu's, slimme badges, thema's, snelkoppelingen en bediening voor desktop, telefoon en tablet.
+**Een persoonlijke, moderne zijbalk voor Home Assistant.** Richt je dashboards, menu's, live sensorbadges en vormgeving zelf in — op desktop, telefoon en tablet.
 
-**Officieel project van Robin Bouwman** · [Officiële GitHub-repository](https://github.com/OnlyRobin/PalaSideBar) · [Gepubliceerde versies](https://github.com/OnlyRobin/PalaSideBar/releases)
+[**Installeren**](#installeren) · [**Zo werkt het**](#zo-werkt-het) · [**Versies**](#versies-en-releases) · [**Bijwerken**](#bijwerken-en-terugzetten) · [**Hulp**](#hulp-en-problemen)
 
-**© 2026 Robin Bouwman** · De oorspronkelijke PalaSidebar-bijdragen worden verspreid onder de [MIT-licentie](LICENSE). [Herkomst, officiële releases en naamsvermelding](OFFICIEEL-PROJECT.md).
+<p align="center">
+  <a href="docs/images/palasidebar-standaard-groot.png"><img src="docs/images/palasidebar-standaard.webp" width="250" alt="Standaard PalaSidebar"></a>
+  <a href="docs/images/palasidebar-aangepast-groot.png"><img src="docs/images/palasidebar-aangepast.webp" width="250" alt="PalaSidebar met eigen vormgeving"></a>
+  <a href="docs/images/palasidebar-sensoren-groot.png"><img src="docs/images/palasidebar-sensoren.webp" width="250" alt="PalaSidebar met live sensoren"></a>
+</p>
 
-## PalaSidebar in beeld
+<p align="center"><sub>Klik op een voorbeeld om het groter te bekijken. De weergave is afhankelijk van je Home Assistant-thema en instellingen.</sub></p>
 
-Klik op een afbeelding om de **grote PNG-versie (2400 × 1333 pixels)** te openen. Op deze voorpagina blijven de voorbeelden compact. Voor onbeperkt scherp zoomen is er daarnaast een schaalbare SVG-versie.
+## Installeren
 
-<table>
-  <tr>
-    <th>Standaard</th>
-    <th>Aangepast</th>
-    <th>Live sensoren</th>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/images/palasidebar-standaard-groot.png"><img src="docs/images/palasidebar-standaard-groot.png" alt="Standaard PalaSidebar met overzichtelijk menu en instellingen" width="285"></a></td>
-    <td align="center"><a href="https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/images/palasidebar-aangepast-groot.png"><img src="docs/images/palasidebar-aangepast-groot.png" alt="Aangepaste PalaSidebar met persoonlijke fotoheader en instellingen" width="285"></a></td>
-    <td align="center"><a href="https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/images/palasidebar-sensoren-groot.png"><img src="docs/images/palasidebar-sensoren-groot.png" alt="PalaSidebar met live sensorbadges en verborgen Home Assistant-header" width="285"></a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="docs/images/palasidebar-standaard-groot.png">Grote afbeelding</a> · <a href="docs/images/palasidebar-standaard-scherp.svg">Scherpe SVG</a></td>
-    <td align="center"><a href="docs/images/palasidebar-aangepast-groot.png">Grote afbeelding</a> · <a href="docs/images/palasidebar-aangepast-scherp.svg">Scherpe SVG</a></td>
-    <td align="center"><a href="docs/images/palasidebar-sensoren-groot.png">Grote afbeelding</a> · <a href="docs/images/palasidebar-sensoren-scherp.svg">Scherpe SVG</a></td>
-  </tr>
-</table>
+PalaSidebar is een **aangepaste Home Assistant-integratie** die je via [HACS](https://www.hacs.xyz/) installeert. Je hoeft geen JavaScript handmatig in de map `www` te plaatsen.
 
-*Illustratieve voorbeelden die nauw aansluiten bij PalaSidebar; het uiterlijk hangt af van je Home Assistant-thema, gekozen instellingen en beschikbare sensoren.*
+1. Installeer [HACS](https://www.hacs.xyz/docs/use/) in Home Assistant als je dat nog niet hebt.
+2. Open **HACS → ⋮ → Aangepaste repositories** (*Custom repositories*).
+3. Voeg `https://github.com/OnlyRobin/PalaSideBar` toe en kies als type **Integratie** (*Integration*).
+4. Zoek/open **PalaSidebar** in HACS en kies **Downloaden**. Gebruik voor normaal gebruik de **Stable-versie v2.0.0**.
+5. **Herstart Home Assistant volledig**.
+6. Ga naar **Instellingen → Apparaten en diensten → Integratie toevoegen**, zoek **PalaSidebar** en voeg deze toe als dat nog niet is gebeurd.
+7. Open PalaSidebar en pas de indeling en het uiterlijk aan via het eigen **instellingenmenu**.
 
-## Huidige versies
+> **Belangrijk:** de integratie laadt de frontend automatisch vanuit `custom_components/pala_sidebar`. Voeg dus géén extra PalaSidebar-script toe aan `frontend.extra_module_url` of de Lovelace-resources. Verwijder zo nodig oude, handmatige PalaSidebar-verwijzingen om dubbel laden te voorkomen.
 
-| Versie | Betekenis |
+**Liever eerst een testversie proberen?** Kies in HACS bij **PalaSidebar → Opnieuw downloaden → Andere versie nodig?** een beschikbare prerelease, bijvoorbeeld [v2.0.1-rc.1](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1-rc.1). Schakel de weergave van testversies in als dat nodig is. Maak eerst een back-up.
+
+## Zo werkt het
+
+PalaSidebar biedt een vervangende, instelbare navigatie in Home Assistant. Je kunt de sidebar inklappen, je favoriete dashboards bereikbaar houden en live Home Assistant-informatie naast je menu-items tonen.
+
+### Wat kun je aanpassen?
+
+| Onderdeel | Mogelijkheden |
 | --- | --- |
-| **v2.0.0 Stable — eerste officiële stabiele release** | Gebaseerd op volledig geteste RC14, met dezelfde functies. [Stable releasenotities](docs/RELEASE-v2.0.0-STABLE.md) |
-| [v2.0.0-rc.14](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.14) | Laatste goedgekeurde RC; beschikbaar als terugvalversie |
-| [v2.0.0-rc.13](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.13) | Eén achtergrondgalerij en duidelijkere Home Assistant-badges |
-| [v2.0.0-rc.12](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.12) | Badge Design Studio, kleuren, randen, gradient en meerdere achtergronden |
-| [v2.0.0-rc.11](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc.11) | Eigen lettertypen, premium presets, herstelde footer-tekstgrootte |
-| [v2.0.0-rc10](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc10) | Screenshot-voorbeeld in bugmelding en eerste footer-tekstgroottefix |
-| [v2.0.0-rc9](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc9) | Zichtbare feedback bij handmatige updatecontrole |
-| [v2.0.0-rc8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc8) | Kanaalbewuste updatemeldingen |
-| [v2.0.0-rc7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-rc7) | Zelftest, bugmelden en broncodebewaking |
-| [Oudere RC-releases](https://github.com/OnlyRobin/PalaSideBar/releases) | Blijven beschikbaar voor terugval |
-| [v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) | Laatste bèta |
+| **Menu en dashboards** | Eigen secties en menu-items, volgorde, favorieten, snelkoppelingen en dashboards. |
+| **Live badges** | Sensorwaarden, iconen, meerdere gegevens, kleurregels en afzonderlijke badge-opmaak. |
+| **Header** | Titel, subtitel, avatar of afbeelding, extra sensorinformatie en eigen kleuren. |
+| **Vormgeving** | Thema's, achtergronden, lettertypen, tekstgroottes, glaseffecten, randen en afrondingen. |
+| **Sectie Design Studio** | Een rand of achtergrond rond volledige secties (zoals START en BEHEER), plus aparte opmaak voor sectiekoppen en menu-items. |
+| **Bediening** | Snelmenu via lang indrukken/rechtermuisknop, mobiele swipebediening en ondersteuning voor de terugknop. |
+| **Extra's** | Agenda, Control Center, Performance, diagnose, back-ups en herstelpunten. |
 
-**Onze werkwijze:** veranderingen eerst op de permanente [`rc`-branch](https://github.com/OnlyRobin/PalaSideBar/tree/rc), daarna een nieuwe HACS-prerelease. We verplaatsen of verwijderen **nooit bestaande RC-tags of -releases**. De `beta`- en `main`-branches blijven behouden. De eerste Stable-versie is op basis van RC14 door de gebruiker goedgekeurd; nieuwe RC-versies blijven eerst getest worden voordat zij naar Stable gaan.
+### Waar staan de instellingen?
 
-**Versionering:** vanaf RC11 gebruiken we Semantic Versioning: `2.0.0-rc.11`, `2.0.0-rc.12` enzovoort. Door de bekende HACS-sorteerfout wordt niet altijd de nieuwste RC automatisch aangeboden. Historische tags zoals `v2.0.0-rc10` blijven ongewijzigd. HACS biedt geen volledig afzonderlijke bèta- en RC-updatekanalen; kies de gewenste prerelease expliciet.
+Open de **PalaSidebar-instellingen**. De onderdelen zijn overzichtelijk verdeeld:
 
-**HACS:** voor de eerste stabiele versie kies je **PalaSidebar v2.0.0** zonder prerelease. RC14 blijft via *Opnieuw downloaden → Andere versie nodig?* beschikbaar. Installeer altijd via HACS en herstart Home Assistant.
+| Groep | Instellingen |
+| --- | --- |
+| **Basis & weergave** | Algemeen, Header, Snelmenu |
+| **Menu & inhoud** | Indeling, Dashboards, Acties, Sensoren, Agenda, Control Center |
+| **Vormgeving** | Thema's, Design, PalaSidebar UI, Badges |
+| **Onderhoud** | Diagnose, Performance, Backup |
 
-**Let op — HACS 2.x updatevolgorde:** GitHub REST retourneert sommige RC-releases niet op semantische versievolgorde. HACS neemt deze volgorde over en kan hierdoor RC9 als nieuwste voorstellen, terwijl RC10 en RC.11 al bestaan. De overstap naar `rc.11` lost dit op oudere HACS-versies niet vanzelf op. Kies bij een gewenste testversie onder **PalaSidebar → Opnieuw downloaden → Andere versie nodig?** expliciet `v2.0.0-rc.14` en herstart Home Assistant. Dit is een [bekend HACS-probleem (#5655)](https://github.com/hacs/integration/issues/5655); we wijzigen oudere releases of tags niet om de volgorde te manipuleren.
+Een paar handige startpunten:
 
-## Mogelijkheden
+- **Een dashboard of menu-item toevoegen:** open **Menu & inhoud → Indeling** of **Dashboards**, kies wat je wilt tonen en sla de wijzigingen op.
+- **Een live sensorbadge maken:** ga naar **Menu & inhoud → Sensoren** of de badge-editor, zoek je Home Assistant-entiteit en stel de weergave, het icoon en eventueel kleurregels in. Je kunt ook een attribuut van een sensor gebruiken.
+- **Een headerfoto plaatsen:** open **Basis & weergave → Header**, selecteer een afbeelding, bekijk de uitsnede en sla de header op.
+- **Kleuren en randen instellen:** ga naar **Vormgeving → PalaSidebar UI** voor de live voorvertoning, de Badge Design Studio en de Sectie Design Studio. Algemene styling hoeft bestaande individuele sensorkleurregels niet te overschrijven.
+- **Instellingen bewaren:** gebruik de opslagknop van het betreffende onderdeel. Je voorkeuren kunnen per Home Assistant-account worden bewaard; via **Onderhoud → Backup** kun je exporteren en herstellen.
 
-- Zelf je sidebar indelen met menu's, categorieën, dashboards en favorieten.
-- Dynamische sensorbadges met iconen, kleuren en actuele waarden.
-- Home Assistant-entiteiten zoeken op naam of ID, met attribuutkeuze voor headerteksten en andere geschikte dynamische velden.
-- Live Control Center voor snelle bediening en statusinformatie.
-- Eigen thema's, Theme Studio en instellingen voor lettertypen en vormgeving.
-- Snelmenu's via lang indrukken of rechtermuisknop, inclusief dashboardvolgorde.
-- Mobiele bediening met swipebewegingen en ondersteuning voor de terugknop.
-- Instellingen per Home Assistant-account, met import, export en herstelpunten.
-- Performance Center met instellingen en informatie over prestaties.
-- Automatische registratie van de frontend via de integratie; geen losse bestanden in `www` nodig.
+Meer uitleg over installatie, instellingen en veelvoorkomende problemen staat in de [configuratiehandleiding](docs/configuration.md).
 
-## PalaSidebar installeren met HACS
+## Versies en releases
 
-1. Zorg dat **HACS** is geïnstalleerd in Home Assistant.
-2. Open **HACS → drie puntjes → Aangepaste repositories** (of *Custom repositories*).
-3. Voeg `https://github.com/OnlyRobin/PalaSideBar` toe als type **Integratie** (*Integration*).
-4. Open **PalaSidebar**, schakel de weergave van testversies (*pre-releases / beta versions*) in en kies **v2.0.0-rc7** (nieuwste RC) of bewust een eerdere testversie.
-5. Klik op **Downloaden** en herstart Home Assistant **volledig**.
-6. Open **Instellingen → Apparaten en diensten → Integratie toevoegen** en voeg **PalaSidebar** toe, als deze nog niet is toegevoegd.
-7. Verwijder eventuele oude, handmatig ingestelde PalaSidebar-JavaScript-resources om dubbel laden te voorkomen.
+| Kanaal | Versie | Voor wie? |
+| --- | --- | --- |
+| **Stable** | [**v2.0.0**](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0) | Aanbevolen voor dagelijks gebruik. Eerste officieel goedgekeurde stabiele versie, gebaseerd op RC14. |
+| **RC (test)** | [**v2.0.1-rc.1**](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1-rc.1) | Nieuwere testversie met oplossingen voor [Issue #16](https://github.com/OnlyRobin/PalaSideBar/issues/16) (ingeklapte sidebar) en [Issue #17](https://github.com/OnlyRobin/PalaSideBar/issues/17) (headerfoto). Praktijktesten blijven belangrijk. |
+| **Oudere versies** | [Alle releases](https://github.com/OnlyRobin/PalaSideBar/releases) | Eerdere RC- en bètaversies om terug te zetten of wijzigingen te bekijken. |
 
-Alle integratiebestanden staan onder `custom_components/pala_sidebar`. De frontend wordt automatisch geregistreerd.
+**Stable** is de goedgekeurde versie. **RC** (*release candidate*) is een testversie en wordt niet vanzelf Stable. Na v2.0.0 loopt de testreeks verder met `2.0.1-rc.x`. Oude tags blijven beschikbaar; een Stable-release verschijnt pas na goedkeuring en geslaagde controles.
 
-### Bijwerken vanaf een oudere of handmatige installatie
+**Let op bij HACS:** de volgorde van prereleases kan soms onjuist worden getoond ([HACS-issue #5655](https://github.com/hacs/integration/issues/5655)). Selecteer daarom zo nodig **handmatig de exacte versietag** via *Opnieuw downloaden → Andere versie nodig?*.
 
-Maak **vóór** de update een Home Assistant-back-up en exporteer je PalaSidebar-instellingen. Bewaar daarnaast een kopie van `custom_components/pala_sidebar` en, indien aanwezig, je eigen `pala-sidebar-config.json` **buiten de integratiemap**. HACS mag bestanden in die map vervangen.
+[Alle releases en wijzigingen](https://github.com/OnlyRobin/PalaSideBar/releases) · [Releasenotities Stable v2.0.0](docs/RELEASE-v2.0.0-STABLE.md) · [RC-branch](https://github.com/OnlyRobin/PalaSideBar/tree/rc)
 
-Open vervolgens **HACS → PalaSidebar → Download/Opnieuw downloaden**, kies de gewenste versie en herstart Home Assistant. Bestaande accountinstellingen gebruiken dezelfde opslaggegevens en oude vormgevingsinstellingen worden zo veel mogelijk overgenomen.
+## Bijwerken en terugzetten
 
-Verander de integratiedomeinnaam `pala_sidebar` niet: dit kan opgeslagen configuraties en resourcepaden onbruikbaar maken.
+1. Maak vóór een update een **Home Assistant-back-up** en exporteer je PalaSidebar-instellingen.
+2. Open **HACS → PalaSidebar → Downloaden / Opnieuw downloaden**.
+3. Kies de gewenste **Stable** of een specifieke **RC-testversie**.
+4. Installeer de versie en **herstart Home Assistant volledig**.
+5. Controleer de sidebar op desktop en mobiel. Gebruik bij twijfel de back-up of selecteer via HACS een eerdere release.
 
-### Versie controleren
-
-Open op je Home Assistant-adres het pad:
+De actieve frontendversie kun je ook bekijken via dit pad op je eigen Home Assistant-adres:
 
 ```text
 /pala_sidebar/assets/pala-sidebar-version.json
 ```
 
-Bij RC5 moet hier `2.0.0-rc5` staan nadat je deze release hebt gekozen; bij RC4 `2.0.0-rc4` en bij beta8 `2.0.0-beta8`. De versie staat ook onderaan PalaSidebar.
+Je kunt tevens in **Onderhoud → Diagnose** de zelftest of updatecontrole gebruiken. PalaSidebar kan nieuwe releases melden, maar **installeert updates niet zelf**: dat gaat via HACS.
 
-### Teruggaan naar een eerdere versie
+## Hulp en problemen
 
-Ga naar **HACS → PalaSidebar → Download/Opnieuw downloaden** en selecteer een nog beschikbare release (bijvoorbeeld beta8 of RC4). Herstart Home Assistant en herstel zo nodig je back-up. Een andere versie kiezen is geen vervanging voor een back-up van je instellingen.
-
-## Wat is nieuw in RC7?
-
-- **Instellingen → Diagnose:** lokaal een zelftest uitvoeren, vervolgens een bug via een gecontroleerd GitHub-issueformulier melden. De melding wordt pas op GitHub ingediend als jij op Submit klikt.
-- **RC-updatebericht:** PalaSidebar kan via openbare GitHub-release-informatie een nieuwere RC melden. Je installeert zelf via HACS.
-- **Publieke codebewaking:** een wekelijkse GitHub Action zoekt naar twee herkenbare broncodemarkeringen in openbare repositories en maakt een controle-issue als die ergens samen voorkomen. Dit is best-effort en kan hernoemde of aangepaste kopieën missen. MIT blijft van kracht.
-- Vorige RC's, inclusief RC6, blijven bestaan om terug te zetten.
-
-Zie de [Nederlandstalige RC7-release notes](docs/RELEASE-v2.0.0-rc7.md).
-
-## Wat is nieuw in RC6?
-
-- De **desktop- en mobielsliders voor tekstgrootte** werken nu echt in de eigen sidebar, niet alleen in het voorbeeld en de Home Assistant-tokens.
-- Labels, badges, sensorwaarden, zoektekst, secties en agenda schalen direct mee. Waarden worden correct als percentages weergegeven.
-- De headerfoto-upload en opslag bij accountwisseling zijn robuuster gemaakt.
-- Meer regressietests en belastingtests met 120 badges.
-- **RC5 blijft beschikbaar**. Deze RC6 is bedoeld om eerst op je eigen apparaten te testen.
-
-Zie [alle RC6-release-opmerkingen](docs/RELEASE-v2.0.0-rc6.md).
-
-## Wat is nieuw in RC5?
-
-- **Header → Headerafbeelding**: kies direct op je telefoon, tablet of computer een JPG-, PNG- of WebP-afbeelding.
-- PalaSidebar maakt er lokaal een kleine JPEG-headerstrook van en slaat die op **bij je Home Assistant-accountinstellingen**. Er is geen aparte `www`-map, externe uploadserver of opslagplugin nodig.
-- **Direct voorbeeld**, uitsnede boven/midden/onder en een knop om de foto te verwijderen. De wijziging wordt pas definitief na **Header opslaan**.
-- Je bestaande titel, subtitel, extra sensorregel en headerkleuren blijven werken. Ook de optie om de originele Home Assistant-sidebarheader te verbergen blijft behouden.
-- Bestandslimiet: 4 MB voor de bron; de opgeslagen afbeelding is maximaal circa 100 kB in Base64 (verkleind).
-- De gemaakte headerfoto wordt onderdeel van de accountinstellingen en dus ook van geëxporteerde instellingen en herstelpunten. Exporteer bij voorkeur voor de update je instellingen.
-
-De automatische code-, HACS-, Hassfest- en Chromium-controles zijn geslaagd. Het blijft een testfunctie: controleer de bediening en synchronisatie ook op je eigen telefoon en tablet. Zie [RC5-release-opmerkingen](docs/RELEASE-v2.0.0-rc5.md).
-
-## Wat is nieuw in RC4?
-
-- **Algemeen → Kleuraccent**: een echte kleurenkiezer, bewerkbare HEX-code en een direct zichtbaar voorbeeld. Je accent wordt pas definitief toegepast na **Instellingen opslaan**.
-- **Header**: visuele kleurkiezers voor de zeven kleuren van tekst, sensorregel, headerachtergrond, logo en klok.
-- Bij de header kun je een eigen kleur verwijderen met **Themakleur gebruiken**. Een lege instelling blijft automatisch de vormgeving van het thema volgen.
-- Ongeldige HEX-kleuren worden gemarkeerd en blokkeren het bewaren zonder bestaande kleuren te overschrijven.
-- De reeds aanwezige kleurkiezers onder **Badges**, **Thema’s** en **PalaSidebar UI** blijven gewoon beschikbaar.
-
-RC4 is gepubliceerd na geslaagde geautomatiseerde code-, Hassfest-, HACS- en Chromium-regressietests. Het blijft een testversie: controleer op je telefoon en tablet vooral de standaardkleur, kleurkeuze, HEX-invoer, opslaan en de keuze voor themakleuren. Zie [RC4-wijzigingen](docs/RELEASE-v2.0.0-rc4.md).
-
-## Sensoren zoeken en attributen gebruiken
-
-- In **Instellingen → Header** kun je een Home Assistant-sensor zoeken op naam of `entity_id`.
-- Je kunt de gewone sensorwaarde of een beschikbaar attribuut (bijvoorbeeld `race_name` of `countdown`) kiezen.
-- Met **Sensorwaarde invoegen** plaats je de gekozen waarde in titel, subtitel of extra sensorregel.
-- De sensorwaarde wordt als voorbeeld getoond en kan na opslaan live in de header worden bijgewerkt.
-- De entiteitenzoeker bij bestaande sensorvelden heeft een herkenbare zoekknop en betere suggesties.
-- Bestaande sensortokens zoals `{sensor.woonkamer_temperatuur}` en `{sensor.f1#race_name}` blijven werken.
-
-Deze functies zijn opgenomen in de huidige RC4 en RC5. Controleer sensorselectie en attribuutweergave ook op je eigen telefoon of tablet.
-
-## Wat is verbeterd in beta8?
-
-- Het lege tabblad **PalaSidebar UI** is hersteld.
-- De standaardondertitel **Mijn Home Assistant** wordt weergegeven als er geen ondertitel is ingesteld.
-- De standaardsectie **BEHEER** bevat meer opties, waaronder Apparaten, Entiteiten, Automatiseringen, Scripts, Helpers en Ontwikkelaarstools.
-- De overbodige dubbele voorbeeldweergave tijdens het openen van UI-instellingen is verwijderd.
-
-Zie de [beta8-release](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8) voor de volledige toelichting. Beta8 bevat de herstelde instellingenweergave, ondertitel en beheerschermen.
-
-## Premium vormgeving en eigen lettertypen
-
-Open **PalaSidebar → Instellingen → PalaSidebar UI**. De live-voorvertoning laat wijzigingen zien voordat je ze opslaat. Gebruik een van de profielen **HA standaard**, **Klassieke stijl**, **Premium glas**, **Compact**, **AMOLED**, **Midnight Gold**, **Nordic Ice** of **Zonsondergang**. Je kunt vervolgens onder andere accentkleur, glassterkte, kaart-/knopafronding, schaduw, premium knop-gloed en responsieve tekstgroottes aanpassen.
-
-**Lettertype uploaden:** kies een eigen WOFF2-, WOFF-, TTF- of OTF-bestand van maximaal **160 kB**, selecteer **Eigen lettertype (upload)** en klik **Vormgeving opslaan**. Het bestand wordt als gegevens-URL opgeslagen in je PalaSidebar-accountvoorkeuren (dus niet naar GitHub verzonden). Grote fontbestanden zijn bewust beperkt om opslag en prestaties te beschermen. Kies alleen een font dat je vertrouwt en waarvoor je gebruiksrechten hebt. Met **Verwijder eigen lettertype** kun je het terugzetten.
-
-**Tekstgrootte van onderste knoppen:** de desktop- en mobielregelaar beïnvloeden ook de **originele** Home Assistant-knoppen **Instellingen**, **Meldingen** en **Profiel**. Gebruik desgewenst **Onderste Home Assistant-knoppen** om uitsluitend dit gedeelte extra te vergroten/verkleinen. Deze drie onderdelen zijn geen gewone PalaSidebar-menu-items.
-
-**Bugs en screenshots:** in **Instellingen → Diagnose → Bug melden** kun je een screenshot selecteren en lokaal bekijken. Voeg het bestand daarna zelf toe aan het GitHub-issue. Een gekozen afbeelding wordt niet automatisch verstuurd. Controleer zelf altijd eerst op gevoelige informatie.
-
-## Badge Design Studio en achtergronden (RC12)
-
-Onder **PalaSidebar → Instellingen → PalaSidebar UI** staat nu een aparte **Badge Design Studio**. Kies of standaard sensorbadges hun bestaande thema-accent gebruiken of eigen kleuren. Stel vervolgens badgeachtergrond, tekstkleur, randkleur, randdikte, hoekafronding, binnenruimte, transparantie en gloed in. De live preview laat het resultaat direct zien. Bestaande sensorgestuurde kleuren (zoals temperatuur, warmtepomp en F1) blijven afzonderlijk werken en worden niet door de algemene kleur vervangen.
-
-**Home Assistant-badges:** de badges naast **Instellingen** en **Meldingen** hebben hun eigen kleurinstellingen: PalaSidebar-accent, HA-kleur of eigen kleur. Rand en afronding zijn instelbaar zonder de waarde of werking van Home Assistant te veranderen.
-
-**Per sensorbadge:** open de bestaande badge-editor om voor één badge een eigen randdikte, radius, HEX-randkleur of gloed te kiezen. Naast Solid, Soft, Outline, Plain en Dot zijn **Glass** en **Gradient** beschikbaar. Een instelling op één badge heeft voorrang op de algemene badgevormgeving.
-
-**Dashboardachtergrond:** er is nu één visuele galerij met alle negen achtergronden, waaronder Eigen kleur, Midnight, Aurora en Zonsondergang. De dubbele achtergrond-dropdown is verwijderd; het gekozen voorbeeld en de bestaande presets gebruiken dezelfde opgeslagen instelling.
-
-Alle nieuwe instellingen gebruiken begrensde waarden en veilige standaardwaarden. Wijzigingen worden pas definitief met **Vormgeving opslaan**. Test kleurwisseling op telefoon/tablet en controleer ook je bestaande sensorbadges voordat je een RC als geschikt voor Stable beoordeelt.
-
-## Sectie Design Studio en opgeruimde instellingen (RC14)
-
-**Instellingen zijn nu in vier groepen verdeeld** in plaats van zestien gelijkwaardige tabs naast elkaar:
-
-| Categorie | Instellingen |
+| Probleem | Controleer eerst |
 | --- | --- |
-| **Basis & weergave** | Algemeen, Header, Snelmenu |
-| **Menu & inhoud** | Indeling, Dashboards, Acties, Sensoren, Agenda, Control Center |
-| **Vormgeving** | Thema’s, Design, PalaSidebar UI, Badges |
-| **Onderhoud** | Diagnose, Performance, Backup |
+| **Sidebar verschijnt niet** | Is de integratie toegevoegd onder *Apparaten en diensten* en is Home Assistant volledig herstart? |
+| **Dubbele sidebar of vreemd gedrag** | Verwijder oude handmatige PalaSidebar-JavaScript-resources en `extra_module_url`-verwijzingen. |
+| **Wijzigingen worden niet zichtbaar** | Controleer de geïnstalleerde versie, herstart Home Assistant en vernieuw zo nodig de browser-/frontendcache. |
+| **HACS toont een oudere RC** | Kies de gewenste release handmatig onder *Andere versie nodig?*. |
+| **Instellingen herstellen** | Gebruik **Onderhoud → Backup** en je eigen Home Assistant-back-up. |
 
-Alle bestaande functies, tab-ID's, instellingen en opslag blijven behouden. Open **Vormgeving → PalaSidebar UI** voor de nieuwe **Sectie Design Studio**. Hiermee geef je START, BEHEER en andere secties één doorlopende kaart rondom kop en inhoud, met keuze uit Uit, Outline, Soft, Glass of Accent. Randkleur, -dikte en -stijl, afgeronde hoeken, achtergrond, transparantie, binnenruimte en gloed zijn apart instelbaar. Daaronder vind je **Sectiekoppen** (titelkleur, grootte en achtergrond) en **Items binnen secties** (itemranden, afronding, padding, tussenruimte en actieve randkleur). Het live voorbeeld toont de wijzigingen vóór opslaan. **Standaard blijft deze nieuwe styling uitgeschakeld**, zodat je bestaande menu en badgekleuren ongewijzigd blijven.
+**Een bug melden?** Open **Onderhoud → Diagnose → Bug melden** of maak een [GitHub Issue](https://github.com/OnlyRobin/PalaSideBar/issues/new). Vermeld je PalaSidebar-versie, Home Assistant-versie, apparaat en stappen om de fout te reproduceren. Screenshots voeg je zelf toe op GitHub; controleer ze eerst op privégegevens, tokens en adressen.
 
-Op mobiele apparaten tonen de vier hoofdcategorieën in een compacte tweekolomsindeling. Voor het testen op echte apparaten, inclusief secties inklappen, swipe, backpress, F1- en warmtepompbadges, zie [RC14 release-instructies](https://github.com/OnlyRobin/PalaSideBar/blob/rc/docs/RELEASE-v2.0.0-rc.14.md).
+## Project en links
 
-## Instellingen en compatibiliteit
+- [GitHub-repository](https://github.com/OnlyRobin/PalaSideBar) · [Releases](https://github.com/OnlyRobin/PalaSideBar/releases) · [Issues](https://github.com/OnlyRobin/PalaSideBar/issues) · [GitHub Actions](https://github.com/OnlyRobin/PalaSideBar/actions)
+- [Uitgebreide configuratie](docs/configuration.md) · [Officiële uitgaven](OFFICIEEL-PROJECT.md) · [Herkomst van broncode en assets](PROVENANCE.md)
+- [MIT-licentie](LICENSE) · [Nederlandstalige licentie-uitleg](docs/LICENTIE-EN-GEBRUIK-NL.md)
 
-Open het instellingenmenu van PalaSidebar om dashboards, badges, thema's, snelkoppelingen en **PalaSidebar UI** aan te passen. Eerdere vormgevingsinstellingen worden bij het inladen indien mogelijk overgenomen.
-
-PalaSidebar is gebouwd als Home Assistant-customintegratie. Lokale logo's worden meegeleverd voor Home Assistant **2026.3 en nieuwer**. De werking op oudere versies en alle specifieke Android-apparaten is nog niet volledig bevestigd.
-
-## Ontwikkeling en testen
-
-- **[`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main):** beschermde hoofdbranch en projectdocumentatie.
-- **[`beta`](https://github.com/OnlyRobin/PalaSideBar/tree/beta):** vaste betabranch, momenteel gebaseerd op Beta8.
-- **[`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc):** permanente testbranch, momenteel RC14; hieruit publiceren we nieuwe testreleases via HACS.
-
-Oude GitHub-releases en tags blijven beschikbaar, ook als de oude tijdelijke branches zijn verwijderd. Stable wordt pas op basis van een door de gebruiker goedgekeurde RC voorbereid.
-
-De technische bestanden staan in `custom_components/pala_sidebar`. Automatische controles draaien via GitHub Actions: codecontrole, Hassfest, HACS-validatie en browser-/touchregressietests.
-
-Lees [Develop testen](docs/DEVELOP-TESTEN-NL.md) voor een veilige testopstelling of bekijk [GitHub Actions](https://github.com/OnlyRobin/PalaSideBar/actions). Meld fouten via [GitHub Issues](https://github.com/OnlyRobin/PalaSideBar/issues) met de versie, het toestel en de stappen om de fout te reproduceren. Deel geen wachtwoorden, tokens of privégegevens.
-
-## Veiligheid en controle van de Git-geschiedenis
-
-De openbare repository en alle tijdens de controle bereikbare branches, tags en historische commits zijn onderzocht op mogelijke geheimen en privégegevens. Daarbij zijn **geen herkenbare geheimen** gevonden. De scanner is getest met een fictieve sleutel, zodat een onbetrouwbaar 'groen' resultaat wordt voorkomen.
-
-Lees het [volledige Nederlandstalige veiligheidsverslag](docs/VEILIGHEIDSCONTROLE-2026-10-31.md). De controles hebben bekende beperkingen en vormen geen zelfstandige juridische bevestiging van rechten op alle externe afbeeldingen.
-
-## Licentie en auteursrecht
-
-**© 2026 Robin Bouwman.** De eigen PalaSidebar-bijdragen vallen onder de [MIT-licentie](LICENSE). Dit is de enige actieve projectlicentie voor deze bijdragen; er worden **geen nieuwe beperkingen** op gebruik, forks of doorverkoop ingevoerd. De rechten en naamsvermeldingen van eventueel materiaal van derden blijven behouden. Meer informatie staat in [Herkomst en licenties](PROVENANCE.md) en de [publicatiecontrole](docs/PUBLICATION-AUDIT-2026-10-31.md).
-
-**Wat betekent MIT precies?** Lees de [Nederlandstalige uitleg over gebruik, auteursrecht en verspreiding](docs/LICENTIE-EN-GEBRUIK-NL.md). Hierin staat ook wat MIT toestaat bij forks en doorverkoop, en welke opties er zijn als toekomstige versies strengere voorwaarden zouden moeten krijgen. Deze uitleg voegt géén nieuwe beperkingen toe aan MIT.
-
-Lees ook [hoe je officiële uitgaven herkent](OFFICIEEL-PROJECT.md) en controleer de herkomst als je een fork of download van een andere bron tegenkomt. De MIT-licentie staat ook commerciële distributie toe, mits de licentievoorwaarden worden gevolgd.
-
-De juridische tekst van het bestand `LICENSE` blijft bewust in de oorspronkelijke Engelstalige MIT-formulering. Technische bestandsnamen, programmeeridentificaties en vereiste Home Assistant/HACS-sleutels worden niet vertaald.
+**PalaSidebar is een project van Robin Bouwman · © 2026 Robin Bouwman.** De oorspronkelijke PalaSidebar-bijdragen vallen onder de MIT-licentie; rechten van derden blijven van toepassing.
