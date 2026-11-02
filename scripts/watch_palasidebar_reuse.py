@@ -79,7 +79,8 @@ def _summary(status: str, description: str) -> None:
 
 
 
-def request(method: str, url: str, token: str, payload: dict | None = None):
+def request(method: str, url: str, token: str, payload: dict | None = None, *,
+            wait_budget: list[int] | None = None):
     body = json.dumps(payload).encode("utf-8") if payload is not None else None
     headers = {
         "Accept": "application/vnd.github+json",
@@ -91,7 +92,8 @@ def request(method: str, url: str, token: str, payload: dict | None = None):
         headers["Content-Type"] = "application/json"
     req = urllib.request.Request(url, data=body, headers=headers, method=method)
     endpoint = urllib.parse.urlsplit(url).path
-    waited_seconds = 0
+    if wait_budget is None:
+        wait_budget = [0]
 
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
@@ -110,11 +112,11 @@ def request(method: str, url: str, token: str, payload: dict | None = None):
                     "zoekcontrole onvolledig, probeer later opnieuw."
                 ) from error
             delay = _retry_seconds(error, attempt) if limited else 3 * 2 ** (attempt - 1)
-            if delay > MAX_WAIT_SECONDS or waited_seconds + delay > MAX_TOTAL_WAIT_SECONDS:
+            if delay > MAX_WAIT_SECONDS or wait_budget[0] + delay > MAX_TOTAL_WAIT_SECONDS:
                 raise RuntimeError(
                     f"GitHub API {endpoint} is beperkt (HTTP {error.code}); "
                     f"volgende toegestane poging pas over circa {delay} seconden; "
-                    f"wachtbudget {waited_seconds}/{MAX_TOTAL_WAIT_SECONDS}s. "
+                    f"wachtbudget {wait_budget[0]}/{MAX_TOTAL_WAIT_SECONDS}s. "
                     "Geen nieuwe verzoeken uitgevoerd en zoekcontrole onvolledig."
                 ) from error
             print(
@@ -123,7 +125,7 @@ def request(method: str, url: str, token: str, payload: dict | None = None):
                 flush=True,
             )
             time.sleep(delay)
-            waited_seconds += delay
+            wait_budget[0] += delay
         except urllib.error.URLError as error:
             if method != "GET":
                 raise  # Bij onbekende POST-uitkomst nooit opnieuw een Issue aanmaken.
@@ -145,11 +147,12 @@ def request(method: str, url: str, token: str, payload: dict | None = None):
 def find_public_repositories(token: str):
     """Code Search is incomplete: renamed/deleted markers or unindexed code is invisible."""
     results = {}
+    wait_budget = [0]  # Eén gedeeld wachtbudget voor alle fingerprintzoekopdrachten.
     for index, mark in enumerate(FINGERPRINTS):
         if index:
             time.sleep(2)  # Kleine pauze tussen twee aparte GitHub-codezoekopdrachten.
         query = urllib.parse.urlencode({"q": f'"{mark}" in:file', "per_page": 100})
-        answer = request("GET", f"{API}/search/code?{query}", token)
+        answer = request("GET", f"{API}/search/code?{query}", token, wait_budget=wait_budget)
         if answer.get("incomplete_results"):
             raise RuntimeError(
                 "GitHub Code Search meldt incomplete_results=true; "
