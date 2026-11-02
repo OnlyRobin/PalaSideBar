@@ -1,0 +1,115 @@
+"""Gerichte offline regressietests voor GitHub-rate-limits en veilige herhaalpogingen."""
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
+from unittest.mock import patch
+import io
+import json
+import os
+import tempfile
+import urllib.error
+
+spec = spec_from_file_location(
+    "source_watch_retry",
+    Path(__file__).resolve().parents[1] / "scripts/watch_palasidebar_reuse.py",
+)
+watch = module_from_spec(spec)
+spec.loader.exec_module(watch)
+
+URL = "https://api.github.com/search/code?q=PALASIDEBAR"
+
+
+def error(status, headers=None, body="API rate limit exceeded"):
+    return urllib.error.HTTPError(
+        URL, status, "HTTP failure", headers or {},
+        io.BytesIO(json.dumps({"message": body}).encode("utf-8")),
+    )
+
+
+def response(data):
+    return io.BytesIO(json.dumps(data).encode("utf-8"))
+
+
+def run_request(outcomes):
+    with patch.object(watch.urllib.request, "urlopen", side_effect=outcomes) as urlopen:
+        with patch.object(watch.time, "sleep") as sleep:
+            with patch.object(watch.time, "time", return_value=1000):
+                try:
+                    value = watch.request("GET", URL, "fake-token")
+                except Exception as failure:
+                    return None, failure, sleep.call_args_list, urlopen.call_count
+                return value, None, sleep.call_args_list, urlopen.call_count
+
+
+# 429 met Retry-After: header bepaalt wachttijd en daarna opnieuw proberen.
+value, failure, sleeps, count = run_request([
+    error(429, {"Retry-After": "4"}), response({"items": []}),
+])
+assert failure is None and value == {"items": []}
+assert [call.args[0] for call in sleeps] == [4], sleeps
+assert count == 2
+
+# 429 zonder headers: GitHub vereist minimaal een minuut bij secundaire limieten.
+value, failure, sleeps, count = run_request([
+    error(429), error(429), response({"items": []}),
+])
+assert failure is None and count == 3
+assert [call.args[0] for call in sleeps] == [60, 120], sleeps
+
+# Na drie pogingen moet het resultaat expliciet ONVOLLEDIG blijven, niet leeg/succes.
+value, failure, sleeps, count = run_request([
+    error(429), error(429), error(429),
+])
+assert isinstance(failure, RuntimeError) and "onvolledig" in str(failure)
+assert count == 3 and len(sleeps) == 2
+
+# 403 zonder rate-limit-signaal: niet nogmaals proberen (bv. foutieve rechten).
+value, failure, sleeps, count = run_request([
+    error(403, body="Resource not accessible by integration"),
+])
+assert isinstance(failure, urllib.error.HTTPError)
+assert count == 1 and not sleeps
+
+# Primaire rate-limit: resetmoment respecteren.
+value, failure, sleeps, count = run_request([
+    error(403, {"X-RateLimit-Remaining": "0", "X-RateLimit-Reset": "1060"}),
+    response({"items": []}),
+])
+assert failure is None and count == 2
+assert [call.args[0] for call in sleeps] == [61], sleeps
+
+# Blijkt het resetmoment > 3 minuten, blijf van de API af; geen onveilige storm.
+value, failure, sleeps, count = run_request([
+    error(429, {"Retry-After": "600"}),
+])
+assert isinstance(failure, RuntimeError) and "onvolledig" in str(failure)
+assert count == 1 and not sleeps
+
+# Serverfout mag wel kort opnieuw worden geprobeerd.
+value, failure, sleeps, count = run_request([
+    error(503), response({"items": []}),
+])
+assert failure is None and count == 2
+assert [call.args[0] for call in sleeps] == [3], sleeps
+
+# Bij mislukte GitHub-zoekopdracht geen nep-succes en geen notificatie.
+with tempfile.TemporaryDirectory() as folder:
+    summary_path = Path(folder) / "summary.md"
+    env = {
+        "GH_TOKEN": "fake-token",
+        "GH_REPO": "OnlyRobin/PalaSideBar",
+        "GITHUB_STEP_SUMMARY": str(summary_path),
+    }
+    with patch.dict(os.environ, env):
+        with patch.object(watch, "find_public_repositories", side_effect=RuntimeError("zoekcontrole onvolledig")):
+            with patch.object(watch, "notify") as notify:
+                try:
+                    watch.main()
+                except SystemExit as failure:
+                    assert failure.code == 1, failure.code
+                else:
+                    raise AssertionError("Mislukte scan had geen foutcode")
+                notify.assert_not_called()
+    summary = summary_path.read_text(encoding="utf-8")
+    assert "niet afgerond" in summary and "onvolledig" in summary
+
+print("PASS rate-limit-tests: 429/403, Retry-After, reset, 503, maximaal wachten en geen vals succes")
