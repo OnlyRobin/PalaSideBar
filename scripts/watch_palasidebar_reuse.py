@@ -25,7 +25,8 @@ FINGERPRINTS = (
 ORIGINAL = "onlyrobin/palasidebar"
 AGENT = "PalaSidebar-public-source-monitor/1.1"
 MAX_ATTEMPTS = 3
-MAX_WAIT_SECONDS = 360
+MAX_WAIT_SECONDS = 1800
+MAX_TOTAL_WAIT_SECONDS = 2100  # Binnen GitHub Actions joblimiet van 45 minuten blijven
 
 
 def _rate_limited(error: urllib.error.HTTPError) -> bool:
@@ -90,6 +91,7 @@ def request(method: str, url: str, token: str, payload: dict | None = None):
         headers["Content-Type"] = "application/json"
     req = urllib.request.Request(url, data=body, headers=headers, method=method)
     endpoint = urllib.parse.urlsplit(url).path
+    waited_seconds = 0
 
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
@@ -108,10 +110,11 @@ def request(method: str, url: str, token: str, payload: dict | None = None):
                     "zoekcontrole onvolledig, probeer later opnieuw."
                 ) from error
             delay = _retry_seconds(error, attempt) if limited else 3 * 2 ** (attempt - 1)
-            if delay > MAX_WAIT_SECONDS:
+            if delay > MAX_WAIT_SECONDS or waited_seconds + delay > MAX_TOTAL_WAIT_SECONDS:
                 raise RuntimeError(
                     f"GitHub API {endpoint} is beperkt (HTTP {error.code}); "
-                    f"volgende toegestane poging pas over circa {delay} seconden. "
+                    f"volgende toegestane poging pas over circa {delay} seconden; "
+                    f"wachtbudget {waited_seconds}/{MAX_TOTAL_WAIT_SECONDS}s. "
                     "Geen nieuwe verzoeken uitgevoerd en zoekcontrole onvolledig."
                 ) from error
             print(
@@ -120,6 +123,7 @@ def request(method: str, url: str, token: str, payload: dict | None = None):
                 flush=True,
             )
             time.sleep(delay)
+            waited_seconds += delay
         except urllib.error.URLError as error:
             if method != "GET":
                 raise  # Bij onbekende POST-uitkomst nooit opnieuw een Issue aanmaken.
