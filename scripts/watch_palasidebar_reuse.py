@@ -25,7 +25,7 @@ FINGERPRINTS = (
 ORIGINAL = "onlyrobin/palasidebar"
 AGENT = "PalaSidebar-public-source-monitor/1.1"
 MAX_ATTEMPTS = 3
-MAX_WAIT_SECONDS = 180
+MAX_WAIT_SECONDS = 360
 
 
 def _rate_limited(error: urllib.error.HTTPError) -> bool:
