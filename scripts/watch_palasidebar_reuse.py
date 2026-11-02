@@ -96,6 +96,8 @@ def request(method: str, url: str, token: str, payload: dict | None = None):
             with urllib.request.urlopen(req, timeout=25) as response:
                 return json.load(response)
         except urllib.error.HTTPError as error:
+            if method != "GET":
+                raise  # Issue-aanmaak (POST) niet herhalen: dubbele meldingen voorkomen.
             limited = _rate_limited(error)
             transient = error.code in (500, 502, 503, 504)
             if not limited and not transient:
@@ -119,6 +121,8 @@ def request(method: str, url: str, token: str, payload: dict | None = None):
             )
             time.sleep(delay)
         except urllib.error.URLError as error:
+            if method != "GET":
+                raise  # Bij onbekende POST-uitkomst nooit opnieuw een Issue aanmaken.
             if attempt == MAX_ATTEMPTS:
                 raise RuntimeError(
                     f"GitHub API {endpoint} niet bereikbaar na {attempt} pogingen; "
