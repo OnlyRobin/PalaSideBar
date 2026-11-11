@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.1-rc.3';
+  const VERSION = '2.0.1-rc.4';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -1217,6 +1217,19 @@ md-filled-select {
 .entity .health-label{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .entity .value{margin-left:auto;font-weight:800;white-space:nowrap;font-size:11px;max-width:58%;text-overflow:ellipsis;overflow:hidden}
 .footer{padding:9px;display:flex;align-items:center;flex-wrap:wrap;gap:5px;border-top:1px solid var(--divider-color,#6675);font-size:11px;color:var(--secondary-text-color,#9ba8b5)}.footer .right{margin-left:auto}
+/* RC4: PalaGuard footer shortcut is a genuine installed-panel indicator, NOT a security verdict.
+   The logo is served by the separately installed PalaGuard integration; no PalaGuard code is bundled. */
+.footer .pala-guard-launch{position:relative;display:inline-flex;flex:0 0 36px;width:36px;height:36px;align-items:center;justify-content:center;
+  padding:4px;border:1px solid rgba(244,186,52,.58);border-radius:12px;background:rgba(255,190,45,.09);color:#ffcf60;
+  box-shadow:0 0 0 1px rgba(255,192,50,.10),0 0 12px rgba(244,176,38,.22);cursor:pointer;
+  transition:border-color .17s ease,box-shadow .17s ease,background .17s ease,transform .17s ease}
+.footer .pala-guard-launch[data-alone="true"]{margin-left:auto}
+.footer .pala-guard-launch:hover{border-color:#ffd66c;background:rgba(244,187,52,.16);box-shadow:0 0 0 1px rgba(255,213,106,.22),0 0 17px rgba(255,195,48,.40);transform:translateY(-1px)}
+.footer .pala-guard-launch:focus-visible{outline:2px solid #ffd66c;outline-offset:2px}
+.footer .pala-guard-logo{width:26px;height:26px;object-fit:contain;border-radius:6px;display:block}
+.footer .pala-guard-fallback{font-size:21px;line-height:1}
+:host([data-integration="native"][data-compact="true"]) .footer .pala-guard-launch{width:34px;height:34px;flex-basis:34px}
+@media(prefers-reduced-motion:reduce){.footer .pala-guard-launch{transition:none}.footer .pala-guard-launch:hover{transform:none}}
 /* Own optional HA restart action: native HA footer + badges are untouched. */
 .footer .pala-restart{width:100%;flex:1 1 100%;display:flex;align-items:center;justify-content:flex-start;gap:var(--p-ui-item-gap,10px);padding:9px 10px;min-height:40px;border:1px solid var(--divider-color,#ffffff24);background:var(--p-soft,#ffffff0a);color:var(--primary-text-color,inherit);border-radius:var(--p-ui-radius,12px);cursor:pointer;text-align:left;font:600 var(--p-ui-text-size,12px)/1.3 var(--primary-font-family,Roboto,Arial,sans-serif);transition:background .15s ease,border-color .15s ease}
 .footer .pala-restart:hover{background:var(--p-accent-soft,#ffffff1a);border-color:var(--p-accent,#38bdf8)}
@@ -4671,6 +4684,14 @@ md-filled-select {
           this._closeOwnedDialog(this.dialog,()=>this._navigate('/palaguard-security'));
         return;
       }
+      if(cmd==='palaguard-footer'){
+        // Same trusted, admin-only panel as the optional integration link.
+        if(this._palaGuardAvailable()){
+          this._navigate('/palaguard-security');
+          if(this.open)this._setOpen(false);
+        }
+        return;
+      }
       if(cmd==='ha-restart'){this._requestHARestart();return;}
       if(cmd==='agenda-collapse'){
         this.saved.agenda=cleanAgenda({...this.saved.agenda,collapsed:!this.saved.agenda?.collapsed});
@@ -5097,6 +5118,9 @@ md-filled-select {
     _updateMenuIfChanged(){
       const signature=this._menuSignatureValue();
       if(this.lastMenuSignature!==signature){this.lastMenuSignature=signature;this._drawList();}
+      // Keep the footer in sync if PalaGuard is installed, removed or an admin logs out.
+      // No new timers, observers or polling: reuse the existing HA menu refresh.
+      if(this._footerPalaGuardAvailable!==this._palaGuardAvailable())this._drawFooter();
     }
     _updatesCount(){
       if(!this._resolved().appearance.show_update_count)return 0;
@@ -5596,6 +5620,23 @@ md-filled-select {
       if(fc.link){const item=this._allItems().find(i=>i.id===fc.link);if(item){const link=$('button','iconbtn');link.type='button';link.title=item.label;link.dataset.do='footer-route';link.dataset.id=item.id;link.append(this._icon(item.icon,'▦'));this.footer.append(link);}}
       if(fc.show_version)this.footer.append($('span','footlabel','PalaSidebar '+VERSION));
       if(fc.show_status){const right=$('span','right');right.append(this._icon('mdi:shield-check-outline','✓'));this.footer.append(right);}
+      // Auto-discovered, admin-only footer quick access. The glow means the
+      // PalaGuard panel exists; it does not claim that Home Assistant is secure.
+      const hasGuard=this._palaGuardAvailable();
+      this._footerPalaGuardAvailable=hasGuard;
+      if(hasGuard){
+        const button=$('button','pala-guard-launch');button.type='button';
+        button.dataset.do='palaguard-footer';
+        button.dataset.alone=String(fc.show_status===false);
+        button.title='PalaGuard gekoppeld · Security Center openen';
+        button.setAttribute('aria-label','PalaGuard gekoppeld. Open PalaGuard Security Center');
+        const icon=$('img','pala-guard-logo');
+        icon.alt='';icon.decoding='async';icon.src='/palaguard-assets/brand-icon.png';
+        const fallback=this._icon('mdi:shield-home-outline','🛡');
+        fallback.classList.add('pala-guard-fallback');fallback.style.display='none';
+        icon.addEventListener('error',()=>{icon.style.display='none';fallback.style.display='inline-flex';},{once:true});
+        button.append(icon,fallback);this.footer.append(button);
+      }
       this.footer.hidden=!this.footer.children.length;
       this._syncNativeFooter();
     }
