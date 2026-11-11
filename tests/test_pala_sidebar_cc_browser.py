@@ -1,8 +1,10 @@
 from pathlib import Path
+import json
 from playwright.sync_api import sync_playwright
 root=Path(__file__).resolve().parents[1] / 'custom_components' / 'pala_sidebar' / 'frontend'
 loader=(root/'pala-sidebar-loader.js').read_text()
 main=(root/'pala-sidebar.js').read_text()
+version=json.loads((root/'pala-sidebar-version.json').read_text())['version']
 assert '/pala_sidebar/config.json' in main
 assert "const MAIN = '/pala_sidebar/assets/pala-sidebar.js'" in loader
 mock_loader=loader.replace('await import(MAIN + query)','await window.__testImport(MAIN + query)').replace('window.location.reload()','window.__testReload()')
@@ -15,7 +17,7 @@ with sync_playwright() as pw:
         page.set_content('<html><body></body></html>')
         page.evaluate('''args => {
             window.__fixture=args.config;window.__source=args.source;
-            window.__networkVersion='2.0.1-rc.2';window.__networkCalls=[];window.__imports=[];window.__reloads=0;
+            window.__networkVersion=args.version;window.__networkCalls=[];window.__imports=[];window.__reloads=0;
             window.__testReload=()=>window.__reloads++;
             window.__testImport=async url=>{window.__imports.push(url);const s=document.createElement('script');s.textContent=window.__source;document.head.append(s);};
             window.fetch=async url=>{
@@ -28,13 +30,13 @@ with sync_playwright() as pw:
             const side=document.createElement('ha-sidebar');side.attachShadow({mode:'open'});side.shadowRoot.innerHTML='<slot name="main-navigation"></slot>';
             side.expanded=true;side.setAttribute('expanded','');ha.shadowRoot.append(side);document.body.append(ha);
             const h={user:{id:'fixture-user',name:'Test',is_admin:true},config:{version:'2026.10'},states:{},entities:{},panels:{},connection:{sendMessagePromise:async req=>req.type==='frontend/get_user_data'?{value:null}:{}}};ha.hass=h;side.hass=h;
-        }''', {'config':fixture,'source':main})
+        }''', {'config':fixture,'source':main,'version':version})
         page.evaluate(mock_loader)
-        page.wait_for_function("window.PalaSidebarUpdater?.status().loaded==='2.0.1-rc.2'",timeout=30000)
+        page.wait_for_function("(v)=>window.PalaSidebarUpdater?.status().loaded===v",arg=version,timeout=30000)
         page.wait_for_function("window.PalaSidebarDiagnostics?.().phase==='gereed'",timeout=30000)
         r=page.evaluate('''()=>({version:window.PalaSidebarDiagnostics().version,imports:window.__imports, calls:window.__networkCalls})''')
-        assert r['version']=='2.0.1-rc.2',r
-        assert r['imports']==['/pala_sidebar/assets/pala-sidebar.js?v=2.0.1-rc.2'],r
+        assert r['version']==version,r
+        assert r['imports']==[f'/pala_sidebar/assets/pala-sidebar.js?v={version}'],r
         assert any('/pala_sidebar/config.json' in x for x in r['calls']),r
         typography=page.evaluate('''()=>{
           const n=document.querySelector('home-assistant').shadowRoot.querySelector('ha-sidebar');
