@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.1-rc.2';
+  const VERSION = '2.0.1-rc.3';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -2877,6 +2877,18 @@ md-filled-select {
       page.append(this._help('Wat betekenen de meldingen?',
         'Ontbrekend: de sensor bestaat niet onder die entity_id. Niet beschikbaar: Home Assistant meldt unknown of unavailable. Dubbele route: twee knoppen verwijzen naar dezelfde pagina; soms is dat bewust. Opslagstatus geeft aan of jouw persoonlijke instellingen veilig naar Home Assistant zijn geschreven.'));
 
+      // Optional security-center entry in the existing Diagnose page.
+      // It is absent when PalaGuard is not installed or the user is not admin.
+      if(this._palaGuardAvailable()){
+        const integration=$('section','pala-palaguard-link');
+        integration.id='pala-palaguard-integration';
+        integration.append($('h3',null,'PalaGuard · Beveiligingscentrum'),
+          $('p','field-note','Automatisch gekoppeld. Open het PalaGuard Security Center vanuit PalaSidebar; PalaSidebar leest geen beveiligingslogboeken of persoonlijke gegevens.'));
+        const buttons=$('div','btnrow');
+        buttons.append(this._button('Open PalaGuard','palaguard-open','primary'));
+        integration.append(buttons);
+        page.append(integration);
+      }
       const holder=$('div');holder.id='pala-diagnostic-results';page.append(holder);
       const actions=$('div','btnrow');actions.append(this._button('Opnieuw controleren','diagnostic-refresh','primary'),this._button('Rapport kopiëren','diagnostic-copy'),this._button('Zelftest uitvoeren','support-test'));page.append(actions);
       const results=$('div','diagnostic-list');results.id='pala-selftest-results';results.setAttribute('role','status');page.append(results);
@@ -4653,6 +4665,12 @@ md-filled-select {
       if(cmd==='open'){this.open?this._setOpen(false):this._openDrawer();return;}
       if(cmd==='close'){this._setOpen(false);return;}
       if(cmd==='settings'){this.showSettings();return;}
+      if(cmd==='palaguard-open'){
+        // Recheck permissions and availability at click time, not only at render.
+        if(this._palaGuardAvailable())
+          this._closeOwnedDialog(this.dialog,()=>this._navigate('/palaguard-security'));
+        return;
+      }
       if(cmd==='ha-restart'){this._requestHARestart();return;}
       if(cmd==='agenda-collapse'){
         this.saved.agenda=cleanAgenda({...this.saved.agenda,collapsed:!this.saved.agenda?.collapsed});
@@ -4987,6 +5005,13 @@ md-filled-select {
     }
     _toggleFavorite(id){const s=new Set(this.saved.favorites);s.has(id)?s.delete(id):s.add(id);this.saved.favorites=[...s];this._saveSettings();this._drawList();}
     _recent(id){this.saved.recent=[id,...this.saved.recent.filter(v=>v!==id)].slice(0,8);this._saveSettings();}
+    // Optional, one-way integration: never read PalaGuard settings, services or secrets.
+    // The security panel is registered only by an installed PalaGuard integration.
+    _palaGuardAvailable(){
+      if(!this.hass?.user?.is_admin)return false;
+      return Object.entries(this.hass?.panels||{}).some(([key,panel])=>
+        key==='palaguard-security'||panel?.url_path==='palaguard-security');
+    }
     _isAvailable(item){
       if(item.admin_only&&!this.hass?.user?.is_admin)return false;
       if(item.hide_mobile && this._isMobile())return false;
@@ -5028,11 +5053,19 @@ md-filled-select {
         group.items.push(item);
       };
       for(const group of cfg.groups){for(const item of group.items)push(group.id,item,group.admin_only);}
+      // Show exactly one dedicated PalaGuard link, even with auto-discovery disabled.
+      // Keep all user-configured sections and labels unchanged.
+      if(this._palaGuardAvailable())push(map.has('beheer')?'beheer':'automatisch',
+        {id:'palaguard',label:'PalaGuard',path:'/palaguard-security',
+          icon:'mdi:shield-lock-outline',admin_only:true});
       for(const link of this.saved.links){const id='persoonlijk-'+cleanId((link.group||'MIJN DASHBOARDS').toLowerCase());push(id,link);}
       if(cfg.discovery.enabled && this.hass?.panels){
         const ex=new Set(arr(cfg.discovery.exclude));const entries=[];
         for(const [key,info] of Object.entries(this.hass.panels)){
           const slug=info.url_path||key;
+          // Dedicated security link above owns this path; never duplicate it
+          // through generic dashboard discovery (including when the item is hidden).
+          if(slug==='palaguard-security')continue;
           if(ex.has(slug)||ex.has(key)||(!cfg.discovery.include_system_panels&&['profile','config','developer-tools','notifications','logbook','history','energy','map','media-browser'].includes(slug)))continue;
           entries.push({id:'auto-'+cleanId(slug),label:text(info.title||prettify(slug)),path:'/'+slug,
             icon:isSafeIcon(info.icon)?info.icon:'mdi:view-dashboard-outline',admin_only:!!info.require_admin});
