@@ -1,5 +1,7 @@
 """RC7: privacyvriendelijk GitHub-bugformulier, lokale zelftest en RC-updatemelding."""
+import json
 from pathlib import Path
+EXPECTED_VERSION=json.loads((Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/manifest.json').read_text())['version']
 from playwright.sync_api import sync_playwright
 
 src=(Path(__file__).resolve().parents[1]/"custom_components/pala_sidebar/frontend/pala-sidebar.js").read_text(encoding="utf-8")
@@ -68,7 +70,7 @@ with sync_playwright() as pw:
           if(window.__requests.length!==before)throw Error('Te vaak updatecontrole');
           return {tests:test.length,issue:window.__opens[0],latest:s._rcCheck.latest,version:window.PalaSidebarDiagnostics().version};
         }""")
-        assert result["tests"]>=5 and result["version"]=="2.0.1-rc.2",result
+        assert result["tests"]>=5 and result["version"]==EXPECTED_VERSION,result
         assert not errors,{"width":width,"errors":errors}
         print("PASS RC7 zelftest, issue privacy, toestemming, release check en cache",width)
         page.close()
