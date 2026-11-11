@@ -1,5 +1,7 @@
 """Regression: UI style settings, fallback subtitle, and BEHEER defaults on desktop/mobile."""
+import json
 from pathlib import Path
+EXPECTED_VERSION=json.loads((Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/manifest.json').read_text())['version']
 from playwright.sync_api import sync_playwright
 
 root = Path(__file__).resolve().parents[1]
@@ -54,7 +56,7 @@ with sync_playwright() as pw:
             'integraties','updates','apparaten','entiteiten','automatiseringen',
             'scripts','helpers','ontwikkelaar','hacs','add-ons')),got
         assert got['uiChildren']>=5 and got['heading'] and got['save'] and got['shown'],got
-        assert got['version']=='2.0.1-rc.2',got
+        assert got['version']==EXPECTED_VERSION,got
         assert not errors,errors
         print('PASS rc4 styling tab, subtitle and BEHEER defaults',width,'px')
         page.close()
