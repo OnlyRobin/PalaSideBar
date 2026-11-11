@@ -1,5 +1,11 @@
 """RC7: privacyvriendelijk GitHub-bugformulier, lokale zelftest en RC-updatemelding."""
+import json
+import re
 from pathlib import Path
+EXPECTED_VERSION=json.loads((Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/manifest.json').read_text())['version']
+RC_MATCH=re.fullmatch(r'(\d+\.\d+\.\d+-rc\.)(\d+)',EXPECTED_VERSION)
+assert RC_MATCH,EXPECTED_VERSION
+NEXT_VERSION=RC_MATCH.group(1)+str(int(RC_MATCH.group(2))+1)
 from playwright.sync_api import sync_playwright
 
 src=(Path(__file__).resolve().parents[1]/"custom_components/pala_sidebar/frontend/pala-sidebar.js").read_text(encoding="utf-8")
@@ -12,7 +18,9 @@ with sync_playwright() as pw:
         errors=[]
         page.on("pageerror",lambda e:errors.append(str(e)))
         page.set_content("<html><body></body></html>")
-        page.evaluate("""src=>{
+        page.evaluate("""args=>{
+          const src=args.src;
+          window.__candidate=args.candidate;
           window.__opens=[];
           window.open=(url)=>{window.__opens.push(url);return {};};
           window.__requests=[];
@@ -20,7 +28,7 @@ with sync_playwright() as pw:
             window.__requests.push({url:String(url),credentials:options.credentials||''});
             if(String(url).startsWith('https://api.github.com/')){
               return {ok:true,text:async()=>JSON.stringify([
-                {tag_name:'v2.0.1-rc.3',prerelease:true,draft:false},
+                {tag_name:'v'+window.__candidate,prerelease:true,draft:false},
                 {tag_name:'v2.0.0-rc7',prerelease:true,draft:false},
                 {tag_name:'v2.0.0-rc5',prerelease:true,draft:false}
               ])};
@@ -36,7 +44,7 @@ with sync_playwright() as pw:
             entities:{},panels:{},connection:{sendMessagePromise:async ()=>({value:null})}};
           ha.hass=hass;nav.hass=hass;
           const script=document.createElement('script');script.textContent=src;document.head.append(script);
-        }""",src)
+        }""",{"src":src,"candidate":NEXT_VERSION})
         page.wait_for_function("window.PalaSidebarDiagnostics?.().phase==='gereed'",timeout=30000)
         page.wait_for_function("""()=>!!document.querySelector('home-assistant')?.shadowRoot?.querySelector('ha-sidebar')?.querySelector('pala-sidebar')?._prefsStore?.ready""",timeout=20000)
         result=page.evaluate("""async ()=>{
@@ -59,7 +67,7 @@ with sync_playwright() as pw:
           const u=new URL(window.__opens[0]);
           if(!u.searchParams.get('body').includes('Sidebar sluit niet'))throw Error('Geen issue inhoud');
           await s._checkRcUpdates(true);
-          if(s._rcCheck.latest!=='v2.0.1-rc.3'||s.rcNotice.hidden)throw Error('RC8 update niet herkend');
+          if(s._rcCheck.latest!=='v'+window.__candidate||s.rcNotice.hidden)throw Error('Nieuwe RC-update niet herkend');
           if(!window.__requests.some(x=>x.url.includes('/releases?per_page=15')&&x.credentials==='omit'))throw Error('GitHub verzoek niet geanonimiseerd');
           s._click({target:{closest:()=>({dataset:{do:'rc-dismiss-update'}})}});
           if(!s.rcNotice.hidden)throw Error('Later verbergen mislukt');
@@ -68,7 +76,7 @@ with sync_playwright() as pw:
           if(window.__requests.length!==before)throw Error('Te vaak updatecontrole');
           return {tests:test.length,issue:window.__opens[0],latest:s._rcCheck.latest,version:window.PalaSidebarDiagnostics().version};
         }""")
-        assert result["tests"]>=5 and result["version"]=="2.0.1-rc.2",result
+        assert result["tests"]>=5 and result["version"]==EXPECTED_VERSION,result
         assert not errors,{"width":width,"errors":errors}
         print("PASS RC7 zelftest, issue privacy, toestemming, release check en cache",width)
         page.close()

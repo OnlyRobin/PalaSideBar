@@ -1,5 +1,7 @@
 """RC3: header-entiteitenkiezer en attribuutselectie; mobiel en desktop."""
+import json
 from pathlib import Path
+EXPECTED_VERSION=json.loads((Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/manifest.json').read_text())['version']
 from playwright.sync_api import sync_playwright
 
 src=(Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/frontend/pala-sidebar.js').read_text(encoding='utf-8')
@@ -67,7 +69,7 @@ with sync_playwright() as pw:
         assert data['rendered']=='Mexico GP',data
         assert data['preview']=='Voorbeeld: Mexico GP',data
         assert data['badgeSearch'] and data['badgeOpen'] and data['safe'],data
-        assert data['version']=='2.0.1-rc.2',data
+        assert data['version']==EXPECTED_VERSION,data
         assert not errors,errors
         print('PASS RC3 sensor zoeken, attributen, opslag en veilig invoegen',width,'px')
         page.close()
