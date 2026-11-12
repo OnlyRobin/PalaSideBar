@@ -29,7 +29,7 @@ with sync_playwright() as pw:
             connection:{sendMessagePromise:async()=>({value:null})}};
           ha.hass=hass;nav.hass=hass;
           const script=document.createElement('script');script.textContent=src;document.head.append(script);
-        }""", SOURCE)
+        }""", {"src":SOURCE,"version":EXPECTED_VERSION})
         page.wait_for_function("window.PalaSidebarDiagnostics?.().phase==='gereed'",timeout=30000)
         page.wait_for_function("""()=>!!document.querySelector('home-assistant')?.shadowRoot
           ?.querySelector('ha-sidebar')?.querySelector('pala-sidebar')?._prefsStore?.ready""",
