@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.1-rc.5';
+  const VERSION = '2.0.1-rc.6';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -4225,6 +4225,16 @@ md-filled-select {
         compact:'.menu{height:44px!important;min-height:44px!important}.menu .title{display:none!important}',
         hidden:'.menu{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important}'
       }[this._effectiveHaHeader(h)]||'';
+      // Issue #22 follow-up: HA's ha-list-nav.before-spacer has its own
+      // margin-block: var(--ha-space-2) (roughly the 16px seen above the photo).
+      // Hiding .menu alone in RC5 does not remove this unrelated space.
+      // Scope the zero-top-margin ONLY to an edge-to-edge header photo, and
+      // ONLY inside the native ha-sidebar shadow root. Preserve its bottom
+      // margin, every other ha-list-nav and the original header preferences.
+      const photoTopMarginCss=h.pala!=='hidden' && !!safeHeaderImage(h.image) &&
+        h.image_edge_to_edge!==false
+          ? 'ha-list-nav.before-spacer{margin-block-start:0!important}'
+          : '';
       const themeCss=active?`
         :host{background-color:var(--pala-ground)!important;
           background-image:${theme.dynamic==='weather'?
@@ -4272,7 +4282,7 @@ md-filled-select {
         :host::-webkit-scrollbar,.wrapper::-webkit-scrollbar,.panels-list::-webkit-scrollbar,
         .menu::-webkit-scrollbar,ha-list-nav::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
       `;
-      const css=headerCss+themeCss+badgeCss+nativeFooterTypographyCss+scrollbarCss;
+      const css=headerCss+photoTopMarginCss+themeCss+badgeCss+nativeFooterTypographyCss+scrollbarCss;
       if(this._haHeaderStyle.textContent!==css)this._haHeaderStyle.textContent=css;
     }
     _setOpen(value,fromHistory=false){
