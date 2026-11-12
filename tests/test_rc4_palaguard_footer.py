@@ -1,5 +1,7 @@
 """PalaSidebar RC4: branded PalaGuard footer is optional, clickable and admin-only."""
+import json
 from pathlib import Path
+EXPECTED_VERSION=json.loads((Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/manifest.json').read_text())['version']
 from playwright.sync_api import sync_playwright
 
 SOURCE=(Path(__file__).resolve().parents[1]/
@@ -13,7 +15,9 @@ with sync_playwright() as pw:
         errors=[]
         page.on("pageerror",lambda e: errors.append(str(e)))
         page.set_content("<html><body></body></html>")
-        page.evaluate("""src=>{
+        page.evaluate("""args=>{
+          const src=args.src;
+          window.__expectedVersion=args.version;
           window.fetch=async()=>({ok:true,text:async()=>JSON.stringify({schema:1})});
           const ha=document.createElement('home-assistant');ha.attachShadow({mode:'open'});
           const nav=document.createElement('ha-sidebar');nav.attachShadow({mode:'open'});
@@ -39,7 +43,7 @@ with sync_playwright() as pw:
             throw Error('Existing footer settings missing');
           if(!sidebar.footer.querySelector('[data-do="ha-restart"]'))
             throw Error('Existing restart missing');
-          if(!sidebar.footer.textContent.includes('PalaSidebar 2.0.1-rc.4'))
+          if(!sidebar.footer.textContent.includes('PalaSidebar '+window.__expectedVersion))
             throw Error('Wrong version in footer');
           hass.panels['palaguard-security']={url_path:'palaguard-security',title:'PalaGuard Security',require_admin:true};
           sidebar._updateMenuIfChanged();
