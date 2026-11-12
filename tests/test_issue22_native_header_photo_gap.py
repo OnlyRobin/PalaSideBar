@@ -18,7 +18,10 @@ with sync_playwright() as pw:
           const ha=document.createElement('home-assistant');ha.attachShadow({mode:'open'});
           const nav=document.createElement('ha-sidebar');nav.attachShadow({mode:'open'});
           nav.style.cssText='display:block;width:330px';
-          nav.shadowRoot.innerHTML='<style>:host{display:block}.menu{display:flex;height:52px;min-height:52px;align-items:center;box-sizing:border-box;padding:10px;background:#17202a}.menu button{width:36px;height:36px}::slotted(pala-sidebar){display:block}</style><div class="menu"><button aria-label="Home Assistant menu">☰</button><span class="title">Home Assistant</span></div><slot name="main-navigation"></slot>';
+          // Replicate the actual HA frontend structure, including
+          // ha-list-nav { margin-block: var(--ha-space-2) }.
+          // RC5 hid .menu but neglected this independent 16px gap.
+          nav.shadowRoot.innerHTML='<style>:host{display:block}.menu{display:flex;height:52px;min-height:52px;align-items:center;box-sizing:border-box;padding:10px;background:#17202a}.menu button{width:36px;height:36px}ha-list-nav{display:block;margin-block:16px}::slotted(pala-sidebar){display:block}</style><div class="menu"><button aria-label="Home Assistant menu">☰</button><span class="title">Home Assistant</span></div><div class="panels-list"><div class="wrapper"><ha-list-nav class="before-spacer"><slot name="main-navigation"></slot></ha-list-nav></div><ha-list-nav class="after-spacer"></ha-list-nav></div>';
           nav.expanded=true;nav.setAttribute('expanded','');
           ha.shadowRoot.append(nav);document.body.append(ha);
           const hass={user:{id:'issue22-top-gap-'+window.innerWidth,name:'Test',is_admin:true},
@@ -33,6 +36,9 @@ with sync_playwright() as pw:
         result=page.evaluate("""() => {
           const nav=document.querySelector('home-assistant').shadowRoot.querySelector('ha-sidebar');
           const s=nav.querySelector('pala-sidebar'),menu=nav.shadowRoot.querySelector('.menu');
+          const navList=nav.shadowRoot.querySelector('ha-list-nav.before-spacer');
+          const fixedList=nav.shadowRoot.querySelector('ha-list-nav.after-spacer');
+          const navMargin=()=>parseFloat(getComputedStyle(navList).marginBlockStart);
           if(s.integration!=='native')throw Error('Native HA sidebar not mounted');
           const canvas=document.createElement('canvas');canvas.width=400;canvas.height=900;
           const ctx=canvas.getContext('2d');
@@ -48,8 +54,8 @@ with sync_playwright() as pw:
           s.saved.header=normal;s.redraw();
           if(!menuVisible())throw Error('Normal native HA menu unexpectedly hidden');
           const before={headTop:head().top,headHeight:head().height,logoY:relativeLogo()};
-          if(before.headTop-nav.getBoundingClientRect().top<48)
-            throw Error('Missing original 52px native menu test fixture');
+          if(before.headTop-nav.getBoundingClientRect().top<65 || navMargin()!==16)
+            throw Error('Fixture must include original 52px menu and 16px navigation top margin');
 
           s.saved.header={...normal,image:photo};s.redraw();
           if(menuVisible())throw Error('Photo did not remove native HA menu gap');
@@ -59,6 +65,9 @@ with sync_playwright() as pw:
           const after={headTop:head().top,headHeight:head().height,logoY:relativeLogo()};
           if(Math.abs(after.headTop-nav.getBoundingClientRect().top)>2)
             throw Error('Gap still exists above photo: '+JSON.stringify(after));
+          if(navMargin()!==0)throw Error('HA before-spacer margin not eliminated: '+navMargin());
+          if(parseFloat(getComputedStyle(fixedList).marginBlockStart)!==16)
+            throw Error('Native fixed navigation margin was modified');
           if(Math.abs(before.headHeight-after.headHeight)>1.2||
              Math.abs(before.logoY-after.logoY)>1.2)
             throw Error('Issue17 regression: photo shifted header layout');
@@ -71,25 +80,25 @@ with sync_playwright() as pw:
           const box=s.dialog.querySelector('#pala-head-image-edge');
           if(!box?.checked)throw Error('Edge-to-edge option absent/not selected');
           box.checked=false;s._saveHeader();
-          if(!menuVisible()||s.saved.header.image_edge_to_edge!==false)
-            throw Error('Disabling edge-to-edge did not restore native top bar');
+          if(!menuVisible()||s.saved.header.image_edge_to_edge!==false || navMargin()!==16)
+            throw Error('Disabling edge-to-edge did not restore native top bar AND its margin');
           s.showSettings('header');
           const again=s.dialog.querySelector('#pala-head-image-edge');
           if(again.checked)throw Error('Edge-to-edge setting did not persist');
           again.checked=true;s._saveHeader();
-          if(menuVisible())throw Error('Re-enabling edge-to-edge did not remove gap');
+          if(menuVisible()||navMargin()!==0)throw Error('Re-enabling edge-to-edge did not remove gap');
           if(s.saved.header.ha!=='normal')
             throw Error('Original native HA header preference was overwritten');
           s.saved.header={...s.saved.header,image:''};s.redraw();
-          if(!menuVisible()||s._effectiveHaHeader()!=='normal')
-            throw Error('Original HA header did not return after photo removal');
+          if(!menuVisible()||s._effectiveHaHeader()!=='normal'||navMargin()!==16)
+            throw Error('Original HA header and top spacing did not return after photo removal');
           s.saved.header={...normal,pala:'hidden',image:photo};s.redraw();
-          if(!menuVisible())throw Error('Both headers hidden with no menu');
+          if(!menuVisible()||navMargin()!==16)throw Error('Both headers hidden with no menu or spacing');
           return {width:window.innerWidth,gapBefore:Math.round(before.headTop-nav.getBoundingClientRect().top),
             gapAfter:Math.round(after.headTop-nav.getBoundingClientRect().top),
             heightBefore:before.headHeight,heightAfter:after.headHeight,settingPersisted:true};
         }""")
-        assert result["gapBefore"]>=48 and abs(result["gapAfter"])<=2,result
+        assert result["gapBefore"]>=65 and abs(result["gapAfter"])<=2,result
         assert abs(result["heightBefore"]-result["heightAfter"])<=1.2,result
         assert not errors,(width,errors)
         print("PASS issue22 native HA gap and photo edge-to-edge",result)
