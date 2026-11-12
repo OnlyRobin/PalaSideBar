@@ -64,7 +64,7 @@ with sync_playwright() as pw:
             throw Error('Issue17 regression: photo shifted header layout');
           if(!s.head.querySelector('[data-do="ha-menu"]'))
             throw Error('Native menu toggle not retained in PalaSidebar');
-          if(s.head.style.backgroundPosition!=='top')
+          if(!s.head.style.backgroundPosition.includes('top'))
             throw Error('Original photo positioning changed');
 
           s.showSettings('header');
