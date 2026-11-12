@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.1-rc.4';
+  const VERSION = '2.0.1-rc.5';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -923,6 +923,7 @@ md-filled-select {
       logo_bg:safeHex(x.logo_bg),logo_color:safeHex(x.logo_color),
       background_color:safeHex(x.background_color),clock_color:safeHex(x.clock_color),
       image:safeHeaderImage(x.image),image_position:['center','top','bottom'].includes(x.image_position)?x.image_position:'center',
+      image_edge_to_edge:x.image_edge_to_edge!==false,
       show_quick:x.show_quick!==false,show_settings:x.show_settings!==false
     };
   }
@@ -3305,6 +3306,14 @@ md-filled-select {
     }
     _mobile(){return this._resolved().mobile || FALLBACK.mobile;}
     _header(){return this.saved.header||this._resolved().header||FALLBACK.header;}
+    _effectiveHaHeader(header=this._header()){
+      // Issue #22: Home Assistant's own menu occupies the strip ABOVE the photo.
+      // Reuse the existing hidden-menu route, not overlay backgrounds or
+      // negative margins. The selected HA-header preference remains intact.
+      if(this.integration==='native' && header.pala!=='hidden' &&
+         safeHeaderImage(header.image) && header.image_edge_to_edge!==false)return 'hidden';
+      return header.ha;
+    }
     _isTablet(){
       if(this.saved.device==='tablet')return true;
       if(this.saved.device!=='auto')return false;
@@ -4215,7 +4224,7 @@ md-filled-select {
         'title-hidden':'.menu .title{display:none!important}',
         compact:'.menu{height:44px!important;min-height:44px!important}.menu .title{display:none!important}',
         hidden:'.menu{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important}'
-      }[h.ha]||'';
+      }[this._effectiveHaHeader(h)]||'';
       const themeCss=active?`
         :host{background-color:var(--pala-ground)!important;
           background-image:${theme.dynamic==='weather'?
@@ -5135,7 +5144,7 @@ md-filled-select {
     redraw(){
       const cfg=this._resolved(),app=cfg.appearance;
       this._syncTheme();this._applyDesign();
-      const hdr=this._header();this.setAttribute('data-header-mode',hdr.pala);this.setAttribute('data-ha-header',hdr.ha);
+      const hdr=this._header();this.setAttribute('data-header-mode',hdr.pala);this.setAttribute('data-ha-header',this._effectiveHaHeader(hdr));
       this.setAttribute('data-hide-logo',String(!hdr.logo));this.setAttribute('data-header-recovery',String(hdr.ha==='hidden'&&hdr.pala==='hidden'));
       this._syncHaHeader();
       this.setAttribute('data-density',this.saved.density||(['normal','compact'].includes(app.density)?app.density:'compact'));
@@ -5179,7 +5188,7 @@ md-filled-select {
       }
       const brand=$('div','brand');brand.append($('strong',null,hdr.title||cfg.title),$('small',null,hdr.subtitle||cfg.subtitle));
       const settings=$('button','iconbtn top-settings');settings.type='button';settings.title='PalaSidebar instellingen';settings.dataset.do='settings';settings.append(this._icon('mdi:cog-outline','⚙'));
-      if(hdr.ha==='hidden'&&this.integration==='native'){
+      if(this._effectiveHaHeader(hdr)==='hidden'&&this.integration==='native'){
         const toggle=$('button','iconbtn');toggle.type='button';toggle.title='Home Assistant-menu openen of sluiten';
         toggle.dataset.do='ha-menu';toggle.append(this._icon('mdi:menu','☰'));this.head.append(toggle);
       }
@@ -7246,6 +7255,12 @@ md-filled-select {
       photoInput.accept='image/jpeg,image/png,image/webp';photoInput.setAttribute('aria-label','Headerafbeelding uploaden');
       photoLabel.append(photoInput);photoEditor.append(photoLabel);
       photoEditor.append(this._formField('Foto positioneren','pala-head-image-position',hh.image_position,[['center','Midden'],['top','Bovenkant'],['bottom','Onderkant']]));
+      const photoEdge=$('label','check'),photoEdgeToggle=$('input');
+      photoEdgeToggle.type='checkbox';photoEdgeToggle.id='pala-head-image-edge';
+      photoEdgeToggle.checked=hh.image_edge_to_edge!==false;
+      photoEdge.append(photoEdgeToggle,$('span',null,'Headerfoto tot aan de bovenrand (aanbevolen)'));
+      photoEditor.append(photoEdge);
+      photoEditor.append($('p','field-note','Verbergt met een foto de aparte Home Assistant-menubalk boven de PalaSidebar-foto; de eigen PalaSidebar-menuknop blijft beschikbaar. Zet uit als je de originele bovenbalk wilt behouden. Zonder foto wordt je normale HA-headerinstelling gebruikt.'));
       const imageButtons=$('div','btnrow');imageButtons.append(this._button('Foto verwijderen','header-image-remove'));photoEditor.append(imageButtons);
       const photoInfo=$('p','field-note','');photoInfo.dataset.imageInfo='1';photoInfo.setAttribute('role','status');photoEditor.append(photoInfo);
       photoEditor.append($('p','field-note','JPG, PNG of WebP tot 4 MB. De volledige foto wordt lokaal verkleind en privé opgeslagen. Foto uit een oudere versie? Upload die opnieuw om boven/midden/onder te kunnen kiezen. Geen aparte www-map nodig.'));
@@ -7641,7 +7656,8 @@ md-filled-select {
         logo_bg:color('pala-head-logo-bg'),logo_color:color('pala-head-logo-color'),
         clock_color:color('pala-head-clock-color'),
         image:this._headerImageDraft===undefined?this._header().image:this._headerImageDraft,
-        image_position:q('pala-head-image-position').value});
+        image_position:q('pala-head-image-position').value,
+        image_edge_to_edge:q('pala-head-image-edge').checked});
       this._headerImageDraft=undefined;
       this._saveSettings();this.redraw();this._editorNotice('Header opgeslagen.');
     }
