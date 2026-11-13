@@ -1,5 +1,8 @@
 # PalaSidebar: develop testen zonder je werkende installatie te verliezen
 
+> **Historische beta-documentatie.** De onderstaande versienummers en oude HACS-menu-instructies beschrijven de ontwikkeling in 2026 vóór de huidige release. Voor **Home Assistant 2026.11+** gebruik je de ingebouwde **Marketplace** onder **Instellingen → Marketplace**. De actuele RC-/Stable-installatie staat in de [huidige testhandleiding op main](https://github.com/OnlyRobin/PalaSideBar/blob/main/docs/DEVELOP-TESTEN-NL.md). De aparte HACS-integratie hoort bij Home Assistant 2026.10 of ouder.
+
+
 ## Welke versie staat waar?
 
 - **main:** de stabiele `v2.0.0` is nog niet gepubliceerd. Beta7, RC1 en RC2 zijn bestaande prereleases. De `main`-branch bevat ook latere documentatieupdates.
