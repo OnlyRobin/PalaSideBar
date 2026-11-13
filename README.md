@@ -19,7 +19,7 @@ PalaSidebar is een **aangepaste Home Assistant-integratie** die je via [HACS](ht
 1. Installeer [HACS](https://www.hacs.xyz/docs/use/) in Home Assistant als je dat nog niet hebt.
 2. Open **HACS → ⋮ → Aangepaste repositories** (*Custom repositories*).
 3. Voeg `https://github.com/OnlyRobin/PalaSideBar` toe en kies als type **Integratie** (*Integration*).
-4. Zoek/open **PalaSidebar** in HACS en kies **Downloaden**. Gebruik voor normaal gebruik de **Stable-versie v2.0.0**.
+4. Zoek/open **PalaSidebar** in HACS en kies **Downloaden**. Gebruik voor normaal gebruik de **Stable-versie v2.0.1**.
 5. **Herstart Home Assistant volledig**.
 6. Ga naar **Instellingen → Apparaten en diensten → Integratie toevoegen**, zoek **PalaSidebar** en voeg deze toe als dat nog niet is gebeurd.
 7. Open PalaSidebar en pas de indeling en het uiterlijk aan via het eigen **instellingenmenu**.
@@ -69,15 +69,15 @@ Meer uitleg over installatie, instellingen en veelvoorkomende problemen staat in
 
 | Kanaal | Versie | Voor wie? |
 | --- | --- | --- |
-| **Stable** | [**v2.0.0**](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0) | Aanbevolen voor dagelijks gebruik. Eerste officieel goedgekeurde stabiele versie, gebaseerd op RC14. |
+| **Stable** | [**v2.0.1**](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1) | Premium kwaliteitsrelease, technisch gelijkwaardig aan de geteste RC7. Bevat headerfixes, PalaGuard-koppeling, toegankelijke bediening en veilige updatecontrole. |
 | **RC (test)** | [**v2.0.1-rc.7**](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1-rc.7) | Premium kwaliteitsrelease met verbeterde toegankelijkheid, veiligere versiecontrole en regressietests. Behoudt oplossingen #16, #17 en #22 en de optionele PalaGuard-koppeling. |
 | **Oudere versies** | [Alle releases](https://github.com/OnlyRobin/PalaSideBar/releases) | Eerdere RC- en bètaversies om terug te zetten of wijzigingen te bekijken. |
 
-**Stable** is de goedgekeurde versie. **RC** (*release candidate*) is een testversie en wordt niet vanzelf Stable. Na v2.0.0 loopt de testreeks verder met `2.0.1-rc.x`. Oude tags blijven beschikbaar; een Stable-release verschijnt pas na goedkeuring en geslaagde controles.
+**Stable** is de vrijgegeven versie. **RC** (*release candidate*) is een testversie en wordt niet vanzelf Stable. De v2.0.1-Stable is gebaseerd op de technisch geteste v2.0.1-rc.7. Oude tags blijven beschikbaar; een Stable-release verschijnt pas na versiecontrole en geslaagde regressietests.
 
 **Let op bij HACS:** de volgorde van prereleases kan soms onjuist worden getoond ([HACS-issue #5655](https://github.com/hacs/integration/issues/5655)). Selecteer daarom zo nodig **handmatig de exacte versietag** via *Opnieuw downloaden → Andere versie nodig?*.
 
-[Alle releases en wijzigingen](https://github.com/OnlyRobin/PalaSideBar/releases) · [Releasenotities Stable v2.0.0](docs/RELEASE-v2.0.0-STABLE.md) · [RC-branch](https://github.com/OnlyRobin/PalaSideBar/tree/rc)
+[Alle releases en wijzigingen](https://github.com/OnlyRobin/PalaSideBar/releases) · [Releasenotities Stable v2.0.1](docs/RELEASE-v2.0.1-STABLE.md) · [RC-branch](https://github.com/OnlyRobin/PalaSideBar/tree/rc)
 
 ## Bijwerken en terugzetten
 
