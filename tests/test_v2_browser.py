@@ -1,5 +1,7 @@
 """Smoke test PalaSidebar 2.0 beta new UX with minimal Home Assistant fixture."""
+import json
 from pathlib import Path
+EXPECTED_VERSION=json.loads((Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/manifest.json').read_text())['version']
 from playwright.sync_api import sync_playwright
 src=(Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/frontend/pala-sidebar.js').read_text()
 fixture={'schema':1,'title':'PalaSidebar','groups':[{'id':'start','title':'START','items':[{'id':'home','label':'Overzicht','path':'/lovelace','icon':'mdi:view-dashboard-outline'},{'id':'energie','label':'Energie','path':'/energy','icon':'mdi:flash'}]}]}
@@ -38,7 +40,7 @@ with sync_playwright() as pw:
         }''')
         assert result['defaults']=={'live':False,'menu':True,'perf':False},result
         assert all(x in result['pages'] for x in ('live_center','themes','performance','quick')),result
-        assert result['version']=='2.0.0',result
+        assert result['version']==EXPECTED_VERSION,result
         result=page.evaluate('''()=>{
           const s=window.__sidebar,d=s.dialog;
           d.querySelector('#pala-v2-live-enabled').checked=true;

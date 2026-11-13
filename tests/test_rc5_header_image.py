@@ -1,5 +1,7 @@
 """RC5: afbeelding in PalaSidebar-header, mobiel/desktop, opslag en herstel."""
+import json
 from pathlib import Path
+EXPECTED_VERSION=json.loads((Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/manifest.json').read_text())['version']
 from playwright.sync_api import sync_playwright
 
 source=(Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/frontend/pala-sidebar.js').read_text(encoding='utf-8')
@@ -61,7 +63,7 @@ with sync_playwright() as pw:
         assert result['preview'] and result['before']=='' and 0<result['afterLength']<=110000,result
         assert result['actual'] and result['position'] in ('bottom','center bottom') and result['restored'],result
         assert result['removedPreview'] and result['remainsBeforeSave'] and result['removed'],result
-        assert result['title']=='Mijn huis' and result['version']=='2.0.0',result
+        assert result['title']=='Mijn huis' and result['version']==EXPECTED_VERSION,result
         assert not errors,errors
         print('PASS RC5 foto upload/uitsnede/opslaan/terugzetten/geen regressie',width,'px')
         page.close()

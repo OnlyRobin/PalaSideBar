@@ -1,12 +1,12 @@
 /**
- * PalaSidebar 2.0.0 – custom_components integratie met AutoLoader.
+ * PalaSidebar 2.0.0-rc7 – custom_components integratie met AutoLoader.
  * Copyright (c) 2026 Robin Bouwman. See repository LICENSE and PROVENANCE.md. No external JavaScript dependencies.
  * Leest uitsluitend HA-status; voert geen services uit zonder interactie.
  * Integratie via native ha-sidebar slot indien beschikbaar; anders overlay.
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.0';
+  const VERSION = '2.0.1';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -923,6 +923,7 @@ md-filled-select {
       logo_bg:safeHex(x.logo_bg),logo_color:safeHex(x.logo_color),
       background_color:safeHex(x.background_color),clock_color:safeHex(x.clock_color),
       image:safeHeaderImage(x.image),image_position:['center','top','bottom'].includes(x.image_position)?x.image_position:'center',
+      image_edge_to_edge:x.image_edge_to_edge!==false,
       show_quick:x.show_quick!==false,show_settings:x.show_settings!==false
     };
   }
@@ -1142,6 +1143,15 @@ md-filled-select {
 .pala-rc-notice[hidden]{display:none!important}
 .pala-rc-notice .btnrow{margin-top:5px;display:flex;gap:6px;flex-wrap:wrap}
 .pala-rc-notice button{cursor:pointer;border:1px solid var(--divider-color,#586273);background:var(--card-background-color,#182631);color:inherit;border-radius:7px;padding:6px 9px;font:inherit}
+/* Updatebericht is uitsluitend voor de open sidebar. In de native iconenrail
+   klapt ook de ruimte in; de melding blijft beschikbaar na uitklappen. */
+:host([data-integration="native"]) .pala-rc-notice{
+  min-width:0;max-height:180px;overflow:hidden;
+  transition:opacity 180ms ease,max-height var(--p-rail-duration,280ms) var(--p-rail-ease,ease),
+    margin var(--p-rail-duration,280ms) var(--p-rail-ease,ease),
+    padding var(--p-rail-duration,280ms) var(--p-rail-ease,ease),
+    border-width var(--p-rail-duration,280ms) var(--p-rail-ease,ease),visibility 0s linear
+}
 .search{margin:3px 9px 10px;display:flex;align-items:center;gap:6px;border-radius:9px;background:var(--secondary-background-color,#2b3645);padding:7px 9px;border:1px solid var(--divider-color,#445);}
 .search input{background:transparent;border:0;outline:none;color:inherit;min-width:0;width:100%;font-size:12px}.search input::placeholder{color:var(--secondary-text-color,#9ba6b7)}
 .list{display:flex;flex-direction:column;gap:3px;padding:0 7px 8px;min-width:0}
@@ -1158,7 +1168,9 @@ md-filled-select {
 .group-content[data-collapsed="true"] .group-content-inner{transform:translateY(-8px)}
 
 .nav-row{display:flex;align-items:center;border-radius:10px;min-height:36px;min-width:0;position:relative}
-.nav-row.active{background:var(--p-soft);color:var(--p-accent)}.nav-row.active:before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--p-accent);border-radius:4px}
+.nav-row.active{background:var(--p-soft);color:var(--p-accent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--p-accent,#38bdf8) 16%,transparent)}
+.nav-row.active:before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--p-accent);border-radius:4px}
 .nav-link{background:transparent;border:0;text-align:left;font:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 9px;min-width:0;flex:1;text-decoration:none!important;color:inherit!important;border-radius:9px;min-height:36px;overflow:hidden}
 .nav-label{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:550;font-size:12px;flex:1;min-width:62px}
 .badge{transition:background-color .32s ease,color .32s ease;background:var(--p-accent);color:#04121b;font-size:10px;font-weight:850;line-height:1.4;min-width:18px;max-width:min(46%,120px);padding:2px 5px;border-radius:7px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;font-variant-numeric:tabular-nums}
@@ -1208,6 +1220,26 @@ md-filled-select {
 .entity .health-label{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .entity .value{margin-left:auto;font-weight:800;white-space:nowrap;font-size:11px;max-width:58%;text-overflow:ellipsis;overflow:hidden}
 .footer{padding:9px;display:flex;align-items:center;flex-wrap:wrap;gap:5px;border-top:1px solid var(--divider-color,#6675);font-size:11px;color:var(--secondary-text-color,#9ba8b5)}.footer .right{margin-left:auto}
+/* Premium polish: compact, theme-aware version label, without changing footer order or height. */
+.footer .footlabel{font-weight:650;letter-spacing:.015em}
+/* Honor device accessibility preference without disabling Home Assistant's own animations. */
+@media(prefers-reduced-motion:reduce){
+  .group-content,.group-content-inner,.group-toggle,.nav-link,.nav-row{transition:none!important}
+  .group-content[data-collapsed="true"] .group-content-inner{transform:none}
+}
+/* RC4: PalaGuard footer shortcut is a genuine installed-panel indicator, NOT a security verdict.
+   The logo is served by the separately installed PalaGuard integration; no PalaGuard code is bundled. */
+.footer .pala-guard-launch{position:relative;display:inline-flex;flex:0 0 36px;width:36px;height:36px;align-items:center;justify-content:center;
+  padding:4px;border:1px solid rgba(244,186,52,.58);border-radius:12px;background:rgba(255,190,45,.09);color:#ffcf60;
+  box-shadow:0 0 0 1px rgba(255,192,50,.10),0 0 12px rgba(244,176,38,.22);cursor:pointer;
+  transition:border-color .17s ease,box-shadow .17s ease,background .17s ease,transform .17s ease}
+.footer .pala-guard-launch[data-alone="true"]{margin-left:auto}
+.footer .pala-guard-launch:hover{border-color:#ffd66c;background:rgba(244,187,52,.16);box-shadow:0 0 0 1px rgba(255,213,106,.22),0 0 17px rgba(255,195,48,.40);transform:translateY(-1px)}
+.footer .pala-guard-launch:focus-visible{outline:2px solid #ffd66c;outline-offset:2px}
+.footer .pala-guard-logo{width:26px;height:26px;object-fit:contain;border-radius:6px;display:block}
+.footer .pala-guard-fallback{font-size:21px;line-height:1}
+:host([data-integration="native"][data-compact="true"]) .footer .pala-guard-launch{width:34px;height:34px;flex-basis:34px}
+@media(prefers-reduced-motion:reduce){.footer .pala-guard-launch{transition:none}.footer .pala-guard-launch:hover{transform:none}}
 /* Own optional HA restart action: native HA footer + badges are untouched. */
 .footer .pala-restart{width:100%;flex:1 1 100%;display:flex;align-items:center;justify-content:flex-start;gap:var(--p-ui-item-gap,10px);padding:9px 10px;min-height:40px;border:1px solid var(--divider-color,#ffffff24);background:var(--p-soft,#ffffff0a);color:var(--primary-text-color,inherit);border-radius:var(--p-ui-radius,12px);cursor:pointer;text-align:left;font:600 var(--p-ui-text-size,12px)/1.3 var(--primary-font-family,Roboto,Arial,sans-serif);transition:background .15s ease,border-color .15s ease}
 .footer .pala-restart:hover{background:var(--p-accent-soft,#ffffff1a);border-color:var(--p-accent,#38bdf8)}
@@ -1218,6 +1250,13 @@ md-filled-select {
 :host([data-integration="native"][data-compact="true"]) .footer .pala-restart{flex:0 0 39px;width:39px;height:39px;min-height:39px;padding:0;gap:0;justify-content:center}
 :host([data-integration="native"][data-compact="true"]) .footer .pala-restart-label{display:none}
 @media(prefers-reduced-motion:reduce){.footer .pala-restart{transition:none}}
+@media(pointer:coarse){
+  .footer .pala-guard-launch{width:44px;height:44px;flex-basis:44px}
+  .footer .pala-restart{min-height:44px}
+  :host([data-integration="native"][data-compact="true"]) .footer .pala-guard-launch{
+    width:42px;height:42px;flex-basis:42px
+  }
+}
 
 .message{font-size:11px;color:var(--p-accent);padding:6px 9px;line-height:1.35}
 :host([data-density="compact"]) .nav-link{padding:6px 8px;min-height:33px}:host([data-density="compact"]) .nav-row{min-height:33px}
@@ -1292,6 +1331,12 @@ md-filled-select {
 }
 :host([data-compact="true"][data-integration="native"]) .health{
   opacity:0;max-height:0;margin-block:0;padding-block:0;pointer-events:none;visibility:hidden;transition:opacity 160ms ease,max-height var(--p-rail-duration) var(--p-rail-ease),margin var(--p-rail-duration) var(--p-rail-ease),padding var(--p-rail-duration) var(--p-rail-ease),visibility 0s linear var(--p-rail-duration)
+}
+:host([data-compact="true"][data-integration="native"]) .pala-rc-notice{
+  opacity:0;max-height:0;margin:0;padding:0;border-width:0;pointer-events:none;visibility:hidden;
+  transition:opacity 160ms ease,max-height var(--p-rail-duration) var(--p-rail-ease),
+    margin var(--p-rail-duration) var(--p-rail-ease),padding var(--p-rail-duration) var(--p-rail-ease),
+    border-width var(--p-rail-duration) var(--p-rail-ease),visibility 0s linear var(--p-rail-duration)
 }
 :host([data-compact="true"][data-integration="native"]) .footer .footlabel{
   opacity:0;max-width:0;pointer-events:none;visibility:hidden;transition:opacity 160ms ease,max-width var(--p-rail-duration) var(--p-rail-ease),visibility 0s linear var(--p-rail-duration)
@@ -1399,14 +1444,12 @@ md-filled-select {
 :host([data-header-mode="app"]) .top .iconbtn{min-width:38px;min-height:38px}
 /* Personal header style variables applied only within PalaSidebar. */
 .top{background:var(--p-header-background,transparent)}
-/* Optionele foto: uitsluitend in de eigen PalaSidebar-header, nooit in de HA-header. */
-.top[data-header-picture="true"]{min-height:94px;padding-top:14px;padding-bottom:10px;background-size:cover;background-repeat:no-repeat;background-position:center;align-items:flex-end;isolation:isolate}
+/* De headerfoto is een achtergrond, geen extra rij in de layout.
+   Behoud exact dezelfde hoogte, padding en verticale uitlijning als zonder foto
+   in normaal, compact, minimal, app en de native ingeklapte iconenrail. */
+.top[data-header-picture="true"]{background-size:cover;background-repeat:no-repeat;background-position:center;isolation:isolate}
 .top[data-header-picture="true"] .brand strong,.top[data-header-picture="true"] .brand small,.top[data-header-picture="true"] .iconbtn{color:#fff!important;text-shadow:0 1px 5px #000c}
 .top[data-header-picture="true"] .logo{box-shadow:0 2px 10px #0009}
-:host([data-header-mode="compact"]) .top[data-header-picture="true"]{min-height:82px}
-:host([data-header-mode="app"]) .top[data-header-picture="true"]{min-height:82px}
-:host([data-header-mode="minimal"]) .top[data-header-picture="true"]{min-height:72px}
-:host([data-compact="true"][data-integration="native"]) .top[data-header-picture="true"]{min-height:36px;padding:4px 7px}
 @media(prefers-reduced-motion:reduce){.top[data-header-picture="true"]{transition:none!important}}
 .top .logo{background:var(--p-header-logo-background,var(--p-accent));color:var(--p-header-logo-color,#06151e)}
 .clock{color:var(--p-header-clock-color,var(--secondary-text-color,#9ca9b9))}
@@ -2559,7 +2602,7 @@ md-filled-select {
         if(!sectionStyle){
           sectionStyle=document.createElement('style');sectionStyle.dataset.palaSectionStudio='';
           sectionStyle.textContent=String.raw`
-            .section-frame{min-width:0;display:block}
+            .section-frame{min-width:0;display:block;transition:border-width var(--p-rail-duration,280ms) ease,padding var(--p-rail-duration,280ms) ease,margin-bottom var(--p-rail-duration,280ms) ease}
             :host([data-pfx-section-studio="true"]) .section-frame{
               border:var(--pala-section-border-width,0px) var(--pala-section-border-style,solid) var(--pala-section-border-color,transparent);
               border-radius:var(--pala-section-radius,14px);
@@ -2567,6 +2610,11 @@ md-filled-select {
               margin-bottom:var(--pala-section-gap,0px);
               background:var(--pala-section-background,transparent);
               box-shadow:var(--pala-section-glow,none)
+            }
+            /* Sectiekaarten mogen de 42px iconenrail niet vernauwen of verspringen. */
+            :host([data-integration="native"][data-compact="true"]) .section-frame{
+              border-width:0;padding:0;margin-bottom:0;background:transparent;box-shadow:none;
+              backdrop-filter:none;-webkit-backdrop-filter:none
             }
             :host([data-pfx-section-mode="glass"]) .section-frame{backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px) saturate(120%)}
             :host([data-pfx-section-studio="true"]) .section-frame > .group-title{
@@ -2859,6 +2907,18 @@ md-filled-select {
       page.append(this._help('Wat betekenen de meldingen?',
         'Ontbrekend: de sensor bestaat niet onder die entity_id. Niet beschikbaar: Home Assistant meldt unknown of unavailable. Dubbele route: twee knoppen verwijzen naar dezelfde pagina; soms is dat bewust. Opslagstatus geeft aan of jouw persoonlijke instellingen veilig naar Home Assistant zijn geschreven.'));
 
+      // Optional security-center entry in the existing Diagnose page.
+      // It is absent when PalaGuard is not installed or the user is not admin.
+      if(this._palaGuardAvailable()){
+        const integration=$('section','pala-palaguard-link');
+        integration.id='pala-palaguard-integration';
+        integration.append($('h3',null,'PalaGuard · Beveiligingscentrum'),
+          $('p','field-note','Automatisch gekoppeld. Open het PalaGuard Security Center vanuit PalaSidebar; PalaSidebar leest geen beveiligingslogboeken of persoonlijke gegevens.'));
+        const buttons=$('div','btnrow');
+        buttons.append(this._button('Open PalaGuard','palaguard-open','primary'));
+        integration.append(buttons);
+        page.append(integration);
+      }
       const holder=$('div');holder.id='pala-diagnostic-results';page.append(holder);
       const actions=$('div','btnrow');actions.append(this._button('Opnieuw controleren','diagnostic-refresh','primary'),this._button('Rapport kopiëren','diagnostic-copy'),this._button('Zelftest uitvoeren','support-test'));page.append(actions);
       const results=$('div','diagnostic-list');results.id='pala-selftest-results';results.setAttribute('role','status');page.append(results);
@@ -3262,6 +3322,14 @@ md-filled-select {
     }
     _mobile(){return this._resolved().mobile || FALLBACK.mobile;}
     _header(){return this.saved.header||this._resolved().header||FALLBACK.header;}
+    _effectiveHaHeader(header=this._header()){
+      // Issue #22: Home Assistant's own menu occupies the strip ABOVE the photo.
+      // Reuse the existing hidden-menu route, not overlay backgrounds or
+      // negative margins. The selected HA-header preference remains intact.
+      if(this.integration==='native' && header.pala!=='hidden' &&
+         safeHeaderImage(header.image) && header.image_edge_to_edge!==false)return 'hidden';
+      return header.ha;
+    }
     _isTablet(){
       if(this.saved.device==='tablet')return true;
       if(this.saved.device!=='auto')return false;
@@ -4172,7 +4240,17 @@ md-filled-select {
         'title-hidden':'.menu .title{display:none!important}',
         compact:'.menu{height:44px!important;min-height:44px!important}.menu .title{display:none!important}',
         hidden:'.menu{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important}'
-      }[h.ha]||'';
+      }[this._effectiveHaHeader(h)]||'';
+      // Issue #22 follow-up: HA's ha-list-nav.before-spacer has its own
+      // margin-block: var(--ha-space-2) (roughly the 16px seen above the photo).
+      // Hiding .menu alone in RC5 does not remove this unrelated space.
+      // Scope the zero-top-margin ONLY to an edge-to-edge header photo, and
+      // ONLY inside the native ha-sidebar shadow root. Preserve its bottom
+      // margin, every other ha-list-nav and the original header preferences.
+      const photoTopMarginCss=h.pala!=='hidden' && !!safeHeaderImage(h.image) &&
+        h.image_edge_to_edge!==false
+          ? 'ha-list-nav.before-spacer{margin-block-start:0!important}'
+          : '';
       const themeCss=active?`
         :host{background-color:var(--pala-ground)!important;
           background-image:${theme.dynamic==='weather'?
@@ -4220,7 +4298,7 @@ md-filled-select {
         :host::-webkit-scrollbar,.wrapper::-webkit-scrollbar,.panels-list::-webkit-scrollbar,
         .menu::-webkit-scrollbar,ha-list-nav::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
       `;
-      const css=headerCss+themeCss+badgeCss+nativeFooterTypographyCss+scrollbarCss;
+      const css=headerCss+photoTopMarginCss+themeCss+badgeCss+nativeFooterTypographyCss+scrollbarCss;
       if(this._haHeaderStyle.textContent!==css)this._haHeaderStyle.textContent=css;
     }
     _setOpen(value,fromHistory=false){
@@ -4635,6 +4713,20 @@ md-filled-select {
       if(cmd==='open'){this.open?this._setOpen(false):this._openDrawer();return;}
       if(cmd==='close'){this._setOpen(false);return;}
       if(cmd==='settings'){this.showSettings();return;}
+      if(cmd==='palaguard-open'){
+        // Recheck permissions and availability at click time, not only at render.
+        if(this._palaGuardAvailable())
+          this._closeOwnedDialog(this.dialog,()=>this._navigate('/palaguard-security'));
+        return;
+      }
+      if(cmd==='palaguard-footer'){
+        // Same trusted, admin-only panel as the optional integration link.
+        if(this._palaGuardAvailable()){
+          this._navigate('/palaguard-security');
+          if(this.open)this._setOpen(false);
+        }
+        return;
+      }
       if(cmd==='ha-restart'){this._requestHARestart();return;}
       if(cmd==='agenda-collapse'){
         this.saved.agenda=cleanAgenda({...this.saved.agenda,collapsed:!this.saved.agenda?.collapsed});
@@ -4901,6 +4993,7 @@ md-filled-select {
         return;
       }
       if(id==='pala-head-image-file'){const file=e.target.files?.[0];if(file)void this._loadHeaderImage(file);return;}
+      if(id==='pala-head-image-position'){this._previewHeaderImage();return;}
       if(id==='pala-layout-section')this._layoutFillSection();
       if(id==='pala-layout-item')this._layoutFillItem();
       if(id==='pala-menu-select')this._fillMenuEditor(e.target.value);
@@ -4968,6 +5061,13 @@ md-filled-select {
     }
     _toggleFavorite(id){const s=new Set(this.saved.favorites);s.has(id)?s.delete(id):s.add(id);this.saved.favorites=[...s];this._saveSettings();this._drawList();}
     _recent(id){this.saved.recent=[id,...this.saved.recent.filter(v=>v!==id)].slice(0,8);this._saveSettings();}
+    // Optional, one-way integration: never read PalaGuard settings, services or secrets.
+    // The security panel is registered only by an installed PalaGuard integration.
+    _palaGuardAvailable(){
+      if(!this.hass?.user?.is_admin)return false;
+      return Object.entries(this.hass?.panels||{}).some(([key,panel])=>
+        key==='palaguard-security'||panel?.url_path==='palaguard-security');
+    }
     _isAvailable(item){
       if(item.admin_only&&!this.hass?.user?.is_admin)return false;
       if(item.hide_mobile && this._isMobile())return false;
@@ -5009,11 +5109,19 @@ md-filled-select {
         group.items.push(item);
       };
       for(const group of cfg.groups){for(const item of group.items)push(group.id,item,group.admin_only);}
+      // Show exactly one dedicated PalaGuard link, even with auto-discovery disabled.
+      // Keep all user-configured sections and labels unchanged.
+      if(this._palaGuardAvailable())push(map.has('beheer')?'beheer':'automatisch',
+        {id:'palaguard',label:'PalaGuard',path:'/palaguard-security',
+          icon:'mdi:shield-lock-outline',admin_only:true});
       for(const link of this.saved.links){const id='persoonlijk-'+cleanId((link.group||'MIJN DASHBOARDS').toLowerCase());push(id,link);}
       if(cfg.discovery.enabled && this.hass?.panels){
         const ex=new Set(arr(cfg.discovery.exclude));const entries=[];
         for(const [key,info] of Object.entries(this.hass.panels)){
           const slug=info.url_path||key;
+          // Dedicated security link above owns this path; never duplicate it
+          // through generic dashboard discovery (including when the item is hidden).
+          if(slug==='palaguard-security')continue;
           if(ex.has(slug)||ex.has(key)||(!cfg.discovery.include_system_panels&&['profile','config','developer-tools','notifications','logbook','history','energy','map','media-browser'].includes(slug)))continue;
           entries.push({id:'auto-'+cleanId(slug),label:text(info.title||prettify(slug)),path:'/'+slug,
             icon:isSafeIcon(info.icon)?info.icon:'mdi:view-dashboard-outline',admin_only:!!info.require_admin});
@@ -5045,6 +5153,9 @@ md-filled-select {
     _updateMenuIfChanged(){
       const signature=this._menuSignatureValue();
       if(this.lastMenuSignature!==signature){this.lastMenuSignature=signature;this._drawList();}
+      // Keep the footer in sync if PalaGuard is installed, removed or an admin logs out.
+      // No new timers, observers or polling: reuse the existing HA menu refresh.
+      if(this._footerPalaGuardAvailable!==this._palaGuardAvailable())this._drawFooter();
     }
     _updatesCount(){
       if(!this._resolved().appearance.show_update_count)return 0;
@@ -5059,7 +5170,7 @@ md-filled-select {
     redraw(){
       const cfg=this._resolved(),app=cfg.appearance;
       this._syncTheme();this._applyDesign();
-      const hdr=this._header();this.setAttribute('data-header-mode',hdr.pala);this.setAttribute('data-ha-header',hdr.ha);
+      const hdr=this._header();this.setAttribute('data-header-mode',hdr.pala);this.setAttribute('data-ha-header',this._effectiveHaHeader(hdr));
       this.setAttribute('data-hide-logo',String(!hdr.logo));this.setAttribute('data-header-recovery',String(hdr.ha==='hidden'&&hdr.pala==='hidden'));
       this._syncHaHeader();
       this.setAttribute('data-density',this.saved.density||(['normal','compact'].includes(app.density)?app.density:'compact'));
@@ -5103,7 +5214,7 @@ md-filled-select {
       }
       const brand=$('div','brand');brand.append($('strong',null,hdr.title||cfg.title),$('small',null,hdr.subtitle||cfg.subtitle));
       const settings=$('button','iconbtn top-settings');settings.type='button';settings.title='PalaSidebar instellingen';settings.dataset.do='settings';settings.append(this._icon('mdi:cog-outline','⚙'));
-      if(hdr.ha==='hidden'&&this.integration==='native'){
+      if(this._effectiveHaHeader(hdr)==='hidden'&&this.integration==='native'){
         const toggle=$('button','iconbtn');toggle.type='button';toggle.title='Home Assistant-menu openen of sluiten';
         toggle.dataset.do='ha-menu';toggle.append(this._icon('mdi:menu','☰'));this.head.append(toggle);
       }
@@ -5544,6 +5655,23 @@ md-filled-select {
       if(fc.link){const item=this._allItems().find(i=>i.id===fc.link);if(item){const link=$('button','iconbtn');link.type='button';link.title=item.label;link.dataset.do='footer-route';link.dataset.id=item.id;link.append(this._icon(item.icon,'▦'));this.footer.append(link);}}
       if(fc.show_version)this.footer.append($('span','footlabel','PalaSidebar '+VERSION));
       if(fc.show_status){const right=$('span','right');right.append(this._icon('mdi:shield-check-outline','✓'));this.footer.append(right);}
+      // Auto-discovered, admin-only footer quick access. The glow means the
+      // PalaGuard panel exists; it does not claim that Home Assistant is secure.
+      const hasGuard=this._palaGuardAvailable();
+      this._footerPalaGuardAvailable=hasGuard;
+      if(hasGuard){
+        const button=$('button','pala-guard-launch');button.type='button';
+        button.dataset.do='palaguard-footer';
+        button.dataset.alone=String(fc.show_status===false);
+        button.title='PalaGuard gekoppeld · Security Center openen';
+        button.setAttribute('aria-label','PalaGuard gekoppeld. Open PalaGuard Security Center');
+        const icon=$('img','pala-guard-logo');
+        icon.alt='';icon.decoding='async';icon.src='/palaguard-assets/brand-icon.png';
+        const fallback=this._icon('mdi:shield-home-outline','🛡');
+        fallback.classList.add('pala-guard-fallback');fallback.style.display='none';
+        icon.addEventListener('error',()=>{icon.style.display='none';fallback.style.display='inline-flex';},{once:true});
+        button.append(icon,fallback);this.footer.append(button);
+      }
       this.footer.hidden=!this.footer.children.length;
       this._syncNativeFooter();
     }
@@ -7152,10 +7280,16 @@ md-filled-select {
       const photoInput=$('input');photoInput.type='file';photoInput.id='pala-head-image-file';
       photoInput.accept='image/jpeg,image/png,image/webp';photoInput.setAttribute('aria-label','Headerafbeelding uploaden');
       photoLabel.append(photoInput);photoEditor.append(photoLabel);
-      photoEditor.append(this._formField('Uitsnede positioneren','pala-head-image-position',hh.image_position,[['center','Midden'],['top','Bovenkant'],['bottom','Onderkant']]));
+      photoEditor.append(this._formField('Foto positioneren','pala-head-image-position',hh.image_position,[['center','Midden'],['top','Bovenkant'],['bottom','Onderkant']]));
+      const photoEdge=$('label','check'),photoEdgeToggle=$('input');
+      photoEdgeToggle.type='checkbox';photoEdgeToggle.id='pala-head-image-edge';
+      photoEdgeToggle.checked=hh.image_edge_to_edge!==false;
+      photoEdge.append(photoEdgeToggle,$('span',null,'Headerfoto tot aan de bovenrand (aanbevolen)'));
+      photoEditor.append(photoEdge);
+      photoEditor.append($('p','field-note','Verbergt met een foto de aparte Home Assistant-menubalk boven de PalaSidebar-foto; de eigen PalaSidebar-menuknop blijft beschikbaar. Zet uit als je de originele bovenbalk wilt behouden. Zonder foto wordt je normale HA-headerinstelling gebruikt.'));
       const imageButtons=$('div','btnrow');imageButtons.append(this._button('Foto verwijderen','header-image-remove'));photoEditor.append(imageButtons);
       const photoInfo=$('p','field-note','');photoInfo.dataset.imageInfo='1';photoInfo.setAttribute('role','status');photoEditor.append(photoInfo);
-      photoEditor.append($('p','field-note','JPG, PNG of WebP tot 4 MB. Wordt lokaal verkleind en privé met je Home Assistant-accountinstellingen gesynchroniseerd. Geen aparte www-map nodig.'));
+      photoEditor.append($('p','field-note','JPG, PNG of WebP tot 4 MB. De volledige foto wordt lokaal verkleind en privé opgeslagen. Foto uit een oudere versie? Upload die opnieuw om boven/midden/onder te kunnen kiezen. Geen aparte www-map nodig.'));
       headPage.append(photoEditor);
       const tokenPane=$('div','layout-dynamic-panel');
       tokenPane.append($('h4',null,'Sensor of attribuut aan de header toevoegen'));
@@ -7464,7 +7598,12 @@ md-filled-select {
       const value=this._headerImageDraft===undefined?this._header().image:this._headerImageDraft;
       const image=safeHeaderImage(value);
       preview.replaceChildren();
-      if(image){const pic=$('img');pic.src=image;pic.alt='Voorbeeld van de gekozen headerfoto';preview.append(pic);}
+      if(image){
+        const pic=$('img');pic.src=image;pic.alt='Voorbeeld van de gekozen headerfoto';
+        const position=this.dialog.querySelector('#pala-head-image-position')?.value||this._header().image_position;
+        pic.style.objectPosition='center '+(position==='top'?'top':position==='bottom'?'bottom':'center');
+        preview.append(pic);
+      }
       else preview.append($('span',null,'Geen headerfoto · standaard header'));
       if(info)info.textContent=this._headerImageBusy?'Afbeelding verwerken…':image?'De foto verschijnt na Header opslaan.':'De standaardkleur van je thema blijft actief.';
     }
@@ -7489,14 +7628,17 @@ md-filled-select {
         if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>12000||image.naturalHeight>12000 ||
            image.naturalWidth*image.naturalHeight>24000000)throw Error('Afmetingen te groot');
         const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');if(!ctx)throw Error('Geen afbeeldingsverwerking');
-        // JPEG-strip van ca. 3:1; EXIF/metadata worden niet opgeslagen.
-        const sourceRatio=3.1,iw=image.naturalWidth,ih=image.naturalHeight;
-        const sw=Math.min(iw,ih*sourceRatio),sh=sw/sourceRatio;
-        const sx=(iw-sw)/2,sy=(ih-sh)/2;
+        // Bewaar de volledige foto in de compacte JPEG, zonder metadata.
+        // De header past de zichtbare uitsnede daarna toe met background-size:cover
+        // en background-position. De oude vaste 3.1:1-uitsnede gooide boven-
+        // en onderkant al weg vóór de positieknop gebruikt kon worden.
+        const iw=image.naturalWidth,ih=image.naturalHeight;
         let result='';
-        for(const width of [720,580,460,340]){
-          canvas.width=width;canvas.height=Math.round(width/sourceRatio);
-          ctx.drawImage(image,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+        for(const maxSize of [720,580,460,340,260]){
+          const scale=Math.min(1,maxSize/Math.max(iw,ih));
+          canvas.width=Math.max(1,Math.round(iw*scale));
+          canvas.height=Math.max(1,Math.round(ih*scale));
+          ctx.drawImage(image,0,0,iw,ih,0,0,canvas.width,canvas.height);
           for(const quality of [0.76,0.60,0.45]){
             result=canvas.toDataURL('image/jpeg',quality);
             if(result.length<=100000)break;
@@ -7540,7 +7682,8 @@ md-filled-select {
         logo_bg:color('pala-head-logo-bg'),logo_color:color('pala-head-logo-color'),
         clock_color:color('pala-head-clock-color'),
         image:this._headerImageDraft===undefined?this._header().image:this._headerImageDraft,
-        image_position:q('pala-head-image-position').value});
+        image_position:q('pala-head-image-position').value,
+        image_edge_to_edge:q('pala-head-image-edge').checked});
       this._headerImageDraft=undefined;
       this._saveSettings();this.redraw();this._editorNotice('Header opgeslagen.');
     }
