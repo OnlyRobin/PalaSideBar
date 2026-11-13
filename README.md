@@ -26,7 +26,7 @@ PalaSidebar is een **aangepaste Home Assistant-integratie** die je via [HACS](ht
 
 > **Belangrijk:** de integratie laadt de frontend automatisch vanuit `custom_components/pala_sidebar`. Voeg dus géén extra PalaSidebar-script toe aan `frontend.extra_module_url` of de Lovelace-resources. Verwijder zo nodig oude, handmatige PalaSidebar-verwijzingen om dubbel laden te voorkomen.
 
-**Liever eerst een testversie proberen?** Kies in HACS bij **PalaSidebar → Opnieuw downloaden → Andere versie nodig?** een beschikbare prerelease, bijvoorbeeld [v2.0.1-rc.1](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1-rc.1). Schakel de weergave van testversies in als dat nodig is. Maak eerst een back-up.
+**Liever eerst een testversie proberen?** Kies in HACS bij **PalaSidebar → Opnieuw downloaden → Andere versie nodig?** een beschikbare prerelease, bijvoorbeeld [v2.0.1-rc.7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1-rc.7). Schakel de weergave van testversies in als dat nodig is. Maak eerst een back-up.
 
 ## Zo werkt het
 
@@ -70,7 +70,7 @@ Meer uitleg over installatie, instellingen en veelvoorkomende problemen staat in
 | Kanaal | Versie | Voor wie? |
 | --- | --- | --- |
 | **Stable** | [**v2.0.0**](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0) | Aanbevolen voor dagelijks gebruik. Eerste officieel goedgekeurde stabiele versie, gebaseerd op RC14. |
-| **RC (test)** | [**v2.0.1-rc.1**](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1-rc.1) | Nieuwere testversie met oplossingen voor [Issue #16](https://github.com/OnlyRobin/PalaSideBar/issues/16) (ingeklapte sidebar) en [Issue #17](https://github.com/OnlyRobin/PalaSideBar/issues/17) (headerfoto). Praktijktesten blijven belangrijk. |
+| **RC (test)** | [**v2.0.1-rc.7**](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1-rc.7) | Premium kwaliteitsrelease met verbeterde toegankelijkheid, veiligere versiecontrole en regressietests. Behoudt oplossingen #16, #17 en #22 en de optionele PalaGuard-koppeling. |
 | **Oudere versies** | [Alle releases](https://github.com/OnlyRobin/PalaSideBar/releases) | Eerdere RC- en bètaversies om terug te zetten of wijzigingen te bekijken. |
 
 **Stable** is de goedgekeurde versie. **RC** (*release candidate*) is een testversie en wordt niet vanzelf Stable. Na v2.0.0 loopt de testreeks verder met `2.0.1-rc.x`. Oude tags blijven beschikbaar; een Stable-release verschijnt pas na goedkeuring en geslaagde controles.
