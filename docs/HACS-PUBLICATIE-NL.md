@@ -3,7 +3,7 @@
 Repository: https://github.com/OnlyRobin/PalaSideBar  
 Doelversie: **`2.0.0-beta7`** — GitHub-release-tag: **`v2.0.0-beta7`**
 
-> **Historisch publicatieplan:** deze stappen zijn op 31 oktober 2026 uitgevoerd. De repository is **openbaar**, GitHub-prerelease [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) is gepubliceerd en de Code checks, Hassfest en HACS-validatie zijn geslaagd. De instructies hieronder blijven beschikbaar als referentie voor een nieuwe repository; publiceer **niet** nogmaals dezelfde tag.
+> **Historisch publicatieplan (31 oktober 2026):** deze stappen zijn op 31 oktober 2026 uitgevoerd. De repository is **openbaar**, GitHub-prerelease [v2.0.0-beta7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta7) is gepubliceerd en de Code checks, Hassfest en HACS-validatie zijn geslaagd. De instructies hieronder blijven beschikbaar als referentie voor een nieuwe repository; publiceer **niet** nogmaals dezelfde tag.
 
 ## 0. Publicatievoorwaarden controleren
 
@@ -46,16 +46,21 @@ Pas **na geslaagde HACS-validatie**:
 
 **Let op:** alleen een Git-tag maken is niet hetzelfde als een GitHub-release publiceren. HACS gebruikt de release en de tag als versiebron. De tag `v2.0.0-beta7` hoort bij manifestversie `2.0.0-beta7`.
 
-## 4. Via HACS installeren
+## 4. Installeren: historisch HACS, nu ingebouwde Marketplace
 
-1. Maak een back-up van `/config/custom_components/pala_sidebar` en exporteer PalaSidebar-accountinstellingen.
-2. Als je `pala-sidebar-config.json` lokaal hebt aangepast, maak daarvan een **aparte** back-up buiten de integratiemap.
-3. Open HACS → drie puntjes → **Custom repositories**.
-4. Voeg `https://github.com/OnlyRobin/PalaSideBar` toe met type **Integration**.
-5. Kies PalaSidebar en schakel **Show beta/pre-release versions** in indien nodig.
-6. Installeer de prerelease, herstart Home Assistant volledig en voeg de integratie zo nodig toe via Instellingen → Apparaten en diensten.
-7. Verwijder eventueel overgebleven **handmatige frontendresources** om dubbel laden te voorkomen.
-8. Test menu, lang indrukken, dashboards sorteren, backpress, badges, thema's, Live Control Center, herstartbevestiging en automatische updates op desktop en Android.
+Dit document beschrijft de eerste publicatie in oktober 2026. **Vanaf Home Assistant 2026.11 is HACS standaard ingebouwd als Marketplace**, dus de oude HACS-menu-instructies hieronder zijn vervangen door de huidige stappen.
+
+1. Maak vooraf een Home Assistant-back-up en exporteer je PalaSidebar-accountinstellingen. Bewaar een aangepaste `pala-sidebar-config.json` ook apart buiten de integratiemap.
+2. Open als beheerder **Instellingen → Marketplace**, zoek **PalaSidebar** en open de repositorypagina.
+3. Ontbreekt PalaSidebar, kies **Toevoegen via link** (*Add from link*), voer `https://github.com/OnlyRobin/PalaSideBar` in en bevestig het type **Integratie** als daarom wordt gevraagd. Voor een aangepaste repository vraagt Marketplace om GitHub-apparaatautorisatie.
+4. Kies **Installeren** voor de nieuwste Stable, momenteel [v2.0.1](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1).
+5. Volg de aangeboden configuratie; herstart Home Assistant wanneer nodig. Voeg de integratie zo nodig toe via **Instellingen → Apparaten en diensten**.
+6. Voor een gepubliceerde RC: open de PalaSidebar-repository en kies **⋮ → Andere versie installeren**. Schakel voor automatische RC-updates de **Pre-release**-entiteit van het Marketplace-repositoryapparaat in.
+7. Verwijder oude **handmatige frontendresources** om dubbel laden te voorkomen; test vervolgens de sidebar op desktop en Android.
+
+**Bij een mislukte update:** herstel de back-up van vóór de update. De Marketplace raadt *Andere versie installeren* niet aan als rollbackmethode.
+
+Voor **Home Assistant 2026.10 of ouder** blijft de afzonderlijke HACS-integratie het historische installatiepad. Bestaande HACS-installaties migreren automatisch bij een upgrade naar 2026.11.
 
 ## 5. Verificatie en vervolg
 
@@ -66,5 +71,5 @@ Pas **na geslaagde HACS-validatie**:
 
 Officiële informatie:
 - https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility
-- https://hacs.dev/docs/publish/integration/
-- https://hacs.dev/docs/publish/start/
+- https://www.home-assistant.io/integrations/marketplace
+- https://contributors.home-assistant.io/marketplace/guides/integrations/
