@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "🔐 Beveiligingslek privé melden"
+    url: "https://github.com/OnlyRobin/PalaSideBar/security/policy"
+    about: "Lees het beveiligingsbeleid. Meld geen kwetsbaarheden, tokens of echte aanvalsinformatie in een openbare issue."
+  - name: "📘 Installatie en probleemoplossing"
+    url: "https://github.com/OnlyRobin/PalaSideBar#hulp-en-problemen"
+    about: "Marketplace-installatie, instellingen, updates en de meest voorkomende problemen."
