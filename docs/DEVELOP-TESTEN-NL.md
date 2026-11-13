@@ -1,40 +1,45 @@
 # PalaSidebar veilig testen: Beta, RC en Stable
 
-De drie **publicatiekanalen** zijn:
+> **Home Assistant 2026.11+:** de oude, apart te installeren HACS-integratie is vervangen door de **ingebouwde Marketplace** onder **Instellingen → Marketplace**. Deze handleiding gebruikt de actuele menupaden. Op Home Assistant 2026.10 of ouder gebruik je nog HACS. Zie de [officiële Marketplace-documentatie](https://www.home-assistant.io/integrations/marketplace).
 
-- [`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main): officiële Stable-code.
+De drie publicatiekanalen zijn:
+
+- [`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main): Stable-code; de nieuwste gepubliceerde Stable is [v2.0.1](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1).
+- [`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc): geteste release candidates; laatst gepubliceerd [v2.0.1-rc.7](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1-rc.7).
 - [`beta`](https://github.com/OnlyRobin/PalaSideBar/tree/beta): historische bèta-/ontwikkellijn.
-- [`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc): permanente release-candidatebranch, momenteel v2.0.1-rc.7.
 
-Daarnaast kunnen tijdelijke fix-, audit- en featurebranches bestaan voor pull requests; die zijn geen extra releasekanaal.
+Tijdelijke feature- en fixbranches zijn geen extra releasekanalen. Nieuwe code verschijnt eerst als een nieuwe RC. Bestaande GitHub-release-tags worden niet overschreven.
 
-**Wijzigingen in de app verschijnen eerst als een nieuwe, hoger genummerde RC.** Elke RC krijgt een eigen onveranderlijke GitHub-prerelease. De vorige RC-tags en releases blijven permanent bestaan als herstelopties. Een Stable-release vereist volledige CI op de releasecommit, een concrete regressiebeoordeling en een uitdrukkelijke vrijgave; een Chromium-test alleen bewijst geen langdurige werking op echte HA-apparaten.
+## Een RC via de ingebouwde Marketplace testen
 
-## Een RC via HACS testen
-
-1. Maak een back-up van Home Assistant en exporteer de PalaSidebar-accountinstellingen.
-2. Open HACS (of vanaf Home Assistant 2026.11 de Marketplace) en zoek **PalaSidebar**.
-3. Kies **Downloaden / Opnieuw downloaden**, schakel **testversies / prereleases** in en selecteer de nieuwste `v2.0.1-rc.N`.
-4. Installeer de update en herstart Home Assistant volledig.
-5. Controleer het versienummer in de integratie en test op desktop, telefoon en tablet.
-6. Meld eventuele fouten via [GitHub Issues](https://github.com/OnlyRobin/PalaSideBar/issues).
+1. Maak een **Home Assistant-back-up** en exporteer je PalaSidebar-accountinstellingen.
+2. Open als beheerder **Instellingen → Marketplace**. Zoek de repository **PalaSidebar**. Is die niet zichtbaar, kies **Toevoegen via link** (*Add from link*) en vul `https://github.com/OnlyRobin/PalaSideBar` in. Marketplace vraagt om een GitHub-koppeling bij aangepaste repositories.
+3. Open **Instellingen → Apparaten en diensten → Marketplace** en selecteer het apparaat dat bij de PalaSidebar-repository hoort. Schakel de standaard uitgeschakelde entiteit **Pre-release** in en zet de schakelaar aan om RC-updates te ontvangen.
+4. Open de PalaSidebar-repository in de Marketplace. Kies rechtsboven **⋮ → Andere versie installeren** (*Install another version*) en selecteer expliciet de gewenste gepubliceerde RC, bijvoorbeeld `v2.0.1-rc.7`.
+5. Installeer de versie en herstart Home Assistant na de update. Controleer `/pala_sidebar/assets/pala-sidebar-version.json`.
+6. Test op desktop, telefoon en tablet en meld bevindingen via [GitHub Issues](https://github.com/OnlyRobin/PalaSideBar/issues).
 
 ### Praktijktesten
 
-- [ ] Desktop en mobiel: tekstgrootte, menu en dynamische badges.
-- [ ] Android: swipe open en dicht, terugknop, lang indrukken en dialogen.
-- [ ] Tablet/PalaKiosk: scrollen, animaties en vloeiend aftellen bij live F1-badges.
-- [ ] Home Assistant: verborgen originele sidebarheader en zichtbare eigen PalaSidebar-header.
-- [ ] Headerfoto kiezen, bewaren, terugladen en verwijderen.
-- [ ] Instellingen per account, export/import en herstellen.
-- [ ] Geen geheugen- of prestatieproblemen bij langdurig gebruik.
+- [ ] Desktop/mobiel: menu, tekstgrootte en dynamische badges.
+- [ ] Android: swipe, terugknop, lang indrukken en dialogen.
+- [ ] Tablet/PalaKiosk: scrollen, animaties en live sensorwaarden/F1.
+- [ ] Native Home Assistant-menu en eigen PalaSidebar-header.
+- [ ] Headerfoto opslaan, positioneren, verwijderen en herladen.
+- [ ] Instellingen per account, export/import en herstelpunten.
+- [ ] PalaGuard-snelkoppeling: zichtbaar voor beheerder wanneer de integratie aanwezig is; anders verborgen.
+- [ ] Langdurig gebruik zonder onnodige geheugendruk of prestatieverlies.
 
-Bij problemen kun je via HACS een **vorige RC-release** opnieuw installeren; de branch `rc` zelf is geen herstelpunt voor oudere code, daarvoor dienen de onveranderlijke release-tags.
+## Bij problemen herstellen
 
-## Belangrijk bij het icoon in de Updates-pagina
+De officiële Marketplace-documentatie adviseert **het terugzetten van een Home Assistant-back-up** wanneer een update misgaat. **Andere versie installeren** is bedoeld om een specifieke versie te kiezen en wordt niet aanbevolen als manier om een update terug te draaien. Bewaar daarom altijd een back-up van vóór de test.
 
-PalaSidebar levert de correcte lokale `custom_components/pala_sidebar/brand/`-afbeeldingen mee. Het ontbreken van een logo in de oude HACS-updateweergave is een bekend probleem van de HACS-frontend, niet van die bestanden. De nieuwere Home Assistant Marketplace vanaf 2026.11 gebruikt het nieuwe brands-systeem. Voor dit visuele probleem is geen codepatch of nieuwe RC nodig.
+Een GitHub-release-tag blijft ongewijzigd beschikbaar als code- en distributiereferentie; de actieve `rc`-branch is geen historisch herstelpunt.
 
-## Stable
+## Logo bij Updates
 
-Een stabiele versie wordt pas voorbereid na expliciete goedkeuring van de meest recent geteste RC en een nieuwe, geslaagde controle van alle tests. De open [concept-pull-request](https://github.com/OnlyRobin/PalaSideBar/pull/12) is uitsluitend bedoeld voor dat toekomstige besluit; er wordt niets automatisch samengevoegd.
+PalaSidebar bevat lokaal zijn brand-afbeeldingen in `custom_components/pala_sidebar/brand/`. De huidige Marketplace gebruikt die tijdens repositoryherkenning. Een verouderde HACS-schermafbeelding of een oud cache-icoon zegt niets over het functioneren van de integratie. Meld een werkelijk ontbrekend logo met versie en screenshot via een GitHub Issue.
+
+## Stable publiceren
+
+Stable wordt pas gepubliceerd na expliciete vrijgave, bronvergelijking met de geteste RC, HACS/Marketplace-validatie (de technische GitHub-actie blijft **HACS** heten), Hassfest en de volledige backend-/Chromium-regressies op de definitieve Stable-commit. Automatische tests vervangen geen praktijkcontrole op echte apparaten.
