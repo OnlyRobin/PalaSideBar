@@ -16,6 +16,24 @@
   const MIN_ACTIVE_INTERVAL = 60 * 1000;
   const ACCEPTED_VERSION = /^\d{1,3}\.\d{1,3}\.\d{1,4}(?:-(?:beta|rc)\.?[1-9]\d*)?$/i;
   const state = { loaded: null, latest: null, checking: false, checkedAt: 0, failed: false, skipped: null };
+  // Do not suggest a reload as an "update" when the manifest is older than
+  // the already-running frontend (e.g. during a rollback or partial copy).
+  // Order at an equal core version: beta < RC < stable.
+  function isNewerVersion(candidate, current) {
+    const parse = (value) => {
+      const match = /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-(beta|rc)\.?([1-9][0-9]*))?$/i.exec(value || '');
+      if (!match) return null;
+      return [+match[1], +match[2], +match[3],
+        match[4] ? (match[4].toLowerCase() === 'rc' ? 1 : 0) : 2,
+        Number(match[5] || 0)];
+    };
+    const next = parse(candidate), loaded = parse(current);
+    if (!next || !loaded) return false;
+    for (let index = 0; index < next.length; index++) {
+      if (next[index] !== loaded[index]) return next[index] > loaded[index];
+    }
+    return false;
+  }
   let notice = null;
 
   async function fetchVersion() {
@@ -78,8 +96,8 @@
     try {
       state.latest = await fetchVersion();
       state.failed = false;
-      if (state.loaded && state.latest !== state.loaded) showNotice(state.latest);
-      else if (state.loaded === state.latest) clearNotice();
+      if (state.loaded && isNewerVersion(state.latest, state.loaded)) showNotice(state.latest);
+      else clearNotice();
     } catch (err) {
       state.failed = true;
       // One warning on load / manual check, not every background poll.
