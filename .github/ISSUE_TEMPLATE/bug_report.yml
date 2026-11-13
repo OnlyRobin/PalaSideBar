@@ -1,0 +1,98 @@
+name: "🐛 Bug melden"
+description: "Meld een reproduceerbare fout in PalaSidebar (geen beveiligingslek)."
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bedankt voor je melding! Controleer eerst of er al een issue bestaat.
+        **Beveiligingslek? Niet openbaar melden.** Lees [SECURITY.md](../../SECURITY.md) via de repository.
+        Plaats nooit wachtwoorden, tokens, privé-IP-adressen of andere gevoelige informatie.
+  - type: input
+    id: palasidebar_version
+    attributes:
+      label: "PalaSidebar-versie"
+      description: "Bijvoorbeeld 2.0.1 Stable of 2.0.1-rc.7."
+      placeholder: "2.0.1"
+    validations:
+      required: true
+  - type: input
+    id: ha_version
+    attributes:
+      label: "Home Assistant-versie"
+      placeholder: "2026.11.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: "Installatiemethode"
+      options:
+        - "Marketplace (Home Assistant 2026.11+)"
+        - "HACS (Home Assistant 2026.10 of ouder)"
+        - "Handmatige/andere installatie"
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: "Apparaat en browser/app"
+      description: "Bijvoorbeeld Windows + Chrome, Android Companion App of PalaKiosk."
+      placeholder: "Android 16 / Companion App"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Onderdeel"
+      options:
+        - "Navigatie / focus / scrollen"
+        - "Header / afbeelding"
+        - "Thema / vormgeving / badges"
+        - "Instellingen / opslag / back-up"
+        - "PalaGuard-koppeling"
+        - "PalaKiosk / mobiel"
+        - "Installatie / update"
+        - "Overig"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "Stappen om de fout te reproduceren"
+      description: "Beschrijf de kleinst mogelijke reeks handelingen."
+      placeholder: |
+        1. Open ...
+        2. Klik op ...
+        3. De fout verschijnt ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Wat had er moeten gebeuren?"
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Wat gebeurt er daadwerkelijk?"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Aanvullende context, foutmelding of screenshot (optioneel)"
+      description: "Anonimiseer logs en afbeeldingen vooraf; plak geen inloggegevens, tokens, MAC-adressen of privé-IP's."
+      render: text
+    validations:
+      required: false
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: "Controle vóór publiceren"
+      options:
+        - label: "Ik heb gecontroleerd dat deze melding geen wachtwoorden, tokens of andere privégegevens bevat."
+          required: true
+        - label: "Dit is geen vertrouwelijk beveiligingslek; daarvoor gebruik ik de privé-meldroute."
+          required: true
