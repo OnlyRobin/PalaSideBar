@@ -111,7 +111,17 @@ De PalaSidebar-zelftest en updatecontrole vind je onder **Onderhoud → Diagnose
 | **Een RC verschijnt niet in Marketplace** | Controleer de **Pre-release**-schakelaar bij *Instellingen → Apparaten en diensten → Marketplace → PalaSidebar-repository* of kies *⋮ → Andere versie installeren*. |
 | **Instellingen herstellen** | Gebruik **Onderhoud → Backup** en je eigen Home Assistant-back-up. |
 
-**Een bug melden?** Open **Onderhoud → Diagnose → Bug melden** of maak een [GitHub Issue](https://github.com/OnlyRobin/PalaSideBar/issues/new). Vermeld je PalaSidebar-versie, Home Assistant-versie, apparaat en stappen om de fout te reproduceren. Screenshots voeg je zelf toe op GitHub; controleer ze eerst op privégegevens, tokens en adressen.
+**Een bug melden?** Open **Onderhoud → Diagnose → Bug melden** of gebruik het passende [GitHub-issueformulier](https://github.com/OnlyRobin/PalaSideBar/issues/new/choose). Vermeld je PalaSidebar-versie, Home Assistant-versie, apparaat en stappen om de fout te reproduceren. Screenshots voeg je zelf toe op GitHub; controleer ze eerst op privégegevens, tokens en adressen.
+
+## Community, bijdragen en veiligheid
+
+Wil je PalaSidebar verbeteren of een probleem melden? Gebruik de juiste route:
+
+- [Gedragscode](CODE_OF_CONDUCT.md) – respectvol samenwerken en meldingen over gedrag.
+- [Beveiligingsbeleid](SECURITY.md) – mogelijke kwetsbaarheden **privé** melden, nooit met tokens in een openbare issue.
+- [Bug melden of verbetering voorstellen](https://github.com/OnlyRobin/PalaSideBar/issues/new/choose) – begeleide formulieren voor reproduceerbare meldingen en ideeën.
+- [Bijdragen](CONTRIBUTING.md) en [pull-request-sjabloon](.github/PULL_REQUEST_TEMPLATE.md) – codewijzigingen, tests en RC/Stable-afspraken.
+- [Toegankelijkheidsverklaring](ACCESSIBILITY.md) – uitgangspunten, bekende beperkingen en hoe je toegankelijkheidsproblemen meldt.
 
 ## Project en links
 

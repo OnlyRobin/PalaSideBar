@@ -1,0 +1,52 @@
+name: "✨ Verbetering voorstellen"
+description: "Stel een nieuwe functie, UX-verbetering of integratie voor."
+title: "[Idee] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bedankt voor je idee voor PalaSidebar. Beschrijf vooral welk probleem de verbetering oplost.
+        Plaats geen tokens, wachtwoorden of persoonlijke gegevens.
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Onderdeel"
+      options:
+        - "Navigatie / menu / snelkoppelingen"
+        - "Badges / sensoren"
+        - "Thema / layout / animaties"
+        - "Mobiel / PalaKiosk / toegankelijkheid"
+        - "PalaGuard of andere optionele integratie"
+        - "Back-up / instellingen / synchronisatie"
+        - "Performance / diagnose"
+        - "Overig"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Welk probleem wil je oplossen?"
+      description: "Wat kun je nu niet of niet prettig doen?"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: "Hoe zou het moeten werken?"
+      description: "Beschrijf de gewenste bediening en instellingen, met zo nodig alternatieven."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Wanneer is het gelukt? (optioneel)"
+      description: "Beschrijf zo mogelijk hoe de functie te testen is op desktop en mobiel."
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: "Controle"
+      options:
+        - label: "Ik heb gekeken of dit idee al bestaat en deel geen vertrouwelijke informatie."
+          required: true
