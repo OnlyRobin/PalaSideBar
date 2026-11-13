@@ -4,19 +4,23 @@ Leuk dat je wilt helpen met PalaSidebar!
 
 ## Fouten melden
 
-Maak een melding via [GitHub Issues](https://github.com/OnlyRobin/PalaSideBar/issues). Vermeld daarbij de Home Assistant-versie, PalaSidebar-versie, je toestel of browser, de stappen om de fout te herhalen en eventuele foutmeldingen uit de browserconsole.
+Gebruik het formulier **[Bug melden](https://github.com/OnlyRobin/PalaSideBar/issues/new/choose)**. Het vraagt automatisch naar de Home Assistant-versie, PalaSidebar-versie, installatiemethode, apparaat, reproduceerstappen en verwacht/daadwerkelijk gedrag. Voor ideeën is er een apart formulier **Verbetering voorstellen**.
 
-**Deel nooit wachtwoorden, toegangstokens, privé-IP-adressen of andere vertrouwelijke gegevens.**
+**Deel nooit wachtwoorden, toegangstokens, privé-IP-adressen of andere vertrouwelijke gegevens. Een beveiligingslek hoort niet in een openbare issue; gebruik [SECURITY.md](SECURITY.md).**
 
 ## Wijzigingen voorstellen
 
-- Werk bij voorkeur vanaf `develop`; stuur veranderingen via een pull request.
+- Voor codewijzigingen: maak een feature- of fixbranch vanaf `rc` en stuur een pull request naar `rc`; de geteste RC wordt later gecontroleerd naar `main` gepromoveerd. Voor uitsluitend documentatie kun je een pull request naar `main` openen.
 - Houd aanpassingen overzichtelijk en verander bestaande thema-, swipe- en navigatiewerking niet onnodig.
-- Voeg bij nieuwe functionaliteit ook een passende regressietest toe.
+- Vul het [pull-request-sjabloon](.github/PULL_REQUEST_TEMPLATE.md) in en voeg bij nieuwe functionaliteit of bugfixes een passende regressietest toe.
 - Controleer vóór het indienen de JavaScript-syntax, Python-compilatie en GitHub Actions (Code checks, Hassfest en HACS-validatie).
-- Test belangrijke UI-wijzigingen op desktop én op een mobiel scherm.
+- Test belangrijke UI-wijzigingen op desktop én op een mobiel scherm; beschrijf eerlijk wat nog niet op echte Home Assistant-/PalaKiosk-apparaten is getest.
 - Gebruik duidelijke Nederlandse documentatie en interfaceberichten. **Vertaal geen technische sleutels, bestandspaden of API-velden** die Home Assistant vereist.
-- Publiceer geen nieuwe release of bestaande tagwijziging zonder controle.
+- Publiceer geen nieuwe release of bestaande tagwijziging zonder controle. Bestaande GitHub-tags en releases blijven onveranderd; Stable vereist herhaalde tests op de releasecommit.
+
+## Samenwerken en toegankelijkheid
+
+We hanteren de [gedragscode](CODE_OF_CONDUCT.md). Meld intimidatie via GitHub of een geschikt privé kanaal en bespreek technische problemen met respect. We streven naar toetsenbordondersteuning, bruikbare touchdoelen en verminderde animaties; zie [ACCESSIBILITY.md](ACCESSIBILITY.md).
 
 ## Licenties en rechten
 
