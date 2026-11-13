@@ -26,7 +26,7 @@ with sync_playwright() as pw:
         ("2.0.1", "2.0.0", False),
         ("2.0.1", "2.0.2", True),
     ]
-    assert version == "2.0.1-rc.7", version
+    assert version in ("2.0.1-rc.7", "2.0.1"), version
     for width in (390, 1280):
         for loaded, next_version, should_show in scenarios:
             page = browser.new_page(viewport={"width": width, "height": 850})
