@@ -63,7 +63,8 @@ with sync_playwright() as pw:
           return {original,scaled,reset:getComputedStyle(label).fontSize};
         }''')
         assert sizing=={'original':'12px','scaled':'15px','reset':'12px'},sizing
-        page.evaluate("window.__networkVersion='2.0.1'")
+        # Always simulate a genuinely newer Stable than RC7 or Stable v2.0.1.
+        page.evaluate("window.__networkVersion='2.0.2'")
         page.evaluate('window.PalaSidebarUpdater.check()')
         page.wait_for_selector('#palasidebar-update-notice',timeout=10000)
         page.locator('#palasidebar-update-notice').evaluate('(el)=>el.shadowRoot.querySelector("#update").click()')
