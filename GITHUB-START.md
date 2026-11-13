@@ -15,13 +15,20 @@ Repository: https://github.com/OnlyRobin/PalaSideBar
 
 Lees [PROVENANCE.md](PROVENANCE.md) en het [publicatieonderzoek](docs/PUBLICATION-AUDIT-2026-10-31.md). De MIT-licentie geldt alleen voor materiaal dat de rechthebbenden daadwerkelijk onder MIT mogen verspreiden. Eventuele licenties van derden blijven geldig.
 
-## Huidige installatie
+## Huidige installatie (Home Assistant 2026.11+)
 
-De nieuwste beta is **[v2.0.0-beta8](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.0-beta8)**.
+De eerste HACS-publicatiestappen hierboven zijn **historisch**. Sinds Home Assistant **2026.11** is HACS ingebouwd als **Marketplace**. De aparte HACS-installatie is niet meer nodig.
 
-1. Voeg `https://github.com/OnlyRobin/PalaSideBar` toe bij **HACS → Aangepaste repositories** als type **Integratie**.
-2. Open PalaSidebar, schakel testversies in en kies expliciet beta8.
-3. Installeer de versie en herstart Home Assistant.
-4. Maak vóór het bijwerken van een handmatige installatie altijd een back-up van de integratiemap en instellingen.
+1. Open **Instellingen → Marketplace** als beheerder en accepteer bij het eerste gebruik de waarschuwing voor communitysoftware.
+2. Zoek **PalaSidebar**. Niet in de catalogus? Kies rechtsboven **Toevoegen via link** (*Add from link*) en vul `https://github.com/OnlyRobin/PalaSideBar` in.
+3. Koppel je GitHub-account via de apparaatcode als Marketplace daarom vraagt en kies, indien nodig, het type **Integratie**.
+4. Open PalaSidebar, kies **Installeren** en gebruik de actuele [v2.0.1 Stable](https://github.com/OnlyRobin/PalaSideBar/releases/tag/v2.0.1).
+5. Volg de instelwizard. Herstart Home Assistant wanneer daarom gevraagd wordt; voeg PalaSidebar zo nodig toe via **Instellingen → Apparaten en diensten**.
 
-Alle verdere instructies staan in de [README](README.md).
+Een RC selecteer je via de repositorypagina **⋮ → Andere versie installeren**. Om ook automatisch RC-updates aangeboden te krijgen, activeer je de standaard uitgeschakelde **Pre-release**-entiteit van de PalaSidebar-repository onder **Instellingen → Apparaten en diensten → Marketplace**.
+
+Maak vóór iedere update een back-up van Home Assistant en exporteer de sidebarinstellingen. Herstel bij problemen de back-up; gebruik **Andere versie installeren** niet als gewone rollbackmethode.
+
+Op **Home Assistant 2026.10 of ouder** gebruik je nog de afzonderlijke HACS-integratie. Na upgraden naar 2026.11 worden eerdere HACS-installaties automatisch meegenomen.
+
+Zie de actuele [README](README.md) en de [officiële Marketplace-documentatie](https://www.home-assistant.io/integrations/marketplace).
