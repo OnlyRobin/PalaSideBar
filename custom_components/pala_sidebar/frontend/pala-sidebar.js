@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const VERSION = '2.0.1-rc.6';
+  const VERSION = '2.0.1-rc.7';
   const SERVER_RECOVERY_KEY='palasidebar.recovery.v1';
   const RECOVERY_LIMIT=5;
   // Native Home Assistant server-side storage. Cleared browser data cannot remove this.
@@ -1168,7 +1168,9 @@ md-filled-select {
 .group-content[data-collapsed="true"] .group-content-inner{transform:translateY(-8px)}
 
 .nav-row{display:flex;align-items:center;border-radius:10px;min-height:36px;min-width:0;position:relative}
-.nav-row.active{background:var(--p-soft);color:var(--p-accent)}.nav-row.active:before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--p-accent);border-radius:4px}
+.nav-row.active{background:var(--p-soft);color:var(--p-accent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--p-accent,#38bdf8) 16%,transparent)}
+.nav-row.active:before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--p-accent);border-radius:4px}
 .nav-link{background:transparent;border:0;text-align:left;font:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 9px;min-width:0;flex:1;text-decoration:none!important;color:inherit!important;border-radius:9px;min-height:36px;overflow:hidden}
 .nav-label{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:550;font-size:12px;flex:1;min-width:62px}
 .badge{transition:background-color .32s ease,color .32s ease;background:var(--p-accent);color:#04121b;font-size:10px;font-weight:850;line-height:1.4;min-width:18px;max-width:min(46%,120px);padding:2px 5px;border-radius:7px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;font-variant-numeric:tabular-nums}
@@ -1218,6 +1220,20 @@ md-filled-select {
 .entity .health-label{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .entity .value{margin-left:auto;font-weight:800;white-space:nowrap;font-size:11px;max-width:58%;text-overflow:ellipsis;overflow:hidden}
 .footer{padding:9px;display:flex;align-items:center;flex-wrap:wrap;gap:5px;border-top:1px solid var(--divider-color,#6675);font-size:11px;color:var(--secondary-text-color,#9ba8b5)}.footer .right{margin-left:auto}
+/* Premium polish: compact, theme-aware version label, without changing footer order or height. */
+.footer .footlabel{font-weight:650;letter-spacing:.015em}
+@media(pointer:coarse){
+  .footer .pala-guard-launch{width:44px;height:44px;flex-basis:44px}
+  .footer .pala-restart{min-height:44px}
+  :host([data-integration="native"][data-compact="true"]) .footer .pala-guard-launch{
+    width:42px;height:42px;flex-basis:42px
+  }
+}
+/* Honor device accessibility preference without disabling Home Assistant's own animations. */
+@media(prefers-reduced-motion:reduce){
+  .group-content,.group-content-inner,.group-toggle,.nav-link,.nav-row{transition:none!important}
+  .group-content[data-collapsed="true"] .group-content-inner{transform:none}
+}
 /* RC4: PalaGuard footer shortcut is a genuine installed-panel indicator, NOT a security verdict.
    The logo is served by the separately installed PalaGuard integration; no PalaGuard code is bundled. */
 .footer .pala-guard-launch{position:relative;display:inline-flex;flex:0 0 36px;width:36px;height:36px;align-items:center;justify-content:center;
