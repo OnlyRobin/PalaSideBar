@@ -1,5 +1,7 @@
 """RC4: visual color picker + HEX sync, optional theme colors, safe saving."""
+import json
 from pathlib import Path
+EXPECTED_VERSION=json.loads((Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/manifest.json').read_text())['version']
 from playwright.sync_api import sync_playwright
 
 src=(Path(__file__).resolve().parents[1]/'custom_components/pala_sidebar/frontend/pala-sidebar.js').read_text(encoding='utf-8')
@@ -85,7 +87,7 @@ with sync_playwright() as pw:
         assert data['invalidBlocked'] and data['invalidCleared'],data
         assert data['headerSaved']=={'title':'#112233','logo':'#77aa22','clock':'','subtitle':''},data
         assert data['restored']=='#112233' and data['autoRestored'],data
-        assert data['badgeUnchanged'] and data['version']=='2.0.0',data
+        assert data['badgeUnchanged'] and data['version']==EXPECTED_VERSION,data
         assert not errors,errors
         print('PASS RC4 kleurenkiezer Algemeen/Header, bewaren, wissen, validatie, badges',width,'px')
         page.close()

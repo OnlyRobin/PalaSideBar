@@ -1,18 +1,20 @@
 # PalaSidebar veilig testen: Beta, RC en Stable
 
-De repository heeft **precies drie vaste branches**:
+De drie **publicatiekanalen** zijn:
 
-- [`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main): beschermde standaardbranch en officiële projectdocumentatie.
-- [`beta`](https://github.com/OnlyRobin/PalaSideBar/tree/beta): bètabranch, momenteel gebaseerd op v2.0.0-beta8.
-- [`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc): permanente release-candidatebranch, momenteel gebaseerd op v2.0.0-rc6.
+- [`main`](https://github.com/OnlyRobin/PalaSideBar/tree/main): officiële Stable-code.
+- [`beta`](https://github.com/OnlyRobin/PalaSideBar/tree/beta): historische bèta-/ontwikkellijn.
+- [`rc`](https://github.com/OnlyRobin/PalaSideBar/tree/rc): permanente release-candidatebranch, momenteel v2.0.1-rc.7.
 
-**Wijzigingen in de app verschijnen altijd eerst als een nieuwe, hoger genummerde RC.** RC6 wordt RC7, RC8 enzovoort, met voor elke versie een nieuwe GitHub-prerelease. De vorige RC-tags en releases blijven permanent bestaan als herstelopties. Alleen nadat je zelf op je apparaten akkoord hebt gegeven, wordt een gecontroleerde RC uitgebracht als Stable.
+Daarnaast kunnen tijdelijke fix-, audit- en featurebranches bestaan voor pull requests; die zijn geen extra releasekanaal.
+
+**Wijzigingen in de app verschijnen eerst als een nieuwe, hoger genummerde RC.** Elke RC krijgt een eigen onveranderlijke GitHub-prerelease. De vorige RC-tags en releases blijven permanent bestaan als herstelopties. Een Stable-release vereist volledige CI op de releasecommit, een concrete regressiebeoordeling en een uitdrukkelijke vrijgave; een Chromium-test alleen bewijst geen langdurige werking op echte HA-apparaten.
 
 ## Een RC via HACS testen
 
 1. Maak een back-up van Home Assistant en exporteer de PalaSidebar-accountinstellingen.
 2. Open HACS (of vanaf Home Assistant 2026.11 de Marketplace) en zoek **PalaSidebar**.
-3. Kies **Downloaden / Opnieuw downloaden**, schakel **testversies / prereleases** in en selecteer de nieuwste `v2.0.0-rcN`.
+3. Kies **Downloaden / Opnieuw downloaden**, schakel **testversies / prereleases** in en selecteer de nieuwste `v2.0.1-rc.N`.
 4. Installeer de update en herstart Home Assistant volledig.
 5. Controleer het versienummer in de integratie en test op desktop, telefoon en tablet.
 6. Meld eventuele fouten via [GitHub Issues](https://github.com/OnlyRobin/PalaSideBar/issues).
