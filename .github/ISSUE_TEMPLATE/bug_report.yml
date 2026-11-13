@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Bedankt voor je melding! Controleer eerst of er al een issue bestaat.
-        **Beveiligingslek? Niet openbaar melden.** Lees [SECURITY.md](../../SECURITY.md) via de repository.
+        **Beveiligingslek? Niet openbaar melden.** Lees [SECURITY.md](https://github.com/OnlyRobin/PalaSideBar/security/policy) via de repository.
         Plaats nooit wachtwoorden, tokens, privé-IP-adressen of andere gevoelige informatie.
   - type: input
     id: palasidebar_version
