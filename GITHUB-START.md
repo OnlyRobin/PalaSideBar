@@ -17,13 +17,20 @@ De mapstructuur van deze ZIP is **de repositoryroot**. Upload niet het ZIP-besta
 
 Lees `PROVENANCE.md` en de `RELEASE-CHECKLIST.md` voordat je de repository openbaar zet of een release publiceert. Controleer eventuele code, assets en verplichtingen van derden. De MIT-licentie dekt alleen materiaal dat de rechthebbenden daadwerkelijk onder MIT mogen uitbrengen.
 
-## Eerste versie via HACS
+## Eerste HACS-publicatie (historisch)
 
-Nadat de code is gepubliceerd en rechten zijn gecontroleerd:
+De oorspronkelijke beta7 werd in 2026 via de toenmalige aparte HACS-integratie aangeboden. Die publicatiestappen zijn inmiddels afgerond. Herhaal ze niet voor dezelfde tags.
 
-1. Maak in GitHub een release met de tag `v2.0.0-beta7`, gemarkeerd als **pre-release**.
-2. Maak de repository publiek zodra dat juridisch verantwoord is.
-3. Voeg de URL `https://github.com/OnlyRobin/PalaSideBar` toe als **Integration** onder HACS → Custom repositories.
-4. Installeer PalaSidebar, herstart Home Assistant en controleer de versie.
+## Nu installeren met de ingebouwde Marketplace
 
-Bij een migratie van handmatige installatie: maak vooraf een back-up van de oude map en instellingen. HACS gebruikt dezelfde `pala_sidebar`-integratiedomeinnaam.
+1. Ga op **Home Assistant 2026.11 of nieuwer** naar **Instellingen → Marketplace**.
+2. Zoek **PalaSidebar**. Kies zo nodig **Toevoegen via link** (*Add from link*) en vul `https://github.com/OnlyRobin/PalaSideBar` in.
+3. Verbind GitHub via de apparaatcode als Marketplace daarom vraagt.
+4. Open de repository, kies **Installeren** en selecteer voor normaal gebruik **v2.0.1 Stable**.
+5. Herstart Home Assistant wanneer nodig en voeg de integratie zo nodig toe onder **Instellingen → Apparaten en diensten**.
+
+Voor RC-testversies gebruik je de **Pre-release**-schakelaar onder **Instellingen → Apparaten en diensten → Marketplace**, of selecteer je op de repositorypagina via **⋮ → Andere versie installeren** een specifieke gepubliceerde versie.
+
+Maak vóór updates een Home Assistant-back-up; herstel deze bij problemen. De oude losse HACS-integratie is alleen nodig op Home Assistant **2026.10 of ouder**.
+
+Zie de [actuele README op main](https://github.com/OnlyRobin/PalaSideBar/blob/main/README.md) en de [Home Assistant Marketplace-handleiding](https://www.home-assistant.io/integrations/marketplace).
