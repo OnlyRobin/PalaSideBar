@@ -1222,13 +1222,6 @@ md-filled-select {
 .footer{padding:9px;display:flex;align-items:center;flex-wrap:wrap;gap:5px;border-top:1px solid var(--divider-color,#6675);font-size:11px;color:var(--secondary-text-color,#9ba8b5)}.footer .right{margin-left:auto}
 /* Premium polish: compact, theme-aware version label, without changing footer order or height. */
 .footer .footlabel{font-weight:650;letter-spacing:.015em}
-@media(pointer:coarse){
-  .footer .pala-guard-launch{width:44px;height:44px;flex-basis:44px}
-  .footer .pala-restart{min-height:44px}
-  :host([data-integration="native"][data-compact="true"]) .footer .pala-guard-launch{
-    width:42px;height:42px;flex-basis:42px
-  }
-}
 /* Honor device accessibility preference without disabling Home Assistant's own animations. */
 @media(prefers-reduced-motion:reduce){
   .group-content,.group-content-inner,.group-toggle,.nav-link,.nav-row{transition:none!important}
@@ -1257,6 +1250,13 @@ md-filled-select {
 :host([data-integration="native"][data-compact="true"]) .footer .pala-restart{flex:0 0 39px;width:39px;height:39px;min-height:39px;padding:0;gap:0;justify-content:center}
 :host([data-integration="native"][data-compact="true"]) .footer .pala-restart-label{display:none}
 @media(prefers-reduced-motion:reduce){.footer .pala-restart{transition:none}}
+@media(pointer:coarse){
+  .footer .pala-guard-launch{width:44px;height:44px;flex-basis:44px}
+  .footer .pala-restart{min-height:44px}
+  :host([data-integration="native"][data-compact="true"]) .footer .pala-guard-launch{
+    width:42px;height:42px;flex-basis:42px
+  }
+}
 
 .message{font-size:11px;color:var(--p-accent);padding:6px 9px;line-height:1.35}
 :host([data-density="compact"]) .nav-link{padding:6px 8px;min-height:33px}:host([data-density="compact"]) .nav-row{min-height:33px}
